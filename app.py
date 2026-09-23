@@ -20,118 +20,115 @@ st.set_page_config(
 
 
 # =========================================================
-# 配色與 UI
+# CSS：只負責外觀，不改搜尋邏輯
 # =========================================================
 
 st.markdown(
     """
     <style>
 
-    /* ==============================
-       整體背景
-       ============================== */
+    /* ===== 整體背景 ===== */
 
     .stApp {
         background-color: #F7F3ED;
+        color: #4E4036;
     }
 
     .main .block-container {
-        max-width: 1250px;
         padding-top: 2rem;
         padding-bottom: 3rem;
+        max-width: 1400px;
     }
 
 
-    /* ==============================
-       一般文字
-       ============================== */
+    /* ===== 標題 ===== */
 
     h1, h2, h3 {
         color: #4E4036 !important;
     }
 
-    p, label {
-        color: #5C5149;
+    h1 {
+        font-weight: 700 !important;
+    }
+
+    h2, h3 {
+        font-weight: 650 !important;
     }
 
 
-    /* ==============================
-       Sidebar
-       ============================== */
+    /* ===== Sidebar ===== */
 
     section[data-testid="stSidebar"] {
         background-color: #EFE7DC;
-        border-right: 1px solid #D8C8B5;
     }
 
-    section[data-testid="stSidebar"] .block-container {
-        padding-top: 2rem;
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #4E4036 !important;
+    }
+
+    section[data-testid="stSidebar"] .stRadio label {
+        color: #5E5148;
     }
 
 
-    /* Sidebar radio */
+    /* ===== Radio ===== */
 
-    section[data-testid="stSidebar"]
     div[role="radiogroup"] label {
-        border-radius: 10px;
-        padding: 8px 10px;
-    }
-
-    section[data-testid="stSidebar"]
-    div[role="radiogroup"] label:hover {
-        background-color: #E4D7C8;
+        font-weight: 500;
     }
 
 
-    /* ==============================
-       Metric
-       ============================== */
+    /* ===== Metric ===== */
 
     div[data-testid="stMetric"] {
         background-color: #FFFDF9;
-        border: 1px solid #DCCDBC;
-        border-radius: 14px;
-        padding: 12px 15px;
-    }
-
-    div[data-testid="stMetricLabel"] {
-        color: #958578 !important;
-    }
-
-    div[data-testid="stMetricValue"] {
-        color: #C56F3A !important;
+        border: 1px solid #E2D6C8;
+        border-radius: 12px;
+        padding: 10px;
     }
 
 
-    /* ==============================
-       搜尋輸入框
-       ============================== */
+    /* =====================================================
+       搜尋框：加大、突出
+       ===================================================== */
 
     div[data-baseweb="input"] {
         background-color: #FFFDF9;
-        border-radius: 12px;
-        border-color: #DCCDBD;
+        border: 2px solid #CDBBA7;
+        border-radius: 14px;
+        min-height: 52px;
+        box-shadow: 0 3px 10px rgba(110, 88, 67, 0.08);
     }
 
     div[data-baseweb="input"]:focus-within {
-        border-color: #D9824B;
-        box-shadow: 0 0 0 1px #D9824B;
+        border: 2px solid #D9824B;
+        box-shadow: 0 0 0 3px rgba(217, 130, 75, 0.12);
+    }
+
+    div[data-baseweb="input"] input {
+        font-size: 17px !important;
+        font-weight: 500 !important;
+        color: #4E4036 !important;
+    }
+
+    div[data-baseweb="input"] input::placeholder {
+        color: #A4978B !important;
+        font-weight: 400 !important;
     }
 
 
-    /* ==============================
-       Text area
-       ============================== */
+    /* ===== Textarea ===== */
 
-    textarea {
-        background-color: #FFFDF9 !important;
-        border-radius: 12px !important;
+    div[data-baseweb="textarea"] {
+        background-color: #FFFDF9;
+        border-radius: 10px;
+        border-color: #DCCDBD;
     }
 
 
-    /* ==============================
-       Selectbox
-       ============================== */
+    /* ===== Selectbox ===== */
 
     div[data-baseweb="select"] > div {
         background-color: #FFFDF9;
@@ -140,107 +137,89 @@ st.markdown(
     }
 
 
-    /* ==============================
-       Expander
-       ============================== */
+    /* ===== Expander ===== */
 
     div[data-testid="stExpander"] {
         background-color: #FFFDF9;
         border: 1px solid #E2D6C8;
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-
-    /* ==============================
-       Container 卡片
-       ============================== */
-
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #FFFDF9;
-        border-color: #E1D5C7;
-        border-radius: 18px;
-        box-shadow: 0 4px 14px rgba(110, 88, 67, 0.05);
-        padding: 4px;
-    }
-
-
-    /* ==============================
-       Info
-       ============================== */
-
-    div[data-testid="stAlert"] {
         border-radius: 12px;
     }
 
 
-    /* ==============================
-       Success
-       ============================== */
+    /* ===== 卡片 ===== */
 
-    div[data-testid="stAlert"][kind="success"] {
-        background-color: #FBF5EE;
-        border-left-color: #D9824B;
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #FFFDF9;
+        border-radius: 14px;
+        border: 1px solid #E2D6C8;
     }
 
 
-    /* ==============================
-       Button
-       ============================== */
+    /* ===== 提示 / Alert ===== */
 
-    button[kind="primary"] {
-        background-color: #D9824B;
-        border-color: #D9824B;
+    div[data-testid="stAlert"] {
         border-radius: 10px;
     }
 
-    button[kind="primary"]:hover {
-        background-color: #C66F38;
-        border-color: #C66F38;
+
+    /* ===== 按鈕 ===== */
+
+    .stButton > button {
+        border-radius: 10px;
+        border: 1px solid #DCCDBD;
+        background-color: #FFFDF9;
+        color: #4E4036;
+    }
+
+    .stButton > button:hover {
+        border-color: #D9824B;
+        color: #D9824B;
+    }
+
+    .stButton > button[kind="primary"] {
+        background-color: #D9824B;
+        border-color: #D9824B;
+        color: white;
     }
 
 
-    /* ==============================
-       Divider
-       ============================== */
+    /* ===== Divider ===== */
 
     hr {
         border-color: #E2D6C8;
     }
 
 
-    /* ==============================
-       Dataframe
-       ============================== */
+    /* ===== Dataframe ===== */
 
     div[data-testid="stDataFrame"] {
-        border-radius: 14px;
+        border-radius: 10px;
         overflow: hidden;
-        border: 1px solid #E0D4C6;
     }
 
 
-    /* ==============================
-       Tabs
-       ============================== */
+    /* ===== Tabs ===== */
 
     button[data-baseweb="tab"] {
-        color: #806F61;
+        color: #6B5B4E;
     }
 
     button[data-baseweb="tab"][aria-selected="true"] {
-        color: #B76531;
+        color: #D9824B;
     }
 
 
-    /* ==============================
-       手機版
-       ============================== */
+    /* ===== 手機版 ===== */
 
-    @media (max-width: 800px) {
+    @media (max-width: 768px) {
 
         .main .block-container {
-            padding: 1rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        div[data-baseweb="input"] input {
+            font-size: 16px !important;
         }
 
     }
@@ -252,41 +231,31 @@ st.markdown(
 
 
 # =========================================================
-# Excel 讀取
+# 讀取 Excel
 # =========================================================
 
+@st.cache_data
 def load_data():
-
     return pd.read_excel(
         FILE_PATH,
         sheet_name=0
     ).fillna("")
 
 
+@st.cache_data
 def load_synonyms():
-
     return pd.read_excel(
         FILE_PATH,
         sheet_name="搜尋詞對照"
     ).fillna("")
 
 
-try:
-
-    df = load_data()
-    synonym_df = load_synonyms()
-
-except Exception as e:
-
-    st.error(
-        f"讀取 Excel 時發生錯誤：{e}"
-    )
-
-    st.stop()
+df = load_data()
+synonym_df = load_synonyms()
 
 
 # =========================================================
-# Excel 安全寫入
+# Excel 儲存
 # =========================================================
 
 def save_data(new_df):
@@ -295,144 +264,138 @@ def save_data(new_df):
 
     ws = wb.worksheets[0]
 
+    # 清除原本資料
     ws.delete_rows(
         1,
         ws.max_row
     )
 
-    for col_index, column_name in enumerate(
+    # 寫入欄位名稱
+    for col_num, column_name in enumerate(
         new_df.columns,
         start=1
     ):
-
         ws.cell(
             row=1,
-            column=col_index,
+            column=col_num,
             value=column_name
         )
 
-    for row_index, row in enumerate(
+    # 寫入資料
+    for row_num, row_data in enumerate(
         new_df.itertuples(index=False),
         start=2
     ):
 
-        for col_index, value in enumerate(
-            row,
+        for col_num, value in enumerate(
+            row_data,
             start=1
         ):
-
             ws.cell(
-                row=row_index,
-                column=col_index,
+                row=row_num,
+                column=col_num,
                 value=value
             )
 
     wb.save(FILE_PATH)
 
+    st.cache_data.clear()
+
 
 # =========================================================
-# 搜尋詞辨識
+# 同義詞處理
 # =========================================================
 
 def find_standard_words(keyword):
 
+    standard_words = []
+
     keyword = str(keyword).strip()
 
-    matched = []
+    if not keyword:
+        return standard_words
 
     for _, row in synonym_df.iterrows():
 
         standard_word = str(
-            row.get(
-                "標準搜尋詞",
-                ""
-            )
+            row.get("標準搜尋詞", "")
         ).strip()
 
-        synonym_word = str(
-            row.get(
-                "同義詞／常見說法",
-                ""
-            )
+        synonyms = str(
+            row.get("同義詞／常見說法", "")
         ).strip()
 
         if not standard_word:
             continue
 
-        if not synonym_word:
+        if standard_word in keyword:
+            standard_words.append(
+                standard_word
+            )
             continue
 
-        if synonym_word in keyword:
+        synonym_list = synonyms.replace(
+            "、",
+            ","
+        ).split(",")
 
-            matched.append(
-                (
-                    standard_word,
-                    synonym_word
+        for synonym in synonym_list:
+
+            synonym = synonym.strip()
+
+            if synonym and synonym in keyword:
+
+                standard_words.append(
+                    standard_word
                 )
-            )
 
-    result = []
+                break
 
-    seen = set()
-
-    for standard_word, synonym_word in matched:
-
-        key = (
-            standard_word,
-            synonym_word
+    return list(
+        dict.fromkeys(
+            standard_words
         )
-
-        if key not in seen:
-
-            seen.add(key)
-
-            result.append(key)
-
-    return result
+    )
 
 
 # =========================================================
-# 商品資訊辨識
+# 商品關鍵字處理
 # =========================================================
 
 def find_product_words(keyword):
 
-    words = []
+    product_words = []
 
     keyword = str(keyword).strip()
 
-    if "商品系列" in df.columns:
+    if not keyword:
+        return product_words
 
-        for value in df["商品系列"].astype(str).unique():
+    product_columns = [
+        "商品系列",
+        "商品編號",
+        "商品名稱"
+    ]
 
-            value = value.strip()
+    for column in product_columns:
 
-            if value != "" and value in keyword:
+        if column not in df.columns:
+            continue
 
-                words.append(value)
-
-    if "商品編號" in df.columns:
-
-        for value in df["商品編號"].astype(str).unique():
-
-            value = value.strip()
-
-            if value != "" and value in keyword:
-
-                words.append(value)
-
-    if "商品名稱" in df.columns:
-
-        for value in df["商品名稱"].astype(str).unique():
+        for value in df[column].astype(str):
 
             value = value.strip()
 
-            if value != "" and value in keyword:
+            if value and value in keyword:
 
-                words.append(value)
+                product_words.append(
+                    value
+                )
 
     return list(
-        dict.fromkeys(words)
+        dict.fromkeys(
+            product_words
+        )
     )
 
 
@@ -440,16 +403,13 @@ def find_product_words(keyword):
 # Sidebar
 # =========================================================
 
-st.sidebar.title(
-    "🏠 客服知識庫"
-)
+st.sidebar.title("🏠 客服知識庫")
 
 st.sidebar.caption(
     "NITORI Customer Service Knowledge"
 )
 
 st.sidebar.divider()
-
 
 page = st.sidebar.radio(
     "功能",
@@ -459,66 +419,46 @@ page = st.sidebar.radio(
     ]
 )
 
-
 st.sidebar.divider()
-
 
 st.sidebar.metric(
     "📚 目前知識庫",
     f"{len(df):,} 筆"
 )
 
-
 st.sidebar.info(
-    "💡 知識庫持續更新中\n\n"
-    "將最新確認的資訊整理後加入資料庫，"
-    "讓大家都能快速找到一致的參考內容。"
+    "💡 知識庫持續更新中..."
 )
 
 
 # =========================================================
-# 🔍 知識搜尋
+# 知識搜尋
 # =========================================================
 
 if page == "🔍 知識搜尋":
 
-    # =====================================================
-    # 頁首
-    # =====================================================
-
-    st.title(
-        "🔍 客服知識搜尋"
-    )
+    st.title("🔍 客服知識搜尋")
 
     st.caption(
-        "快速找到顧客問題對應的標準資訊與回覆內容"
+        "輸入顧客的說法，快速找到對應的標準回覆與判斷依據。"
     )
 
-    st.write(
-        "🛋️　🪴　💡"
-    )
+    st.write("🛋️　🪴　💡")
 
-    st.divider()
-
-
-    # =====================================================
-    # 搜尋區
-    # =====================================================
-
-    st.subheader(
-        "💬 顧客問題"
-    )
+    st.subheader("💬 顧客問題")
 
     st.caption(
         "可以直接輸入顧客原本的說法，不需要先判斷分類。"
     )
 
+    # -----------------------------------------------------
+    # 搜尋區
+    # -----------------------------------------------------
 
     search_col1, search_col2 = st.columns(
         [2.7, 1],
         gap="large"
     )
-
 
     with search_col1:
 
@@ -528,225 +468,252 @@ if page == "🔍 知識搜尋":
             label_visibility="visible"
         )
 
-
     with search_col2:
 
-        st.info(
-            "💡 小提示\n\n"
-            "可以直接輸入顧客說法，例如：\n\n"
-            "「這張椅子多重？」\n\n"
-            "「床墊可以退嗎？」\n\n"
-            "「有沒有展示品？」"
+        st.caption(
+            "💡 小提示：直接輸入顧客的原話即可搜尋\n\n"
+            "例如「椅子多重？」、「床墊可以退嗎？」"
         )
 
 
-    # =====================================================
+    # -----------------------------------------------------
     # 篩選條件
-    # =====================================================
+    # -----------------------------------------------------
 
     with st.expander(
-        "⚙️ 篩選條件（不確定時可以不用設定）"
+        "⚙️ 進階篩選",
+        expanded=False
     ):
 
         filter_col1, filter_col2 = st.columns(2)
 
-
         with filter_col1:
 
-            problem_type_list = sorted(
-                df["問題類型"]
-                .astype(str)
-                .replace("", pd.NA)
-                .dropna()
-                .unique()
-                .tolist()
-            )
+            if "問題類型" in df.columns:
 
-            problem_type = st.selectbox(
-                "問題類型",
-                ["全部"] + problem_type_list
-            )
+                type_options = [
+                    "全部"
+                ] + sorted(
+                    [
+                        x
+                        for x in df["問題類型"]
+                        .astype(str)
+                        .unique()
+                        if x.strip()
+                    ]
+                )
+
+                selected_type = st.selectbox(
+                    "問題類型",
+                    type_options
+                )
+
+            else:
+
+                selected_type = "全部"
 
 
         with filter_col2:
 
-            problem_detail_list = sorted(
-                df["問題細項"]
-                .astype(str)
-                .replace("", pd.NA)
-                .dropna()
-                .unique()
-                .tolist()
-            )
+            if "問題細項" in df.columns:
 
-            problem_detail = st.selectbox(
-                "問題細項",
-                ["全部"] + problem_detail_list
-            )
+                detail_options = [
+                    "全部"
+                ] + sorted(
+                    [
+                        x
+                        for x in df["問題細項"]
+                        .astype(str)
+                        .unique()
+                        if x.strip()
+                    ]
+                )
+
+                selected_detail = st.selectbox(
+                    "問題細項",
+                    detail_options
+                )
+
+            else:
+
+                selected_detail = "全部"
 
 
         filter_col3, filter_col4 = st.columns(2)
 
-
         with filter_col3:
 
-            product_category_list = sorted(
-                df["商品分類代碼"]
-                .astype(str)
-                .replace("", pd.NA)
-                .dropna()
-                .unique()
-                .tolist()
-            )
+            if "商品分類代碼" in df.columns:
 
-            product_category = st.selectbox(
-                "商品分類代碼",
-                ["全部"] + product_category_list
-            )
+                category_options = [
+                    "全部"
+                ] + sorted(
+                    [
+                        x
+                        for x in df["商品分類代碼"]
+                        .astype(str)
+                        .unique()
+                        if x.strip()
+                    ]
+                )
+
+                selected_category = st.selectbox(
+                    "商品分類代碼",
+                    category_options
+                )
+
+            else:
+
+                selected_category = "全部"
 
 
         with filter_col4:
 
-            product_series_list = sorted(
-                df["商品系列"]
-                .astype(str)
-                .replace("", pd.NA)
-                .dropna()
-                .unique()
-                .tolist()
-            )
+            if "商品系列" in df.columns:
 
-            product_series = st.selectbox(
-                "商品系列",
-                ["全部"] + product_series_list
-            )
+                series_options = [
+                    "全部"
+                ] + sorted(
+                    [
+                        x
+                        for x in df["商品系列"]
+                        .astype(str)
+                        .unique()
+                        if x.strip()
+                    ]
+                )
+
+                selected_series = st.selectbox(
+                    "商品系列",
+                    series_options
+                )
+
+            else:
+
+                selected_series = "全部"
 
 
     # =====================================================
     # 搜尋
     # =====================================================
 
-    if keyword:
+    if keyword.strip():
 
-        # -------------------------------------------------
-        # 辨識搜尋詞
-        # -------------------------------------------------
-
-        matched_words = find_standard_words(
+        standard_words = find_standard_words(
             keyword
         )
-
-        standard_words = list(
-            dict.fromkeys(
-                [
-                    x[0]
-                    for x in matched_words
-                ]
-            )
-        )
-
-
-        # -------------------------------------------------
-        # 辨識商品
-        # -------------------------------------------------
 
         product_words = find_product_words(
             keyword
         )
 
+        result_df = df.copy()
+
 
         # -------------------------------------------------
-        # 套用篩選
+        # 篩選
         # -------------------------------------------------
 
-        filtered_df = df.copy()
+        if (
+            selected_type != "全部"
+            and "問題類型" in result_df.columns
+        ):
 
-
-        if problem_type != "全部":
-
-            filtered_df = filtered_df[
-                filtered_df["問題類型"].astype(str)
-                == problem_type
+            result_df = result_df[
+                result_df["問題類型"]
+                .astype(str)
+                .eq(selected_type)
             ]
 
 
-        if problem_detail != "全部":
+        if (
+            selected_detail != "全部"
+            and "問題細項" in result_df.columns
+        ):
 
-            filtered_df = filtered_df[
-                filtered_df["問題細項"].astype(str)
-                == problem_detail
+            result_df = result_df[
+                result_df["問題細項"]
+                .astype(str)
+                .eq(selected_detail)
             ]
 
 
-        if product_category != "全部":
+        if (
+            selected_category != "全部"
+            and "商品分類代碼" in result_df.columns
+        ):
 
-            filtered_df = filtered_df[
-                filtered_df["商品分類代碼"].astype(str)
-                == product_category
+            result_df = result_df[
+                result_df["商品分類代碼"]
+                .astype(str)
+                .eq(selected_category)
             ]
 
 
-        if product_series != "全部":
+        if (
+            selected_series != "全部"
+            and "商品系列" in result_df.columns
+        ):
 
-            filtered_df = filtered_df[
-                filtered_df["商品系列"].astype(str)
-                == product_series
+            result_df = result_df[
+                result_df["商品系列"]
+                .astype(str)
+                .eq(selected_series)
             ]
 
 
-        # =================================================
-        # 第一階段：標準搜尋詞
-        # =================================================
+        # -------------------------------------------------
+        # 搜尋階段 1
+        # 標準搜尋詞 → 問題摘要
+        # -------------------------------------------------
 
         exact_result = pd.DataFrame()
 
+        if standard_words and "問題摘要" in result_df.columns:
 
-        if standard_words:
-
-            exact_result = filtered_df[
-                filtered_df["問題摘要"]
-                .astype(str)
-                .apply(
-                    lambda x:
-                    any(
-                        word in x
-                        for word in standard_words
-                    )
+            mask = result_df[
+                "問題摘要"
+            ].astype(str).apply(
+                lambda x: any(
+                    word in x
+                    for word in standard_words
                 )
-            ].copy()
+            )
+
+            exact_result = result_df[
+                mask
+            ]
 
 
-        # =================================================
-        # 第二階段：關鍵字搜尋
-        # =================================================
+        # -------------------------------------------------
+        # 搜尋階段 2
+        # 標準搜尋詞 → 多欄位
+        # -------------------------------------------------
 
         keyword_result = pd.DataFrame()
 
+        search_columns = [
+            "問題摘要",
+            "關鍵字",
+            "問題細項",
+            "商品名稱",
+            "商品系列",
+            "商品編號"
+        ]
 
-        if standard_words:
+        search_columns = [
+            column
+            for column in search_columns
+            if column in result_df.columns
+        ]
 
-            search_columns = [
-                "問題摘要",
-                "關鍵字",
-                "問題細項",
-                "商品名稱",
-                "商品系列",
-                "商品編號"
-            ]
+        if standard_words and search_columns:
 
-
-            search_columns = [
-                col
-                for col in search_columns
-                if col in filtered_df.columns
-            ]
-
-
-            def keyword_match(row):
+            def match_row(row):
 
                 text = " ".join(
-                    str(row[col])
-                    for col in search_columns
+                    str(row[column])
+                    for column in search_columns
                 )
 
                 return any(
@@ -754,275 +721,180 @@ if page == "🔍 知識搜尋":
                     for word in standard_words
                 )
 
-
-            keyword_result = filtered_df[
-                filtered_df.apply(
-                    keyword_match,
-                    axis=1
-                )
-            ].copy()
-
-
-        # =================================================
-        # 合併標準搜尋結果
-        # =================================================
-
-        if len(exact_result) > 0:
-
-            result = exact_result.copy()
-
-            result["搜尋方式"] = "標準問題詞"
-
-
-        elif len(keyword_result) > 0:
-
-            result = keyword_result.copy()
-
-            result["搜尋方式"] = (
-                "標準搜尋詞＋關鍵字"
-            )
-
-
-        else:
-
-            # =============================================
-            # 第三階段：相似度搜尋
-            # =============================================
-
-            search_columns = [
-                "問題摘要",
-                "關鍵字",
-                "問題細項",
-                "商品名稱",
-                "商品系列",
-                "商品編號"
-            ]
-
-
-            search_columns = [
-                col
-                for col in search_columns
-                if col in filtered_df.columns
-            ]
-
-
-            if len(filtered_df) == 0:
-
-                result = pd.DataFrame()
-
-
-            else:
-
-                filtered_df = filtered_df.copy()
-
-                filtered_df["搜尋內容"] = (
-                    filtered_df[search_columns]
-                    .astype(str)
-                    .agg(" ".join, axis=1)
-                )
-
-
-                expanded_keyword = (
-                    keyword
-                    + " "
-                    + " ".join(standard_words)
-                )
-
-
-                try:
-
-                    vectorizer = TfidfVectorizer(
-                        analyzer="char",
-                        ngram_range=(2, 4)
-                    )
-
-
-                    tfidf_matrix = (
-                        vectorizer.fit_transform(
-                            filtered_df["搜尋內容"]
-                        )
-                    )
-
-
-                    query_vector = (
-                        vectorizer.transform(
-                            [expanded_keyword]
-                        )
-                    )
-
-
-                    similarity = cosine_similarity(
-                        query_vector,
-                        tfidf_matrix
-                    ).flatten()
-
-
-                    filtered_df[
-                        "相關程度"
-                    ] = similarity
-
-
-                    result = filtered_df[
-                        filtered_df["相關程度"] > 0.05
-                    ].sort_values(
-                        "相關程度",
-                        ascending=False
-                    ).copy()
-
-
-                    result["搜尋方式"] = (
-                        "相似度搜尋"
-                    )
-
-
-                except Exception:
-
-                    result = pd.DataFrame()
-
-
-        # =================================================
-        # 商品優先
-        # =================================================
-
-        if product_words and len(result) > 0:
-
-            result["_商品符合"] = result.apply(
-
-                lambda row:
-                any(
-
-                    word in str(
-                        row.get(
-                            "商品名稱",
-                            ""
-                        )
-                    )
-
-                    or word in str(
-                        row.get(
-                            "商品系列",
-                            ""
-                        )
-                    )
-
-                    or word in str(
-                        row.get(
-                            "商品編號",
-                            ""
-                        )
-                    )
-
-                    for word in product_words
-
-                ),
-
+            mask = result_df.apply(
+                match_row,
                 axis=1
             )
 
+            keyword_result = result_df[
+                mask
+            ]
 
-            result = result.sort_values(
-                "_商品符合",
+
+        # -------------------------------------------------
+        # TF-IDF 模糊搜尋
+        # -------------------------------------------------
+
+        fuzzy_result = pd.DataFrame()
+
+        if (
+            exact_result.empty
+            and keyword_result.empty
+            and len(result_df) > 0
+        ):
+
+            search_columns_for_tfidf = [
+                column
+                for column in [
+                    "問題摘要",
+                    "關鍵字",
+                    "問題細項",
+                    "商品名稱",
+                    "商品系列",
+                    "商品編號"
+                ]
+                if column in result_df.columns
+            ]
+
+            documents = result_df[
+                search_columns_for_tfidf
+            ].astype(str).agg(
+                " ".join,
+                axis=1
+            ).tolist()
+
+            vectorizer = TfidfVectorizer(
+                analyzer="char",
+                ngram_range=(2, 4)
+            )
+
+            try:
+
+                matrix = vectorizer.fit_transform(
+                    documents
+                )
+
+                query_vector = vectorizer.transform(
+                    [keyword]
+                )
+
+                scores = cosine_similarity(
+                    query_vector,
+                    matrix
+                )[0]
+
+                result_df = result_df.copy()
+
+                result_df["_score"] = scores
+
+                fuzzy_result = result_df[
+                    result_df["_score"] > 0.05
+                ].sort_values(
+                    "_score",
+                    ascending=False
+                )
+
+            except ValueError:
+
+                fuzzy_result = pd.DataFrame()
+
+
+        # -------------------------------------------------
+        # 合併結果
+        # -------------------------------------------------
+
+        if not exact_result.empty:
+
+            final_result = exact_result.copy()
+
+        elif not keyword_result.empty:
+
+            final_result = keyword_result.copy()
+
+        elif not fuzzy_result.empty:
+
+            final_result = fuzzy_result.copy()
+
+        else:
+
+            final_result = pd.DataFrame()
+
+
+        # -------------------------------------------------
+        # 商品匹配優先
+        # -------------------------------------------------
+
+        if (
+            product_words
+            and not final_result.empty
+        ):
+
+            def product_match(row):
+
+                text = " ".join(
+                    str(row.get(column, ""))
+                    for column in [
+                        "商品系列",
+                        "商品編號",
+                        "商品名稱"
+                    ]
+                )
+
+                return any(
+                    word in text
+                    for word in product_words
+                )
+
+            final_result = final_result.copy()
+
+            final_result["_product_match"] = (
+                final_result.apply(
+                    product_match,
+                    axis=1
+                )
+            )
+
+            final_result = final_result.sort_values(
+                "_product_match",
                 ascending=False
             )
 
 
         # =================================================
-        # 搜尋結果
+        # 顯示結果
         # =================================================
 
         st.divider()
 
-        result_col1, result_col2 = st.columns(
-            [4, 1]
-        )
-
-
-        with result_col1:
+        if not final_result.empty:
 
             st.subheader(
-                "📚 搜尋結果"
+                f"🔎 找到 {len(final_result)} 筆相關資料"
             )
 
-
-        with result_col2:
-
-            st.metric(
-                "找到",
-                f"{len(result)} 筆"
+            display_result = final_result.head(
+                20
             )
 
-
-        # =================================================
-        # 搜尋詞辨識
-        # =================================================
-
-        if matched_words:
-
-            word_text = "　｜　".join(
-                [
-                    f"{synonym} → {standard}"
-                    for standard, synonym
-                    in matched_words
-                ]
-            )
-
-            st.info(
-                f"🔎 搜尋詞辨識：{word_text}"
-            )
-
-
-        # =================================================
-        # 沒有結果
-        # =================================================
-
-        if len(result) == 0:
-
-            st.warning(
-                "🏠 這裡還沒有找到答案"
-            )
-
-            st.write(
-                "可以換個顧客說法，"
-                "或先把篩選條件取消看看。"
-            )
-
-            st.caption(
-                "🔎 商品重量　　"
-                "🔎 門市展示　　"
-                "🔎 退換貨　　"
-                "🔎 配送問題"
-            )
-
-
-        # =================================================
-        # 有結果
-        # =================================================
-
-        else:
-
-            for number, (_, row) in enumerate(
-                result.head(20).iterrows(),
-                start=1
-            ):
-
-                title = str(
-                    row.get(
-                        "問題摘要",
-                        "未設定問題摘要"
-                    )
-                )
-
-
-                # -----------------------------------------
-                # 知識卡片
-                # -----------------------------------------
+            for _, row in display_result.iterrows():
 
                 with st.container(
                     border=True
                 ):
 
+                    # -------------------------------------
+                    # 標題
+                    # -------------------------------------
+
+                    title = str(
+                        row.get(
+                            "問題摘要",
+                            "未提供問題摘要"
+                        )
+                    )
+
                     st.markdown(
-                        f"### {number}. {title}"
+                        f"### 💬 {title}"
                     )
 
 
@@ -1032,25 +904,40 @@ if page == "🔍 知識搜尋":
 
                     tags = []
 
-                    for field in [
-                        "問題類型",
-                        "問題細項",
-                        "商品系列"
-                    ]:
+                    if str(
+                        row.get(
+                            "問題類型",
+                            ""
+                        )
+                    ).strip():
 
-                        value = str(
-                            row.get(
-                                field,
-                                ""
-                            )
-                        ).strip()
+                        tags.append(
+                            f"📂 {row['問題類型']}"
+                        )
 
 
-                        if value:
+                    if str(
+                        row.get(
+                            "問題細項",
+                            ""
+                        )
+                    ).strip():
 
-                            tags.append(
-                                f"🏷️ {value}"
-                            )
+                        tags.append(
+                            f"🏷️ {row['問題細項']}"
+                        )
+
+
+                    if str(
+                        row.get(
+                            "商品系列",
+                            ""
+                        )
+                    ).strip():
+
+                        tags.append(
+                            f"🛋️ {row['商品系列']}"
+                        )
 
 
                     if tags:
@@ -1064,74 +951,61 @@ if page == "🔍 知識搜尋":
                     # 商品資訊
                     # -------------------------------------
 
-                    info_col1, info_col2, info_col3 = st.columns(3)
+                    info_col1, info_col2, info_col3 = st.columns(
+                        3
+                    )
 
 
                     with info_col1:
 
-                        st.caption(
-                            "商品名稱"
-                        )
+                        if "商品名稱" in row.index:
 
-                        st.write(
-                            str(
-                                row.get(
-                                    "商品名稱",
-                                    ""
+                            st.caption("商品名稱")
+
+                            st.write(
+                                str(
+                                    row["商品名稱"]
                                 )
                             )
-                        )
 
 
                     with info_col2:
 
-                        st.caption(
-                            "商品系列"
-                        )
+                        if "商品編號" in row.index:
 
-                        st.write(
-                            str(
-                                row.get(
-                                    "商品系列",
-                                    ""
+                            st.caption("商品編號")
+
+                            st.write(
+                                str(
+                                    row["商品編號"]
                                 )
                             )
-                        )
 
 
                     with info_col3:
 
-                        st.caption(
-                            "商品編號"
-                        )
+                        if "商品分類代碼" in row.index:
 
-                        st.write(
-                            str(
-                                row.get(
-                                    "商品編號",
-                                    ""
+                            st.caption("商品分類")
+
+                            st.write(
+                                str(
+                                    row["商品分類代碼"]
                                 )
                             )
-                        )
 
 
                     # -------------------------------------
                     # 標準回覆
                     # -------------------------------------
 
-                    st.markdown(
-                        "**📋 標準回覆**"
-                    )
+                    if "標準回覆" in row.index:
 
-
-                    st.success(
-                        str(
-                            row.get(
-                                "標準回覆",
-                                ""
+                        st.success(
+                            str(
+                                row["標準回覆"]
                             )
                         )
-                    )
 
 
                     # -------------------------------------
@@ -1139,148 +1013,161 @@ if page == "🔍 知識搜尋":
                     # -------------------------------------
 
                     with st.expander(
-                        "查看判斷依據與其他資訊"
+                        "查看判斷依據與資料來源"
                     ):
 
-                        detail_col1, detail_col2 = st.columns(2)
-
+                        detail_col1, detail_col2 = st.columns(
+                            2
+                        )
 
                         with detail_col1:
 
-                            st.write(
-                                f"**問題類型：** "
-                                f"{row.get('問題類型', '')}"
+                            st.markdown(
+                                "**判斷依據**"
                             )
 
                             st.write(
-                                f"**問題細項：** "
-                                f"{row.get('問題細項', '')}"
-                            )
-
-                            st.write(
-                                f"**商品分類代碼：** "
-                                f"{row.get('商品分類代碼', '')}"
-                            )
-
-                            st.write(
-                                f"**判斷依據：** "
-                                f"{row.get('判斷依據', '')}"
+                                str(
+                                    row.get(
+                                        "判斷依據",
+                                        ""
+                                    )
+                                )
                             )
 
 
                         with detail_col2:
 
-                            st.write(
-                                f"**資料來源：** "
-                                f"{row.get('資料來源', '')}"
+                            st.markdown(
+                                "**資料來源**"
                             )
 
                             st.write(
-                                f"**關鍵字：** "
-                                f"{row.get('關鍵字', '')}"
+                                str(
+                                    row.get(
+                                        "資料來源",
+                                        ""
+                                    )
+                                )
+                            )
+
+
+                        if "關鍵字" in row.index:
+
+                            st.markdown(
+                                "**關鍵字**"
                             )
 
                             st.write(
-                                f"**搜尋方式：** "
-                                f"{row.get('搜尋方式', '')}"
-                            )
-
-                            st.write(
-                                f"**更新人：** "
-                                f"{row.get('更新人', '')}"
-                            )
-
-                            st.write(
-                                f"**更新日期：** "
-                                f"{row.get('更新日期', '')}"
+                                str(
+                                    row["關鍵字"]
+                                )
                             )
 
 
-    # =====================================================
-    # 尚未搜尋
-    # =====================================================
+                        if "建立人" in row.index:
+
+                            st.caption(
+                                f"建立人：{row.get('建立人', '')}　"
+                                f"建立日期：{row.get('建立日期', '')}"
+                            )
+
+
+                        if "更新人" in row.index:
+
+                            st.caption(
+                                f"更新人：{row.get('更新人', '')}　"
+                                f"更新日期：{row.get('更新日期', '')}"
+                            )
+
+
+        else:
+
+            # -------------------------------------------------
+            # 找不到結果
+            # -------------------------------------------------
+
+            st.info(
+                "🔍 目前沒有找到相符的資料。\n\n"
+                "可以試著換個說法，例如使用顧客實際會說的詞彙。"
+            )
+
 
     else:
+
+        # =================================================
+        # 尚未搜尋
+        # =================================================
 
         st.divider()
 
         st.subheader(
-            "🛋️ 今天想查什麼？"
+            "👋 歡迎使用客服知識庫"
         )
 
         st.write(
-            "把顧客的問題直接貼進來，"
-            "讓知識庫幫你找到可以參考的內容。"
+            "先輸入顧客的問題，系統會協助你找到相關的標準回覆。"
+        )
+
+        empty_col1, empty_col2, empty_col3 = st.columns(
+            3
+        )
+
+        with empty_col1:
+
+            st.info(
+                "💬 **直接輸入問題**\n\n"
+                "不用先判斷問題分類，直接輸入顧客說法即可。"
+            )
+
+
+        with empty_col2:
+
+            st.info(
+                "🔎 **搜尋相關知識**\n\n"
+                "系統會從問題、關鍵字及商品資訊中尋找相關資料。"
+            )
+
+
+        with empty_col3:
+
+            st.info(
+                "📚 **查看標準回覆**\n\n"
+                "找到資料後，可以直接查看標準回覆及判斷依據。"
+            )
+
+
+        st.divider()
+
+        st.subheader(
+            "🌿 客服小角落"
+        )
+
+        st.caption(
+            "每天整理一點知識，讓下一次遇到相同問題時，可以更快找到答案。"
         )
 
 
-        example_col1, example_col2 = st.columns(2)
-
-
-        with example_col1:
-
-            st.info(
-                "🔎 商品重量\n\n"
-                "🔎 門市展示"
-            )
-
-
-        with example_col2:
-
-            st.info(
-                "🔎 退換貨\n\n"
-                "🔎 配送問題"
-            )
-
-
-    # =====================================================
-    # 客服小角落
-    # =====================================================
-
-    st.divider()
-
-    st.subheader(
-        "🏠 客服小角落"
-    )
-
-    st.caption(
-        "這裡整理的是客服日常可以查詢的知識內容。\n\n"
-        "如果發現資料需要修正或補充，可以到「資料維護」更新。\n\n"
-        f"目前知識庫共有 {len(df):,} 筆資料。"
-    )
-
-
 # =========================================================
-# 🛠️ 資料維護
+# 資料維護
 # =========================================================
 
 elif page == "🛠️ 資料維護":
 
-    st.title(
-        "🛠️ 知識庫資料維護"
-    )
+    st.title("🛠️ 資料維護")
 
     st.caption(
-        "新增、查看及修改客服知識庫內容"
+        "可查看、建立及修改知識庫資料。"
     )
 
-    st.divider()
-
 
     # =====================================================
-    # 重新讀取最新 Excel
-    # =====================================================
-
-    df = load_data()
-
-
-    # =====================================================
-    # 分頁
+    # Tabs
     # =====================================================
 
     tab1, tab2, tab3 = st.tabs(
         [
-            "📋 現有資料",
+            "📋 目前資料",
             "➕ 新增資料",
             "✏️ 修改資料"
         ]
@@ -1288,69 +1175,41 @@ elif page == "🛠️ 資料維護":
 
 
     # =====================================================
-    # ① 現有資料
+    # Tab 1：目前資料
     # =====================================================
 
     with tab1:
 
         st.subheader(
-            "📋 現有知識庫資料"
+            "📋 知識庫目前資料"
         )
 
-        st.write(
-            f"目前共有 **{len(df)}** 筆資料。"
-        )
-
-
-        search = st.text_input(
+        data_search = st.text_input(
             "搜尋資料",
-            placeholder="可輸入商品名稱、商品編號、問題摘要..."
+            placeholder="輸入關鍵字搜尋目前資料..."
         )
 
 
         display_df = df.copy()
 
 
-        if search:
+        if data_search.strip():
 
-            search_columns = [
-                "商品名稱",
-                "商品系列",
-                "商品編號",
-                "問題摘要",
-                "標準回覆",
-                "關鍵字"
-            ]
-
-
-            search_columns = [
-                col
-                for col in search_columns
-                if col in display_df.columns
-            ]
-
-
-            mask = display_df[
-                search_columns
-            ].astype(str).apply(
-                lambda row:
-                row.str.contains(
-                    search,
+            search_mask = display_df.astype(
+                str
+            ).apply(
+                lambda column: column.str.contains(
+                    data_search,
                     case=False,
                     na=False
-                ).any(),
+                )
+            ).any(
                 axis=1
             )
 
-
             display_df = display_df[
-                mask
+                search_mask
             ]
-
-
-        st.write(
-            f"符合條件：**{len(display_df)}** 筆"
-        )
 
 
         st.dataframe(
@@ -1361,267 +1220,156 @@ elif page == "🛠️ 資料維護":
 
 
     # =====================================================
-    # ② 新增資料
+    # Tab 2：新增資料
     # =====================================================
 
     with tab2:
 
         st.subheader(
-            "➕ 新增知識庫資料"
+            "➕ 新增知識"
         )
 
-        st.info(
-            "填寫完成後按下「新增資料」，資料會直接寫入 Excel。"
-        )
-
-
-        problem_type_list = sorted(
-            df["問題類型"]
-            .astype(str)
-            .replace("", pd.NA)
-            .dropna()
-            .unique()
-            .tolist()
-        )
-
-
-        problem_detail_list = sorted(
-            df["問題細項"]
-            .astype(str)
-            .replace("", pd.NA)
-            .dropna()
-            .unique()
-            .tolist()
+        new_id = (
+            int(
+                pd.to_numeric(
+                    df["序號"],
+                    errors="coerce"
+                ).max()
+            )
+            + 1
+            if "序號" in df.columns
+            and not df.empty
+            else 1
         )
 
 
-        category_list = sorted(
-            df["商品分類代碼"]
-            .astype(str)
-            .replace("", pd.NA)
-            .dropna()
-            .unique()
-            .tolist()
-        )
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            new_type = st.text_input(
+                "問題類型"
+            )
+
+            new_detail = st.text_input(
+                "問題細項"
+            )
+
+            new_category = st.text_input(
+                "商品分類代碼"
+            )
+
+            new_product_name = st.text_input(
+                "商品名稱"
+            )
+
+            new_series = st.text_input(
+                "商品系列"
+            )
+
+            new_product_id = st.text_input(
+                "商品編號"
+            )
 
 
-        with st.form("add_form"):
+        with col2:
 
-            col1, col2 = st.columns(2)
+            new_summary = st.text_input(
+                "問題摘要"
+            )
 
-
-            with col1:
-
-                add_problem_type = st.selectbox(
-                    "問題類型",
-                    problem_type_list
-                )
-
-                add_problem_detail = st.selectbox(
-                    "問題細項",
-                    problem_detail_list
-                )
-
-                add_category = st.selectbox(
-                    "商品分類代碼",
-                    category_list
-                )
-
-                add_product_name = st.text_input(
-                    "商品名稱"
-                )
-
-                add_product_series = st.text_input(
-                    "商品系列"
-                )
-
-                add_product_number = st.text_input(
-                    "商品編號"
-                )
-
-
-            with col2:
-
-                add_summary = st.text_input(
-                    "問題摘要"
-                )
-
-                add_source = st.text_input(
-                    "資料來源"
-                )
-
-                add_keyword = st.text_input(
-                    "關鍵字"
-                )
-
-                add_creator = st.text_input(
-                    "建立人"
-                )
-
-
-            add_answer = st.text_area(
+            new_reply = st.text_area(
                 "標準回覆",
                 height=180
             )
 
-
-            add_basis = st.text_area(
+            new_basis = st.text_area(
                 "判斷依據",
-                height=150
+                height=120
+            )
+
+            new_source = st.text_input(
+                "資料來源"
+            )
+
+            new_keywords = st.text_input(
+                "關鍵字"
+            )
+
+            new_creator = st.text_input(
+                "建立人"
             )
 
 
-            submitted = st.form_submit_button(
-                "➕ 新增資料",
-                type="primary"
+        if st.button(
+            "💾 儲存新增資料",
+            type="primary"
+        ):
+
+            today = datetime.now().strftime(
+                "%Y-%m-%d"
+            )
+
+            new_row = {
+                "序號": new_id,
+                "問題類型": new_type,
+                "問題細項": new_detail,
+                "商品分類代碼": new_category,
+                "商品名稱": new_product_name,
+                "商品系列": new_series,
+                "商品編號": new_product_id,
+                "問題摘要": new_summary,
+                "標準回覆": new_reply,
+                "判斷依據": new_basis,
+                "資料來源": new_source,
+                "關鍵字": new_keywords,
+                "建立人": new_creator,
+                "建立日期": today,
+                "更新人": new_creator,
+                "更新日期": today
+            }
+
+
+            new_df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [new_row]
+                    )
+                ],
+                ignore_index=True
             )
 
 
-        if submitted:
+            save_data(
+                new_df
+            )
 
-            if not add_summary:
+            st.success(
+                "資料已新增完成！"
+            )
 
-                st.warning(
-                    "請至少填寫「問題摘要」。"
-                )
-
-            elif not add_answer:
-
-                st.warning(
-                    "請填寫「標準回覆」。"
-                )
-
-            else:
-
-                numbers = pd.to_numeric(
-                    df["序號"],
-                    errors="coerce"
-                )
-
-
-                if numbers.notna().any():
-
-                    new_id = int(
-                        numbers.max()
-                    ) + 1
-
-                else:
-
-                    new_id = 1
-
-
-                today = datetime.now().strftime(
-                    "%Y-%m-%d"
-                )
-
-
-                new_row = {
-
-                    "序號": new_id,
-
-                    "問題類型":
-                        add_problem_type,
-
-                    "問題細項":
-                        add_problem_detail,
-
-                    "商品分類代碼":
-                        add_category,
-
-                    "商品名稱":
-                        add_product_name,
-
-                    "商品系列":
-                        add_product_series,
-
-                    "商品編號":
-                        add_product_number,
-
-                    "問題摘要":
-                        add_summary,
-
-                    "標準回覆":
-                        add_answer,
-
-                    "判斷依據":
-                        add_basis,
-
-                    "資料來源":
-                        add_source,
-
-                    "關鍵字":
-                        add_keyword,
-
-                    "建立人":
-                        add_creator,
-
-                    "建立日期":
-                        today,
-
-                    "更新人":
-                        add_creator,
-
-                    "更新日期":
-                        today
-                }
-
-
-                df = pd.concat(
-                    [
-                        df,
-                        pd.DataFrame(
-                            [new_row]
-                        )
-                    ],
-                    ignore_index=True
-                )
-
-
-                try:
-
-                    save_data(df)
-
-                    st.success(
-                        f"新增成功！序號：{new_id}"
-                    )
-
-                    st.rerun()
-
-
-                except Exception as e:
-
-                    st.error(
-                        f"儲存失敗：{e}"
-                    )
+            st.rerun()
 
 
     # =====================================================
-    # ③ 修改資料
+    # Tab 3：修改資料
     # =====================================================
 
     with tab3:
 
         st.subheader(
-            "✏️ 修改知識庫資料"
+            "✏️ 修改知識"
         )
 
-        st.write(
-            "先選擇「序號」，找到資料後再進行修改。"
-        )
+        if "序號" in df.columns:
 
-
-        id_list = sorted(
-            pd.to_numeric(
-                df["序號"],
-                errors="coerce"
+            id_list = sorted(
+                pd.to_numeric(
+                    df["序號"],
+                    errors="coerce"
+                ).dropna().astype(int).tolist()
             )
-            .dropna()
-            .astype(int)
-            .tolist()
-        )
-
-
-        if id_list:
 
             selected_id = st.selectbox(
                 "選擇要修改的序號",
@@ -1629,290 +1377,229 @@ elif page == "🛠️ 資料維護":
             )
 
 
-            selected_rows = df[
+            selected_row = df[
                 pd.to_numeric(
                     df["序號"],
                     errors="coerce"
                 ) == selected_id
-            ]
+            ].iloc[0]
 
 
-            if len(selected_rows) > 0:
-
-                row = selected_rows.iloc[0]
+            edit_col1, edit_col2 = st.columns(2)
 
 
-                with st.form("edit_form"):
+            with edit_col1:
 
-                    col1, col2 = st.columns(2)
-
-
-                    with col1:
-
-                        edit_problem_type = st.text_input(
+                edit_type = st.text_input(
+                    "問題類型",
+                    value=str(
+                        selected_row.get(
                             "問題類型",
-                            value=str(
-                                row.get(
-                                    "問題類型",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
-
-                        edit_problem_detail = st.text_input(
+                edit_detail = st.text_input(
+                    "問題細項",
+                    value=str(
+                        selected_row.get(
                             "問題細項",
-                            value=str(
-                                row.get(
-                                    "問題細項",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
-
-                        edit_category = st.text_input(
+                edit_category = st.text_input(
+                    "商品分類代碼",
+                    value=str(
+                        selected_row.get(
                             "商品分類代碼",
-                            value=str(
-                                row.get(
-                                    "商品分類代碼",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
-
-                        edit_product_name = st.text_input(
+                edit_product_name = st.text_input(
+                    "商品名稱",
+                    value=str(
+                        selected_row.get(
                             "商品名稱",
-                            value=str(
-                                row.get(
-                                    "商品名稱",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
-
-                        edit_product_series = st.text_input(
+                edit_series = st.text_input(
+                    "商品系列",
+                    value=str(
+                        selected_row.get(
                             "商品系列",
-                            value=str(
-                                row.get(
-                                    "商品系列",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
-
-                        edit_product_number = st.text_input(
+                edit_product_id = st.text_input(
+                    "商品編號",
+                    value=str(
+                        selected_row.get(
                             "商品編號",
-                            value=str(
-                                row.get(
-                                    "商品編號",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
 
-                    with col2:
+            with edit_col2:
 
-                        edit_summary = st.text_input(
+                edit_summary = st.text_input(
+                    "問題摘要",
+                    value=str(
+                        selected_row.get(
                             "問題摘要",
-                            value=str(
-                                row.get(
-                                    "問題摘要",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
+                edit_reply = st.text_area(
+                    "標準回覆",
+                    value=str(
+                        selected_row.get(
+                            "標準回覆",
+                            ""
+                        )
+                    ),
+                    height=180
+                )
 
-                        edit_source = st.text_input(
+                edit_basis = st.text_area(
+                    "判斷依據",
+                    value=str(
+                        selected_row.get(
+                            "判斷依據",
+                            ""
+                        )
+                    ),
+                    height=120
+                )
+
+                edit_source = st.text_input(
+                    "資料來源",
+                    value=str(
+                        selected_row.get(
                             "資料來源",
-                            value=str(
-                                row.get(
-                                    "資料來源",
-                                    ""
-                                )
-                            )
+                            ""
                         )
+                    )
+                )
 
-
-                        edit_keyword = st.text_input(
+                edit_keywords = st.text_input(
+                    "關鍵字",
+                    value=str(
+                        selected_row.get(
                             "關鍵字",
-                            value=str(
-                                row.get(
-                                    "關鍵字",
-                                    ""
-                                )
-                            )
+                            ""
                         )
-
-
-                        edit_creator = st.text_input(
-                            "建立人",
-                            value=str(
-                                row.get(
-                                    "建立人",
-                                    ""
-                                )
-                            ),
-                            disabled=True
-                        )
-
-
-                    edit_answer = st.text_area(
-                        "標準回覆",
-                        value=str(
-                            row.get(
-                                "標準回覆",
-                                ""
-                            )
-                        ),
-                        height=180
                     )
+                )
+
+                edit_updater = st.text_input(
+                    "更新人"
+                )
 
 
-                    edit_basis = st.text_area(
-                        "判斷依據",
-                        value=str(
-                            row.get(
-                                "判斷依據",
-                                ""
-                            )
-                        ),
-                        height=150
-                    )
+            if st.button(
+                "💾 儲存修改",
+                type="primary"
+            ):
+
+                today = datetime.now().strftime(
+                    "%Y-%m-%d"
+                )
 
 
-                    edit_updater = st.text_input(
-                        "更新人"
-                    )
+                edit_index = df.index[
+                    pd.to_numeric(
+                        df["序號"],
+                        errors="coerce"
+                    ) == selected_id
+                ][0]
 
 
-                    update_button = st.form_submit_button(
-                        "💾 儲存修改",
-                        type="primary"
-                    )
+                df.loc[
+                    edit_index,
+                    "問題類型"
+                ] = edit_type
+
+                df.loc[
+                    edit_index,
+                    "問題細項"
+                ] = edit_detail
+
+                df.loc[
+                    edit_index,
+                    "商品分類代碼"
+                ] = edit_category
+
+                df.loc[
+                    edit_index,
+                    "商品名稱"
+                ] = edit_product_name
+
+                df.loc[
+                    edit_index,
+                    "商品系列"
+                ] = edit_series
+
+                df.loc[
+                    edit_index,
+                    "商品編號"
+                ] = edit_product_id
+
+                df.loc[
+                    edit_index,
+                    "問題摘要"
+                ] = edit_summary
+
+                df.loc[
+                    edit_index,
+                    "標準回覆"
+                ] = edit_reply
+
+                df.loc[
+                    edit_index,
+                    "判斷依據"
+                ] = edit_basis
+
+                df.loc[
+                    edit_index,
+                    "資料來源"
+                ] = edit_source
+
+                df.loc[
+                    edit_index,
+                    "關鍵字"
+                ] = edit_keywords
+
+                df.loc[
+                    edit_index,
+                    "更新人"
+                ] = edit_updater
+
+                df.loc[
+                    edit_index,
+                    "更新日期"
+                ] = today
 
 
-                if update_button:
+                save_data(
+                    df
+                )
 
-                    if not edit_updater:
+                st.success(
+                    "資料已修改完成！"
+                )
 
-                        st.warning(
-                            "請填寫「更新人」。"
-                        )
-
-                    else:
-
-                        today = datetime.now().strftime(
-                            "%Y-%m-%d"
-                        )
-
-
-                        index = selected_rows.index[0]
-
-
-                        df.loc[
-                            index,
-                            "問題類型"
-                        ] = edit_problem_type
-
-
-                        df.loc[
-                            index,
-                            "問題細項"
-                        ] = edit_problem_detail
-
-
-                        df.loc[
-                            index,
-                            "商品分類代碼"
-                        ] = edit_category
-
-
-                        df.loc[
-                            index,
-                            "商品名稱"
-                        ] = edit_product_name
-
-
-                        df.loc[
-                            index,
-                            "商品系列"
-                        ] = edit_product_series
-
-
-                        df.loc[
-                            index,
-                            "商品編號"
-                        ] = edit_product_number
-
-
-                        df.loc[
-                            index,
-                            "問題摘要"
-                        ] = edit_summary
-
-
-                        df.loc[
-                            index,
-                            "標準回覆"
-                        ] = edit_answer
-
-
-                        df.loc[
-                            index,
-                            "判斷依據"
-                        ] = edit_basis
-
-
-                        df.loc[
-                            index,
-                            "資料來源"
-                        ] = edit_source
-
-
-                        df.loc[
-                            index,
-                            "關鍵字"
-                        ] = edit_keyword
-
-
-                        df.loc[
-                            index,
-                            "更新人"
-                        ] = edit_updater
-
-
-                        df.loc[
-                            index,
-                            "更新日期"
-                        ] = today
-
-
-                        try:
-
-                            save_data(df)
-
-                            st.success(
-                                f"序號 {selected_id} 修改成功！"
-                            )
-
-                            st.rerun()
-
-
-                        except Exception as e:
-
-                            st.error(
-                                f"儲存失敗：{e}"
-                            )
-
-
-        else:
-
-            st.info(
-                "目前沒有可修改的資料。"
-            )
+                st.rerun()
