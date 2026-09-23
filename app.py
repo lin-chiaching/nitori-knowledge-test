@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 from openpyxl import load_workbook
+import html
 
 
 # =========================================================
@@ -14,227 +15,574 @@ FILE_PATH = "DATA/知識庫實驗品.xlsx"
 
 st.set_page_config(
     page_title="客服知識庫",
-    page_icon="🔍",
+    page_icon="🏠",
     layout="wide"
 )
 
 
 # =========================================================
-# UI 外觀
+# UI 樣式
 # =========================================================
 
 st.markdown(
     """
     <style>
 
-    /* =========================
-       整體頁面
-       ========================= */
+    /* =====================================================
+       全站基本
+       ===================================================== */
 
-    .block-container {
+    .stApp {
+        background-color: #F7F3ED;
+    }
+
+    .main .block-container {
+        max-width: 1250px;
         padding-top: 2rem;
         padding-bottom: 3rem;
-        max-width: 1400px;
     }
 
-    /* =========================
+    h1, h2, h3 {
+        color: #4E4036;
+    }
+
+    p, label, .stMarkdown {
+        color: #5C5149;
+    }
+
+
+    /* =====================================================
        Sidebar
-       ========================= */
+       ===================================================== */
 
-    [data-testid="stSidebar"] {
-        border-right: 1px solid #e5e7eb;
+    section[data-testid="stSidebar"] {
+        background-color: #EFE7DC;
+        border-right: 1px solid #D8C8B5;
     }
 
-    [data-testid="stSidebar"] .block-container {
+    section[data-testid="stSidebar"] .block-container {
         padding-top: 2rem;
     }
 
     .sidebar-title {
-        font-size: 1.25rem;
+        font-size: 23px;
         font-weight: 700;
-        margin-bottom: 0.2rem;
+        color: #4E4036;
+        margin-bottom: 4px;
     }
 
     .sidebar-subtitle {
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin-bottom: 1.2rem;
+        font-size: 13px;
+        color: #88786A;
+        margin-bottom: 22px;
     }
 
     .sidebar-count {
-        background: #f5f6f8;
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-top: 15px;
-        font-size: 0.9rem;
+        background: #FFFDF9;
+        border: 1px solid #DCCDBC;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-top: 18px;
+        margin-bottom: 18px;
     }
 
-    /* =========================
-       主標題
-       ========================= */
+    .sidebar-count-title {
+        font-size: 12px;
+        color: #958578;
+        margin-bottom: 4px;
+    }
+
+    .sidebar-count-number {
+        font-size: 25px;
+        font-weight: 700;
+        color: #C56F3A;
+    }
+
+    .sidebar-note {
+        background: #F8E8D8;
+        border-left: 4px solid #D9824B;
+        border-radius: 10px;
+        padding: 11px 13px;
+        font-size: 12px;
+        color: #735B49;
+        line-height: 1.6;
+        margin-top: 18px;
+    }
+
+
+    /* =====================================================
+       頁首
+       ===================================================== */
+
+    .page-header {
+        background: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 22px;
+        padding: 26px 30px 24px 30px;
+        margin-bottom: 22px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 18px rgba(110, 88, 67, 0.06);
+    }
+
+    .page-header::after {
+        content: "";
+        position: absolute;
+        right: -35px;
+        bottom: -70px;
+        width: 220px;
+        height: 150px;
+        border: 2px solid #E5D7C8;
+        border-radius: 50%;
+        opacity: 0.7;
+    }
 
     .page-title {
-        font-size: 2rem;
+        font-size: 32px;
         font-weight: 750;
-        margin-bottom: 0.25rem;
+        color: #4E4036;
+        margin-bottom: 5px;
     }
 
     .page-subtitle {
-        color: #6b7280;
-        font-size: 0.95rem;
-        margin-bottom: 1.5rem;
+        color: #8B7C70;
+        font-size: 14px;
+        margin-bottom: 0;
     }
 
-    /* =========================
-       搜尋區塊
-       ========================= */
+    .room-decoration {
+        position: absolute;
+        right: 45px;
+        top: 24px;
+        width: 210px;
+        height: 120px;
+        opacity: 0.8;
+    }
+
+    .room-floor {
+        position: absolute;
+        bottom: 8px;
+        left: 10px;
+        width: 185px;
+        height: 2px;
+        background: #D8C6B3;
+    }
+
+    .room-sofa {
+        position: absolute;
+        bottom: 10px;
+        left: 52px;
+        width: 85px;
+        height: 30px;
+        border: 2px solid #CDB9A4;
+        border-radius: 8px 8px 3px 3px;
+    }
+
+    .room-sofa::before {
+        content: "";
+        position: absolute;
+        left: -5px;
+        bottom: -12px;
+        width: 6px;
+        height: 12px;
+        background: #CDB9A4;
+        box-shadow: 88px 0 0 #CDB9A4;
+    }
+
+    .room-lamp {
+        position: absolute;
+        bottom: 40px;
+        left: 25px;
+        width: 2px;
+        height: 60px;
+        background: #CDB9A4;
+    }
+
+    .room-lamp::before {
+        content: "";
+        position: absolute;
+        top: -8px;
+        left: -14px;
+        width: 30px;
+        height: 18px;
+        border: 2px solid #CDB9A4;
+        border-radius: 50%;
+    }
+
+    .room-plant {
+        position: absolute;
+        bottom: 10px;
+        right: 15px;
+        width: 35px;
+        height: 25px;
+        border: 2px solid #CDB9A4;
+        border-radius: 4px;
+    }
+
+    .room-plant::before {
+        content: "♧";
+        position: absolute;
+        font-size: 34px;
+        left: 2px;
+        top: -34px;
+        color: #CDB9A4;
+    }
+
+
+    /* =====================================================
+       搜尋區
+       ===================================================== */
 
     .search-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 22px 24px 18px 24px;
-        background: #ffffff;
+        background: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 20px;
+        padding: 23px 25px;
         margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(110, 88, 67, 0.05);
     }
 
     .search-card-title {
-        font-size: 1.05rem;
+        font-size: 17px;
         font-weight: 700;
+        color: #55463C;
         margin-bottom: 4px;
     }
 
-    .search-card-description {
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin-bottom: 15px;
+    .search-card-subtitle {
+        font-size: 13px;
+        color: #958579;
+        margin-bottom: 14px;
     }
 
-    /* =========================
+    .hint-card {
+        background: #FBF0E5;
+        border: 1px solid #E9CFB9;
+        border-radius: 15px;
+        padding: 15px 17px;
+        min-height: 116px;
+    }
+
+    .hint-title {
+        color: #B76531;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .hint-text {
+        color: #79685B;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .example-chip {
+        display: inline-block;
+        background: #FFFDF9;
+        border: 1px solid #E3CDB8;
+        color: #80644E;
+        padding: 4px 8px;
+        border-radius: 20px;
+        margin: 3px 3px 0 0;
+        font-size: 11px;
+    }
+
+
+    /* =====================================================
+       Streamlit input
+       ===================================================== */
+
+    div[data-baseweb="input"] {
+        border-radius: 12px;
+        border-color: #DCCDBD;
+        background-color: #FFFDF9;
+    }
+
+    div[data-baseweb="input"]:focus-within {
+        border-color: #D9824B;
+        box-shadow: 0 0 0 1px #D9824B;
+    }
+
+    div[data-baseweb="select"] {
+        border-radius: 10px;
+    }
+
+
+    /* =====================================================
+       Filter
+       ===================================================== */
+
+    div[data-testid="stExpander"] {
+        background: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 14px;
+    }
+
+
+    /* =====================================================
        結果區
-       ========================= */
+       ===================================================== */
 
     .result-header {
-        font-size: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: transparent;
+        margin: 16px 0 12px 0;
+    }
+
+    .result-title {
+        font-size: 20px;
         font-weight: 700;
-        margin-top: 8px;
-        margin-bottom: 4px;
+        color: #55463C;
     }
 
     .result-count {
-        color: #6b7280;
-        font-size: 0.85rem;
-        margin-bottom: 15px;
+        background: #F4E3D4;
+        color: #A85F30;
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 600;
     }
 
-    /* =========================
-       知識卡片
-       ========================= */
+
+    /* =====================================================
+       搜尋詞提示
+       ===================================================== */
+
+    .search-word-box {
+        background: #F7EBDD;
+        border-left: 4px solid #D9824B;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin: 8px 0 16px 0;
+        color: #765B48;
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       Knowledge Card
+       ===================================================== */
 
     .knowledge-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 18px 20px;
-        margin-bottom: 14px;
-        background: #ffffff;
+        background: #FFFDF9;
+        border: 1px solid #E1D5C7;
+        border-radius: 18px;
+        padding: 20px 22px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 14px rgba(110, 88, 67, 0.05);
     }
 
     .knowledge-title {
-        font-size: 1.05rem;
+        color: #4F4138;
+        font-size: 17px;
         font-weight: 700;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         line-height: 1.5;
     }
 
-    .knowledge-meta {
-        font-size: 0.83rem;
-        color: #6b7280;
-        line-height: 1.8;
-    }
-
-    .answer-box {
-        background: #f7f8fa;
-        border-radius: 10px;
-        padding: 15px 17px;
-        margin-top: 15px;
-        margin-bottom: 10px;
+    .tag {
+        display: inline-block;
+        padding: 4px 9px;
+        margin: 0 5px 7px 0;
+        border-radius: 20px;
+        background: #F4E8DC;
+        border: 1px solid #E4D0BC;
+        color: #805D45;
+        font-size: 11px;
     }
 
     .answer-title {
+        color: #B96330;
+        font-size: 13px;
         font-weight: 700;
-        font-size: 0.9rem;
-        margin-bottom: 8px;
+        margin-top: 12px;
+        margin-bottom: 7px;
     }
 
-    .answer-text {
-        font-size: 0.92rem;
-        line-height: 1.7;
+    .answer-box {
+        background: #FBF5EE;
+        border-left: 4px solid #D9824B;
+        border-radius: 10px;
+        padding: 13px 15px;
+        color: #53483F;
+        font-size: 14px;
+        line-height: 1.8;
         white-space: pre-wrap;
     }
 
-    /* =========================
-       空白狀態
-       ========================= */
+    .detail-label {
+        color: #87776A;
+        font-size: 12px;
+        line-height: 1.8;
+    }
 
-    .empty-box {
-        border: 1px dashed #d1d5db;
-        border-radius: 12px;
-        padding: 35px;
+    .detail-value {
+        color: #5C5149;
+    }
+
+
+    /* =====================================================
+       空白狀態
+       ===================================================== */
+
+    .empty-house {
+        background: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 22px;
+        padding: 45px 30px;
         text-align: center;
-        color: #6b7280;
-        margin-top: 15px;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(110, 88, 67, 0.04);
     }
 
     .empty-icon {
-        font-size: 2rem;
-        margin-bottom: 8px;
-    }
-
-    .empty-title {
-        font-weight: 700;
-        color: #374151;
-        margin-bottom: 5px;
-    }
-
-    /* =========================
-       維護頁
-       ========================= */
-
-    .maintenance-header {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 18px 20px;
-        margin-bottom: 20px;
-        background: #ffffff;
-    }
-
-    .maintenance-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .maintenance-description {
-        color: #6b7280;
-        font-size: 0.88rem;
-    }
-
-    /* =========================
-       表單區
-       ========================= */
-
-    .form-section-title {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-top: 10px;
+        font-size: 54px;
         margin-bottom: 10px;
     }
 
-    /* =========================
-       隱藏部分 Streamlit 元素
-       ========================= */
+    .empty-title {
+        color: #59493E;
+        font-size: 21px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
 
-    div[data-testid="stDecoration"] {
-        display: none;
+    .empty-text {
+        color: #918176;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .empty-example {
+        display: inline-block;
+        background: #F8EEE5;
+        border: 1px solid #E6D2BF;
+        border-radius: 20px;
+        padding: 7px 12px;
+        margin: 4px;
+        color: #80634E;
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       客服小角落
+       ===================================================== */
+
+    .service-corner {
+        margin-top: 38px;
+        background: #EFE5D8;
+        border: 1px solid #DCC9B5;
+        border-radius: 20px;
+        padding: 20px 23px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .service-corner::after {
+        content: "☕";
+        position: absolute;
+        right: 25px;
+        bottom: 10px;
+        font-size: 42px;
+        opacity: 0.18;
+    }
+
+    .service-corner-title {
+        color: #5B493C;
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 5px;
+    }
+
+    .service-corner-text {
+        color: #806F61;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+
+    /* =====================================================
+       維護頁
+       ===================================================== */
+
+    .maintenance-header {
+        background: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 20px;
+        padding: 22px 25px;
+        margin-bottom: 20px;
+    }
+
+    .maintenance-title {
+        color: #514238;
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .maintenance-subtitle {
+        color: #8B7A6C;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    div[data-testid="stForm"] {
+        background: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 16px;
+        padding: 18px;
+    }
+
+    button[kind="primary"] {
+        background-color: #D9824B;
+        border-color: #D9824B;
+    }
+
+    button[kind="primary"]:hover {
+        background-color: #C66F38;
+        border-color: #C66F38;
+    }
+
+
+    /* =====================================================
+       Dataframe
+       ===================================================== */
+
+    div[data-testid="stDataFrame"] {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #E0D4C6;
+    }
+
+
+    /* =====================================================
+       手機版
+       ===================================================== */
+
+    @media (max-width: 800px) {
+
+        .main .block-container {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 25px;
+        }
+
+        .room-decoration {
+            display: none;
+        }
+
+        .search-card {
+            padding: 17px;
+        }
+
+        .knowledge-card {
+            padding: 16px;
+        }
     }
 
     </style>
@@ -426,20 +774,20 @@ def find_product_words(keyword):
 
 
 # =========================================================
-# Sidebar
+# 頁面選擇
 # =========================================================
 
 st.sidebar.markdown(
     """
-    <div class="sidebar-title">🔍 客服知識庫</div>
+    <div class="sidebar-title">
+        🏠 客服知識庫
+    </div>
     <div class="sidebar-subtitle">
-        Customer Service Knowledge Base
+        NITORI Customer Service Knowledge
     </div>
     """,
     unsafe_allow_html=True
 )
-
-st.sidebar.divider()
 
 page = st.sidebar.radio(
     "功能",
@@ -450,13 +798,21 @@ page = st.sidebar.radio(
     label_visibility="collapsed"
 )
 
-st.sidebar.divider()
-
 st.sidebar.markdown(
     f"""
     <div class="sidebar-count">
-        📚 目前資料<br>
-        <strong>{len(df):,}</strong> 筆
+        <div class="sidebar-count-title">
+            📚 目前知識庫
+        </div>
+        <div class="sidebar-count-number">
+            {len(df):,} 筆
+        </div>
+    </div>
+
+    <div class="sidebar-note">
+        💡 知識庫持續更新中<br>
+        建議將最新確認的資訊整理後加入資料庫，
+        讓大家都能快速找到一致的參考內容。
     </div>
     """,
     unsafe_allow_html=True
@@ -469,51 +825,105 @@ st.sidebar.markdown(
 
 if page == "🔍 知識搜尋":
 
+    # =====================================================
+    # 頁首
+    # =====================================================
+
     st.markdown(
         """
-        <div class="page-title">客服知識搜尋</div>
-        <div class="page-subtitle">
-            輸入顧客問題，快速找到可參考的標準資訊。
+        <div class="page-header">
+
+            <div class="page-title">
+                🔍 客服知識搜尋
+            </div>
+
+            <div class="page-subtitle">
+                快速找到顧客問題對應的標準資訊與回覆內容
+            </div>
+
+            <div class="room-decoration">
+                <div class="room-lamp"></div>
+                <div class="room-sofa"></div>
+                <div class="room-plant"></div>
+                <div class="room-floor"></div>
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
+
     # =====================================================
-    # 搜尋區塊
+    # 搜尋區
     # =====================================================
 
     st.markdown(
         """
         <div class="search-card">
-            <div class="search-card-title">🔎 顧客問題</div>
-            <div class="search-card-description">
-                可直接輸入顧客原話，例如「這張椅子幾公斤？」、
-                「可以退貨嗎？」或商品名稱。
+
+            <div class="search-card-title">
+                💬 顧客問題
             </div>
+
+            <div class="search-card-subtitle">
+                可以直接輸入顧客原本的說法，不需要先判斷分類。
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    keyword = st.text_input(
-        "顧客問題",
-        placeholder="例如：這張椅子幾公斤？",
-        label_visibility="collapsed"
+    search_col1, search_col2 = st.columns(
+        [2.7, 1],
+        gap="large"
     )
+
+    with search_col1:
+
+        keyword = st.text_input(
+            "🔎 搜尋問題",
+            placeholder="例如：這張椅子幾公斤？",
+            label_visibility="collapsed"
+        )
+
+    with search_col2:
+
+        st.markdown(
+            """
+            <div class="hint-card">
+
+                <div class="hint-title">
+                    💡 小提示
+                </div>
+
+                <div class="hint-text">
+                    可以直接輸入顧客說法，例如：
+                    <br>
+                    <span class="example-chip">這張椅子多重？</span>
+                    <span class="example-chip">床墊可以退嗎？</span>
+                    <span class="example-chip">有沒有展示品？</span>
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
 
     # =====================================================
     # 篩選條件
     # =====================================================
 
     with st.expander(
-        "⚙️ 篩選條件",
+        "⚙️ 篩選條件（不確定時可以不用設定）",
         expanded=False
     ):
 
-        col1, col2 = st.columns(2)
+        filter_col1, filter_col2, filter_col3 = st.columns(3)
 
-        with col1:
+        with filter_col1:
 
             problem_type_list = sorted(
                 df["問題類型"]
@@ -529,7 +939,7 @@ if page == "🔍 知識搜尋":
                 ["全部"] + problem_type_list
             )
 
-        with col2:
+        with filter_col2:
 
             problem_detail_list = sorted(
                 df["問題細項"]
@@ -545,9 +955,7 @@ if page == "🔍 知識搜尋":
                 ["全部"] + problem_detail_list
             )
 
-        col3, col4 = st.columns(2)
-
-        with col3:
+        with filter_col3:
 
             product_category_list = sorted(
                 df["商品分類代碼"]
@@ -563,21 +971,19 @@ if page == "🔍 知識搜尋":
                 ["全部"] + product_category_list
             )
 
-        with col4:
+        product_series_list = sorted(
+            df["商品系列"]
+            .astype(str)
+            .replace("", pd.NA)
+            .dropna()
+            .unique()
+            .tolist()
+        )
 
-            product_series_list = sorted(
-                df["商品系列"]
-                .astype(str)
-                .replace("", pd.NA)
-                .dropna()
-                .unique()
-                .tolist()
-            )
-
-            product_series = st.selectbox(
-                "商品系列",
-                ["全部"] + product_series_list
-            )
+        product_series = st.selectbox(
+            "商品系列",
+            ["全部"] + product_series_list
+        )
 
 
     # =====================================================
@@ -853,6 +1259,7 @@ if page == "🔍 知識搜尋":
                 ascending=False
             )
 
+
         # =================================================
         # 顯示結果
         # =================================================
@@ -862,16 +1269,24 @@ if page == "🔍 知識搜尋":
         st.markdown(
             f"""
             <div class="result-header">
-                搜尋結果
-            </div>
-            <div class="result-count">
-                共找到 {len(result)} 筆相關資料
+
+                <div class="result-title">
+                    📚 搜尋結果
+                </div>
+
+                <div class="result-count">
+                    {len(result)} 筆
+                </div>
+
             </div>
             """,
             unsafe_allow_html=True
         )
 
+
+        # =================================================
         # 搜尋詞辨識結果
+        # =================================================
 
         if matched_words:
 
@@ -880,187 +1295,344 @@ if page == "🔍 知識搜尋":
             for standard_word, synonym_word in matched_words:
 
                 display_words.append(
-                    f"{synonym_word} → {standard_word}"
+                    f"{html.escape(str(synonym_word))} → "
+                    f"{html.escape(str(standard_word))}"
                 )
-
-            st.caption(
-                "🔎 搜尋詞辨識："
-                + "、".join(display_words)
-            )
-
-        # 沒有結果
-
-        if len(result) == 0:
 
             st.markdown(
                 """
-                <div class="empty-box">
-                    <div class="empty-icon">🔍</div>
-                    <div class="empty-title">
-                        目前沒有找到相關資料
-                    </div>
-                    <div>
-                        可以嘗試更換顧客說法，
-                        或取消部分篩選條件後再次搜尋。
-                    </div>
+                <div class="search-word-box">
+                    <strong>🔎 搜尋詞辨識</strong>
+                    &nbsp;&nbsp;
+                    """
+                + "　".join(display_words)
+                + """
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
+
+        # =================================================
+        # 沒有結果
+        # =================================================
+
+        if len(result) == 0:
+
+            st.markdown(
+                """
+                <div class="empty-house">
+
+                    <div class="empty-icon">
+                        🏠
+                    </div>
+
+                    <div class="empty-title">
+                        這裡還沒有找到答案
+                    </div>
+
+                    <div class="empty-text">
+                        可以換個顧客說法，或先把篩選條件取消看看。
+                    </div>
+
+                    <span class="empty-example">
+                        💬 「這張椅子有多重？」
+                    </span>
+
+                    <span class="empty-example">
+                        💬 「這個商品可以退嗎？」
+                    </span>
+
+                    <span class="empty-example">
+                        💬 「門市有展示嗎？」
+                    </span>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        # =================================================
         # 有結果
+        # =================================================
 
         else:
 
             for _, row in result.head(20).iterrows():
 
-                title = row.get(
-                    "問題摘要",
-                    "未設定問題摘要"
+                title = str(
+                    row.get(
+                        "問題摘要",
+                        "未設定問題摘要"
+                    )
                 )
 
-                # =================================================
-                # 知識卡片
-                # =================================================
+                title_html = html.escape(title)
+
+                # -----------------------------------------
+                # 標籤
+                # -----------------------------------------
+
+                tags = []
+
+                tag_fields = [
+                    "問題類型",
+                    "問題細項",
+                    "商品系列"
+                ]
+
+                for field in tag_fields:
+
+                    value = str(
+                        row.get(
+                            field,
+                            ""
+                        )
+                    ).strip()
+
+                    if value:
+
+                        tags.append(
+                            f'<span class="tag">'
+                            f'{html.escape(value)}'
+                            f'</span>'
+                        )
+
+                tags_html = "".join(tags)
+
+
+                # -----------------------------------------
+                # 卡片
+                # -----------------------------------------
 
                 st.markdown(
                     f"""
                     <div class="knowledge-card">
+
                         <div class="knowledge-title">
-                            {title}
+                            {title_html}
                         </div>
 
-                        <div class="knowledge-meta">
-                            <b>問題類型：</b>
-                            {row.get('問題類型', '')}
-                            &nbsp;&nbsp;|&nbsp;&nbsp;
-
-                            <b>問題細項：</b>
-                            {row.get('問題細項', '')}
+                        <div>
+                            {tags_html}
                         </div>
 
-                        <div class="knowledge-meta">
-                            <b>商品名稱：</b>
-                            {row.get('商品名稱', '')}
-                            &nbsp;&nbsp;|&nbsp;&nbsp;
-
-                            <b>商品系列：</b>
-                            {row.get('商品系列', '')}
-                        </div>
-
-                        <div class="knowledge-meta">
-                            <b>商品編號：</b>
-                            {row.get('商品編號', '')}
-                            &nbsp;&nbsp;|&nbsp;&nbsp;
-
-                            <b>商品分類：</b>
-                            {row.get('商品分類代碼', '')}
-                        </div>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-                # =================================================
+
+                # -----------------------------------------
+                # 商品基本資訊
+                # -----------------------------------------
+
+                info_col1, info_col2, info_col3 = st.columns(3)
+
+                with info_col1:
+
+                    st.markdown(
+                        f"""
+                        <div class="detail-label">
+                            商品名稱<br>
+                            <span class="detail-value">
+                                {html.escape(str(row.get('商品名稱', '')))}
+                            </span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                with info_col2:
+
+                    st.markdown(
+                        f"""
+                        <div class="detail-label">
+                            商品系列<br>
+                            <span class="detail-value">
+                                {html.escape(str(row.get('商品系列', '')))}
+                            </span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                with info_col3:
+
+                    st.markdown(
+                        f"""
+                        <div class="detail-label">
+                            商品編號<br>
+                            <span class="detail-value">
+                                {html.escape(str(row.get('商品編號', '')))}
+                            </span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+
+                # -----------------------------------------
                 # 標準回覆
-                # =================================================
+                # -----------------------------------------
+
+                st.markdown(
+                    """
+                    <div class="answer-title">
+                        📋 標準回覆
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                answer_text = html.escape(
+                    str(
+                        row.get(
+                            "標準回覆",
+                            ""
+                        )
+                    )
+                )
 
                 st.markdown(
                     f"""
                     <div class="answer-box">
-                        <div class="answer-title">
-                            📋 標準回覆
-                        </div>
-
-                        <div class="answer-text">
-                            {str(row.get('標準回覆', '')).replace(chr(10), '<br>')}
-                        </div>
+                        {answer_text}
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-                # =================================================
+
+                # -----------------------------------------
                 # 其他資訊
-                # =================================================
+                # -----------------------------------------
 
                 with st.expander(
                     "查看判斷依據與其他資訊"
                 ):
 
-                    st.markdown(
-                        "### 🧭 判斷依據"
+                    st.write(
+                        f"**問題類型：** "
+                        f"{row.get('問題類型', '')}"
                     )
 
                     st.write(
-                        row.get(
-                            "判斷依據",
-                            ""
-                        )
+                        f"**問題細項：** "
+                        f"{row.get('問題細項', '')}"
                     )
 
-                    col1, col2 = st.columns(2)
+                    st.write(
+                        f"**商品分類代碼：** "
+                        f"{row.get('商品分類代碼', '')}"
+                    )
 
-                    with col1:
+                    st.write(
+                        f"**判斷依據：** "
+                        f"{row.get('判斷依據', '')}"
+                    )
 
-                        st.markdown(
-                            "### 📚 資料來源"
-                        )
+                    st.write(
+                        f"**資料來源：** "
+                        f"{row.get('資料來源', '')}"
+                    )
 
-                        st.write(
-                            row.get(
-                                "資料來源",
-                                ""
-                            )
-                        )
+                    st.write(
+                        f"**關鍵字：** "
+                        f"{row.get('關鍵字', '')}"
+                    )
 
-                    with col2:
+                    st.write(
+                        f"**搜尋方式：** "
+                        f"{row.get('搜尋方式', '')}"
+                    )
 
-                        st.markdown(
-                            "### 🏷️ 關鍵字"
-                        )
+                    st.write(
+                        f"**更新人：** "
+                        f"{row.get('更新人', '')}"
+                    )
 
-                        st.write(
-                            row.get(
-                                "關鍵字",
-                                ""
-                            )
-                        )
+                    st.write(
+                        f"**更新日期：** "
+                        f"{row.get('更新日期', '')}"
+                    )
 
-                    st.divider()
+                st.markdown(
+                    "<div style='height:8px'></div>",
+                    unsafe_allow_html=True
+                )
 
-                    col3, col4 = st.columns(2)
 
-                    with col3:
-
-                        st.caption(
-                            f"更新人：{row.get('更新人', '')}"
-                        )
-
-                    with col4:
-
-                        st.caption(
-                            f"更新日期：{row.get('更新日期', '')}"
-                        )
-
+    # =====================================================
+    # 尚未搜尋
+    # =====================================================
 
     else:
 
         st.markdown(
             """
-            <div class="empty-box">
-                <div class="empty-icon">🔎</div>
+            <div class="empty-house">
+
+                <div class="empty-icon">
+                    🛋️
+                </div>
+
                 <div class="empty-title">
-                    請輸入顧客問題
+                    今天想查什麼？
                 </div>
-                <div>
-                    例如：這張椅子幾公斤？
-                    可以退貨嗎？床墊可以試躺嗎？
+
+                <div class="empty-text">
+                    把顧客的問題直接貼進來，
+                    讓知識庫幫你找到可以參考的內容。
                 </div>
+
+                <span class="empty-example">
+                    🔎 商品重量
+                </span>
+
+                <span class="empty-example">
+                    🔎 門市展示
+                </span>
+
+                <span class="empty-example">
+                    🔎 退換貨
+                </span>
+
+                <span class="empty-example">
+                    🔎 配送問題
+                </span>
+
             </div>
             """,
             unsafe_allow_html=True
         )
+
+
+    # =====================================================
+    # 客服小角落
+    # =====================================================
+
+    st.markdown(
+        f"""
+        <div class="service-corner">
+
+            <div class="service-corner-title">
+                🏠 客服小角落
+            </div>
+
+            <div class="service-corner-text">
+                這裡整理的是客服日常可以查詢的知識內容。
+                <br>
+                如果發現資料需要修正或補充，可以到「資料維護」更新。
+                <br>
+                目前知識庫共有 <strong>{len(df):,}</strong> 筆資料。
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # =========================================================
@@ -1071,30 +1643,28 @@ elif page == "🛠️ 資料維護":
 
     st.markdown(
         """
-        <div class="page-title">知識庫維護</div>
-        <div class="page-subtitle">
-            新增、查看及修改客服知識庫資料。
+        <div class="maintenance-header">
+
+            <div class="maintenance-title">
+                🛠️ 知識庫資料維護
+            </div>
+
+            <div class="maintenance-subtitle">
+                新增、查看及修改客服知識庫內容
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
+
+    # =====================================================
+    # 重新讀取最新 Excel
+    # =====================================================
 
     df = load_data()
 
-    st.markdown(
-        f"""
-        <div class="maintenance-header">
-            <div class="maintenance-title">
-                🗂️ 知識庫資料管理
-            </div>
-            <div class="maintenance-description">
-                目前共有 <b>{len(df):,}</b> 筆資料，
-                可在下方進行查看、新增或修改。
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
     # =====================================================
     # 分頁
@@ -1108,6 +1678,7 @@ elif page == "🛠️ 資料維護":
         ]
     )
 
+
     # =====================================================
     # ① 現有資料
     # =====================================================
@@ -1116,6 +1687,10 @@ elif page == "🛠️ 資料維護":
 
         st.subheader(
             "📋 現有知識庫資料"
+        )
+
+        st.write(
+            f"目前共有 **{len(df)}** 筆資料。"
         )
 
         search = st.text_input(
@@ -1158,8 +1733,8 @@ elif page == "🛠️ 資料維護":
                 mask
             ]
 
-        st.caption(
-            f"符合條件：{len(display_df):,} 筆"
+        st.write(
+            f"符合條件：**{len(display_df)}** 筆"
         )
 
         st.dataframe(
@@ -1167,6 +1742,7 @@ elif page == "🛠️ 資料維護":
             use_container_width=True,
             hide_index=True
         )
+
 
     # =====================================================
     # ② 新增資料
@@ -1210,11 +1786,6 @@ elif page == "🛠️ 資料維護":
         )
 
         with st.form("add_form"):
-
-            st.markdown(
-                '<div class="form-section-title">📌 基本資訊</div>',
-                unsafe_allow_html=True
-            )
 
             col1, col2 = st.columns(2)
 
@@ -1265,11 +1836,6 @@ elif page == "🛠️ 資料維護":
                     "建立人"
                 )
 
-            st.markdown(
-                '<div class="form-section-title">📝 回覆內容</div>',
-                unsafe_allow_html=True
-            )
-
             add_answer = st.text_area(
                 "標準回覆",
                 height=180
@@ -1281,9 +1847,9 @@ elif page == "🛠️ 資料維護":
             )
 
             submitted = st.form_submit_button(
-                "➕ 新增資料",
-                use_container_width=True
+                "➕ 新增資料"
             )
+
 
         # =================================================
         # 新增資料
@@ -1400,6 +1966,7 @@ elif page == "🛠️ 資料維護":
                         f"儲存失敗：{e}"
                     )
 
+
     # =====================================================
     # ③ 修改資料
     # =====================================================
@@ -1410,8 +1977,8 @@ elif page == "🛠️ 資料維護":
             "✏️ 修改知識庫資料"
         )
 
-        st.caption(
-            "先選擇序號，找到資料後再進行修改。"
+        st.write(
+            "先輸入「序號」，找到資料後再進行修改。"
         )
 
         id_list = sorted(
@@ -1442,16 +2009,7 @@ elif page == "🛠️ 資料維護":
 
                 row = selected_rows.iloc[0]
 
-                st.info(
-                    f"目前正在編輯：序號 {selected_id}"
-                )
-
                 with st.form("edit_form"):
-
-                    st.markdown(
-                        '<div class="form-section-title">📌 基本資訊</div>',
-                        unsafe_allow_html=True
-                    )
 
                     col1, col2 = st.columns(2)
 
@@ -1560,11 +2118,6 @@ elif page == "🛠️ 資料維護":
                             disabled=True
                         )
 
-                    st.markdown(
-                        '<div class="form-section-title">📝 回覆內容</div>',
-                        unsafe_allow_html=True
-                    )
-
                     edit_answer = st.text_area(
                         "標準回覆",
                         value=str(
@@ -1592,9 +2145,9 @@ elif page == "🛠️ 資料維護":
                     )
 
                     update_button = st.form_submit_button(
-                        "💾 儲存修改",
-                        use_container_width=True
+                        "💾 儲存修改"
                     )
+
 
                 # =================================================
                 # 儲存修改
