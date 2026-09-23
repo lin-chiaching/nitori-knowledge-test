@@ -20,10 +20,243 @@ st.set_page_config(
 
 
 # =========================================================
+# 配色與 UI
+# =========================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* ==============================
+       整體背景
+       ============================== */
+
+    .stApp {
+        background-color: #F7F3ED;
+    }
+
+    .main .block-container {
+        max-width: 1250px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+
+
+    /* ==============================
+       一般文字
+       ============================== */
+
+    h1, h2, h3 {
+        color: #4E4036 !important;
+    }
+
+    p, label {
+        color: #5C5149;
+    }
+
+
+    /* ==============================
+       Sidebar
+       ============================== */
+
+    section[data-testid="stSidebar"] {
+        background-color: #EFE7DC;
+        border-right: 1px solid #D8C8B5;
+    }
+
+    section[data-testid="stSidebar"] .block-container {
+        padding-top: 2rem;
+    }
+
+
+    /* Sidebar radio */
+
+    section[data-testid="stSidebar"]
+    div[role="radiogroup"] label {
+        border-radius: 10px;
+        padding: 8px 10px;
+    }
+
+    section[data-testid="stSidebar"]
+    div[role="radiogroup"] label:hover {
+        background-color: #E4D7C8;
+    }
+
+
+    /* ==============================
+       Metric
+       ============================== */
+
+    div[data-testid="stMetric"] {
+        background-color: #FFFDF9;
+        border: 1px solid #DCCDBC;
+        border-radius: 14px;
+        padding: 12px 15px;
+    }
+
+    div[data-testid="stMetricLabel"] {
+        color: #958578 !important;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: #C56F3A !important;
+    }
+
+
+    /* ==============================
+       搜尋輸入框
+       ============================== */
+
+    div[data-baseweb="input"] {
+        background-color: #FFFDF9;
+        border-radius: 12px;
+        border-color: #DCCDBD;
+    }
+
+    div[data-baseweb="input"]:focus-within {
+        border-color: #D9824B;
+        box-shadow: 0 0 0 1px #D9824B;
+    }
+
+
+    /* ==============================
+       Text area
+       ============================== */
+
+    textarea {
+        background-color: #FFFDF9 !important;
+        border-radius: 12px !important;
+    }
+
+
+    /* ==============================
+       Selectbox
+       ============================== */
+
+    div[data-baseweb="select"] > div {
+        background-color: #FFFDF9;
+        border-radius: 10px;
+        border-color: #DCCDBD;
+    }
+
+
+    /* ==============================
+       Expander
+       ============================== */
+
+    div[data-testid="stExpander"] {
+        background-color: #FFFDF9;
+        border: 1px solid #E2D6C8;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+
+    /* ==============================
+       Container 卡片
+       ============================== */
+
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #FFFDF9;
+        border-color: #E1D5C7;
+        border-radius: 18px;
+        box-shadow: 0 4px 14px rgba(110, 88, 67, 0.05);
+        padding: 4px;
+    }
+
+
+    /* ==============================
+       Info
+       ============================== */
+
+    div[data-testid="stAlert"] {
+        border-radius: 12px;
+    }
+
+
+    /* ==============================
+       Success
+       ============================== */
+
+    div[data-testid="stAlert"][kind="success"] {
+        background-color: #FBF5EE;
+        border-left-color: #D9824B;
+    }
+
+
+    /* ==============================
+       Button
+       ============================== */
+
+    button[kind="primary"] {
+        background-color: #D9824B;
+        border-color: #D9824B;
+        border-radius: 10px;
+    }
+
+    button[kind="primary"]:hover {
+        background-color: #C66F38;
+        border-color: #C66F38;
+    }
+
+
+    /* ==============================
+       Divider
+       ============================== */
+
+    hr {
+        border-color: #E2D6C8;
+    }
+
+
+    /* ==============================
+       Dataframe
+       ============================== */
+
+    div[data-testid="stDataFrame"] {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #E0D4C6;
+    }
+
+
+    /* ==============================
+       Tabs
+       ============================== */
+
+    button[data-baseweb="tab"] {
+        color: #806F61;
+    }
+
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #B76531;
+    }
+
+
+    /* ==============================
+       手機版
+       ============================== */
+
+    @media (max-width: 800px) {
+
+        .main .block-container {
+            padding: 1rem;
+        }
+
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# =========================================================
 # Excel 讀取
 # =========================================================
 
 def load_data():
+
     return pd.read_excel(
         FILE_PATH,
         sheet_name=0
@@ -31,6 +264,7 @@ def load_data():
 
 
 def load_synonyms():
+
     return pd.read_excel(
         FILE_PATH,
         sheet_name="搜尋詞對照"
@@ -38,11 +272,16 @@ def load_synonyms():
 
 
 try:
+
     df = load_data()
     synonym_df = load_synonyms()
 
 except Exception as e:
-    st.error(f"讀取 Excel 時發生錯誤：{e}")
+
+    st.error(
+        f"讀取 Excel 時發生錯誤：{e}"
+    )
+
     st.stop()
 
 
@@ -65,6 +304,7 @@ def save_data(new_df):
         new_df.columns,
         start=1
     ):
+
         ws.cell(
             row=1,
             column=col_index,
@@ -80,6 +320,7 @@ def save_data(new_df):
             row,
             start=1
         ):
+
             ws.cell(
                 row=row_index,
                 column=col_index,
@@ -196,293 +437,19 @@ def find_product_words(keyword):
 
 
 # =========================================================
-# 搜尋邏輯
-# =========================================================
-
-def search_knowledge(
-    keyword,
-    problem_type,
-    problem_detail,
-    product_category,
-    product_series
-):
-
-    matched_words = find_standard_words(
-        keyword
-    )
-
-    standard_words = list(
-        dict.fromkeys(
-            [
-                x[0]
-                for x in matched_words
-            ]
-        )
-    )
-
-    product_words = find_product_words(
-        keyword
-    )
-
-    # -----------------------------------------------------
-    # 套用篩選
-    # -----------------------------------------------------
-
-    filtered_df = df.copy()
-
-    if problem_type != "全部":
-
-        filtered_df = filtered_df[
-            filtered_df["問題類型"].astype(str)
-            == problem_type
-        ]
-
-    if problem_detail != "全部":
-
-        filtered_df = filtered_df[
-            filtered_df["問題細項"].astype(str)
-            == problem_detail
-        ]
-
-    if product_category != "全部":
-
-        filtered_df = filtered_df[
-            filtered_df["商品分類代碼"].astype(str)
-            == product_category
-        ]
-
-    if product_series != "全部":
-
-        filtered_df = filtered_df[
-            filtered_df["商品系列"].astype(str)
-            == product_series
-        ]
-
-    # -----------------------------------------------------
-    # 第一階段：標準搜尋詞
-    # -----------------------------------------------------
-
-    exact_result = pd.DataFrame()
-
-    if standard_words:
-
-        exact_result = filtered_df[
-            filtered_df["問題摘要"]
-            .astype(str)
-            .apply(
-                lambda x:
-                any(
-                    word in x
-                    for word in standard_words
-                )
-            )
-        ].copy()
-
-    # -----------------------------------------------------
-    # 第二階段：關鍵字搜尋
-    # -----------------------------------------------------
-
-    keyword_result = pd.DataFrame()
-
-    if standard_words:
-
-        search_columns = [
-            "問題摘要",
-            "關鍵字",
-            "問題細項",
-            "商品名稱",
-            "商品系列",
-            "商品編號"
-        ]
-
-        search_columns = [
-            col
-            for col in search_columns
-            if col in filtered_df.columns
-        ]
-
-        def keyword_match(row):
-
-            text = " ".join(
-                str(row[col])
-                for col in search_columns
-            )
-
-            return any(
-                word in text
-                for word in standard_words
-            )
-
-        keyword_result = filtered_df[
-            filtered_df.apply(
-                keyword_match,
-                axis=1
-            )
-        ].copy()
-
-    # -----------------------------------------------------
-    # 合併標準搜尋結果
-    # -----------------------------------------------------
-
-    if len(exact_result) > 0:
-
-        result = exact_result.copy()
-
-        result["搜尋方式"] = "標準問題詞"
-
-    elif len(keyword_result) > 0:
-
-        result = keyword_result.copy()
-
-        result["搜尋方式"] = (
-            "標準搜尋詞＋關鍵字"
-        )
-
-    else:
-
-        # -------------------------------------------------
-        # 第三階段：相似度搜尋
-        # -------------------------------------------------
-
-        search_columns = [
-            "問題摘要",
-            "關鍵字",
-            "問題細項",
-            "商品名稱",
-            "商品系列",
-            "商品編號"
-        ]
-
-        search_columns = [
-            col
-            for col in search_columns
-            if col in filtered_df.columns
-        ]
-
-        if len(filtered_df) == 0:
-
-            result = pd.DataFrame()
-
-        else:
-
-            filtered_df = filtered_df.copy()
-
-            filtered_df["搜尋內容"] = (
-                filtered_df[search_columns]
-                .astype(str)
-                .agg(" ".join, axis=1)
-            )
-
-            expanded_keyword = (
-                keyword
-                + " "
-                + " ".join(standard_words)
-            )
-
-            try:
-
-                vectorizer = TfidfVectorizer(
-                    analyzer="char",
-                    ngram_range=(2, 4)
-                )
-
-                tfidf_matrix = (
-                    vectorizer.fit_transform(
-                        filtered_df["搜尋內容"]
-                    )
-                )
-
-                query_vector = (
-                    vectorizer.transform(
-                        [expanded_keyword]
-                    )
-                )
-
-                similarity = cosine_similarity(
-                    query_vector,
-                    tfidf_matrix
-                ).flatten()
-
-                filtered_df[
-                    "相關程度"
-                ] = similarity
-
-                result = filtered_df[
-                    filtered_df["相關程度"] > 0.05
-                ].sort_values(
-                    "相關程度",
-                    ascending=False
-                ).copy()
-
-                result["搜尋方式"] = (
-                    "相似度搜尋"
-                )
-
-            except Exception:
-
-                result = pd.DataFrame()
-
-    # -----------------------------------------------------
-    # 商品優先
-    # -----------------------------------------------------
-
-    if product_words and len(result) > 0:
-
-        result["_商品符合"] = result.apply(
-
-            lambda row:
-            any(
-
-                word in str(
-                    row.get(
-                        "商品名稱",
-                        ""
-                    )
-                )
-
-                or word in str(
-                    row.get(
-                        "商品系列",
-                        ""
-                    )
-                )
-
-                or word in str(
-                    row.get(
-                        "商品編號",
-                        ""
-                    )
-                )
-
-                for word in product_words
-
-            ),
-
-            axis=1
-        )
-
-        result = result.sort_values(
-            "_商品符合",
-            ascending=False
-        )
-
-    return (
-        result,
-        matched_words
-    )
-
-
-# =========================================================
 # Sidebar
 # =========================================================
 
-st.sidebar.title("🏠 客服知識庫")
+st.sidebar.title(
+    "🏠 客服知識庫"
+)
 
 st.sidebar.caption(
     "NITORI Customer Service Knowledge"
 )
 
 st.sidebar.divider()
+
 
 page = st.sidebar.radio(
     "功能",
@@ -492,12 +459,15 @@ page = st.sidebar.radio(
     ]
 )
 
+
 st.sidebar.divider()
+
 
 st.sidebar.metric(
     "📚 目前知識庫",
     f"{len(df):,} 筆"
 )
+
 
 st.sidebar.info(
     "💡 知識庫持續更新中\n\n"
@@ -512,11 +482,13 @@ st.sidebar.info(
 
 if page == "🔍 知識搜尋":
 
-    # -----------------------------------------------------
+    # =====================================================
     # 頁首
-    # -----------------------------------------------------
+    # =====================================================
 
-    st.title("🔍 客服知識搜尋")
+    st.title(
+        "🔍 客服知識搜尋"
+    )
 
     st.caption(
         "快速找到顧客問題對應的標準資訊與回覆內容"
@@ -528,27 +500,34 @@ if page == "🔍 知識搜尋":
 
     st.divider()
 
-    # -----------------------------------------------------
-    # 搜尋區
-    # -----------------------------------------------------
 
-    st.subheader("💬 顧客問題")
+    # =====================================================
+    # 搜尋區
+    # =====================================================
+
+    st.subheader(
+        "💬 顧客問題"
+    )
 
     st.caption(
         "可以直接輸入顧客原本的說法，不需要先判斷分類。"
     )
+
 
     search_col1, search_col2 = st.columns(
         [2.7, 1],
         gap="large"
     )
 
+
     with search_col1:
 
         keyword = st.text_input(
-            "搜尋問題",
-            placeholder="例如：這張椅子幾公斤？"
+            "🔎 搜尋問題",
+            placeholder="例如：這張椅子幾公斤？",
+            label_visibility="visible"
         )
+
 
     with search_col2:
 
@@ -560,15 +539,17 @@ if page == "🔍 知識搜尋":
             "「有沒有展示品？」"
         )
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # 篩選條件
-    # -----------------------------------------------------
+    # =====================================================
 
     with st.expander(
         "⚙️ 篩選條件（不確定時可以不用設定）"
     ):
 
         filter_col1, filter_col2 = st.columns(2)
+
 
         with filter_col1:
 
@@ -586,6 +567,7 @@ if page == "🔍 知識搜尋":
                 ["全部"] + problem_type_list
             )
 
+
         with filter_col2:
 
             problem_detail_list = sorted(
@@ -602,7 +584,9 @@ if page == "🔍 知識搜尋":
                 ["全部"] + problem_detail_list
             )
 
+
         filter_col3, filter_col4 = st.columns(2)
+
 
         with filter_col3:
 
@@ -620,6 +604,7 @@ if page == "🔍 知識搜尋":
                 ["全部"] + product_category_list
             )
 
+
         with filter_col4:
 
             product_series_list = sorted(
@@ -636,35 +621,328 @@ if page == "🔍 知識搜尋":
                 ["全部"] + product_series_list
             )
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # 搜尋
-    # -----------------------------------------------------
+    # =====================================================
 
     if keyword:
 
-        result, matched_words = search_knowledge(
-            keyword,
-            problem_type,
-            problem_detail,
-            product_category,
-            product_series
+        # -------------------------------------------------
+        # 辨識搜尋詞
+        # -------------------------------------------------
+
+        matched_words = find_standard_words(
+            keyword
         )
 
-        st.divider()
+        standard_words = list(
+            dict.fromkeys(
+                [
+                    x[0]
+                    for x in matched_words
+                ]
+            )
+        )
+
 
         # -------------------------------------------------
-        # 搜尋結果
+        # 辨識商品
         # -------------------------------------------------
+
+        product_words = find_product_words(
+            keyword
+        )
+
+
+        # -------------------------------------------------
+        # 套用篩選
+        # -------------------------------------------------
+
+        filtered_df = df.copy()
+
+
+        if problem_type != "全部":
+
+            filtered_df = filtered_df[
+                filtered_df["問題類型"].astype(str)
+                == problem_type
+            ]
+
+
+        if problem_detail != "全部":
+
+            filtered_df = filtered_df[
+                filtered_df["問題細項"].astype(str)
+                == problem_detail
+            ]
+
+
+        if product_category != "全部":
+
+            filtered_df = filtered_df[
+                filtered_df["商品分類代碼"].astype(str)
+                == product_category
+            ]
+
+
+        if product_series != "全部":
+
+            filtered_df = filtered_df[
+                filtered_df["商品系列"].astype(str)
+                == product_series
+            ]
+
+
+        # =================================================
+        # 第一階段：標準搜尋詞
+        # =================================================
+
+        exact_result = pd.DataFrame()
+
+
+        if standard_words:
+
+            exact_result = filtered_df[
+                filtered_df["問題摘要"]
+                .astype(str)
+                .apply(
+                    lambda x:
+                    any(
+                        word in x
+                        for word in standard_words
+                    )
+                )
+            ].copy()
+
+
+        # =================================================
+        # 第二階段：關鍵字搜尋
+        # =================================================
+
+        keyword_result = pd.DataFrame()
+
+
+        if standard_words:
+
+            search_columns = [
+                "問題摘要",
+                "關鍵字",
+                "問題細項",
+                "商品名稱",
+                "商品系列",
+                "商品編號"
+            ]
+
+
+            search_columns = [
+                col
+                for col in search_columns
+                if col in filtered_df.columns
+            ]
+
+
+            def keyword_match(row):
+
+                text = " ".join(
+                    str(row[col])
+                    for col in search_columns
+                )
+
+                return any(
+                    word in text
+                    for word in standard_words
+                )
+
+
+            keyword_result = filtered_df[
+                filtered_df.apply(
+                    keyword_match,
+                    axis=1
+                )
+            ].copy()
+
+
+        # =================================================
+        # 合併標準搜尋結果
+        # =================================================
+
+        if len(exact_result) > 0:
+
+            result = exact_result.copy()
+
+            result["搜尋方式"] = "標準問題詞"
+
+
+        elif len(keyword_result) > 0:
+
+            result = keyword_result.copy()
+
+            result["搜尋方式"] = (
+                "標準搜尋詞＋關鍵字"
+            )
+
+
+        else:
+
+            # =============================================
+            # 第三階段：相似度搜尋
+            # =============================================
+
+            search_columns = [
+                "問題摘要",
+                "關鍵字",
+                "問題細項",
+                "商品名稱",
+                "商品系列",
+                "商品編號"
+            ]
+
+
+            search_columns = [
+                col
+                for col in search_columns
+                if col in filtered_df.columns
+            ]
+
+
+            if len(filtered_df) == 0:
+
+                result = pd.DataFrame()
+
+
+            else:
+
+                filtered_df = filtered_df.copy()
+
+                filtered_df["搜尋內容"] = (
+                    filtered_df[search_columns]
+                    .astype(str)
+                    .agg(" ".join, axis=1)
+                )
+
+
+                expanded_keyword = (
+                    keyword
+                    + " "
+                    + " ".join(standard_words)
+                )
+
+
+                try:
+
+                    vectorizer = TfidfVectorizer(
+                        analyzer="char",
+                        ngram_range=(2, 4)
+                    )
+
+
+                    tfidf_matrix = (
+                        vectorizer.fit_transform(
+                            filtered_df["搜尋內容"]
+                        )
+                    )
+
+
+                    query_vector = (
+                        vectorizer.transform(
+                            [expanded_keyword]
+                        )
+                    )
+
+
+                    similarity = cosine_similarity(
+                        query_vector,
+                        tfidf_matrix
+                    ).flatten()
+
+
+                    filtered_df[
+                        "相關程度"
+                    ] = similarity
+
+
+                    result = filtered_df[
+                        filtered_df["相關程度"] > 0.05
+                    ].sort_values(
+                        "相關程度",
+                        ascending=False
+                    ).copy()
+
+
+                    result["搜尋方式"] = (
+                        "相似度搜尋"
+                    )
+
+
+                except Exception:
+
+                    result = pd.DataFrame()
+
+
+        # =================================================
+        # 商品優先
+        # =================================================
+
+        if product_words and len(result) > 0:
+
+            result["_商品符合"] = result.apply(
+
+                lambda row:
+                any(
+
+                    word in str(
+                        row.get(
+                            "商品名稱",
+                            ""
+                        )
+                    )
+
+                    or word in str(
+                        row.get(
+                            "商品系列",
+                            ""
+                        )
+                    )
+
+                    or word in str(
+                        row.get(
+                            "商品編號",
+                            ""
+                        )
+                    )
+
+                    for word in product_words
+
+                ),
+
+                axis=1
+            )
+
+
+            result = result.sort_values(
+                "_商品符合",
+                ascending=False
+            )
+
+
+        # =================================================
+        # 搜尋結果
+        # =================================================
+
+        st.divider()
 
         result_col1, result_col2 = st.columns(
             [4, 1]
         )
+
 
         with result_col1:
 
             st.subheader(
                 "📚 搜尋結果"
             )
+
 
         with result_col2:
 
@@ -673,13 +951,14 @@ if page == "🔍 知識搜尋":
                 f"{len(result)} 筆"
             )
 
-        # -------------------------------------------------
+
+        # =================================================
         # 搜尋詞辨識
-        # -------------------------------------------------
+        # =================================================
 
         if matched_words:
 
-            word_text = "、".join(
+            word_text = "　｜　".join(
                 [
                     f"{synonym} → {standard}"
                     for standard, synonym
@@ -691,9 +970,10 @@ if page == "🔍 知識搜尋":
                 f"🔎 搜尋詞辨識：{word_text}"
             )
 
-        # -------------------------------------------------
+
+        # =================================================
         # 沒有結果
-        # -------------------------------------------------
+        # =================================================
 
         if len(result) == 0:
 
@@ -707,14 +987,16 @@ if page == "🔍 知識搜尋":
             )
 
             st.caption(
-                "💬 例如：這張椅子有多重？　"
-                "💬 這個商品可以退嗎？　"
-                "💬 門市有展示嗎？"
+                "🔎 商品重量　　"
+                "🔎 門市展示　　"
+                "🔎 退換貨　　"
+                "🔎 配送問題"
             )
 
-        # -------------------------------------------------
+
+        # =================================================
         # 有結果
-        # -------------------------------------------------
+        # =================================================
 
         else:
 
@@ -730,15 +1012,19 @@ if page == "🔍 知識搜尋":
                     )
                 )
 
-                # =========================================
-                # 卡片
-                # =========================================
 
-                with st.container(border=True):
+                # -----------------------------------------
+                # 知識卡片
+                # -----------------------------------------
+
+                with st.container(
+                    border=True
+                ):
 
                     st.markdown(
                         f"### {number}. {title}"
                     )
+
 
                     # -------------------------------------
                     # 標籤
@@ -759,28 +1045,27 @@ if page == "🔍 知識搜尋":
                             )
                         ).strip()
 
+
                         if value:
 
                             tags.append(
-                                value
+                                f"🏷️ {value}"
                             )
+
 
                     if tags:
 
                         st.caption(
-                            "　".join(
-                                [
-                                    f"🏷️ {tag}"
-                                    for tag in tags
-                                ]
-                            )
+                            "　".join(tags)
                         )
+
 
                     # -------------------------------------
                     # 商品資訊
                     # -------------------------------------
 
                     info_col1, info_col2, info_col3 = st.columns(3)
+
 
                     with info_col1:
 
@@ -797,6 +1082,7 @@ if page == "🔍 知識搜尋":
                             )
                         )
 
+
                     with info_col2:
 
                         st.caption(
@@ -811,6 +1097,7 @@ if page == "🔍 知識搜尋":
                                 )
                             )
                         )
+
 
                     with info_col3:
 
@@ -827,6 +1114,7 @@ if page == "🔍 知識搜尋":
                             )
                         )
 
+
                     # -------------------------------------
                     # 標準回覆
                     # -------------------------------------
@@ -834,6 +1122,7 @@ if page == "🔍 知識搜尋":
                     st.markdown(
                         "**📋 標準回覆**"
                     )
+
 
                     st.success(
                         str(
@@ -844,8 +1133,9 @@ if page == "🔍 知識搜尋":
                         )
                     )
 
+
                     # -------------------------------------
-                    # 詳細資訊
+                    # 詳細資料
                     # -------------------------------------
 
                     with st.expander(
@@ -853,6 +1143,7 @@ if page == "🔍 知識搜尋":
                     ):
 
                         detail_col1, detail_col2 = st.columns(2)
+
 
                         with detail_col1:
 
@@ -875,6 +1166,7 @@ if page == "🔍 知識搜尋":
                                 f"**判斷依據：** "
                                 f"{row.get('判斷依據', '')}"
                             )
+
 
                         with detail_col2:
 
@@ -903,9 +1195,10 @@ if page == "🔍 知識搜尋":
                                 f"{row.get('更新日期', '')}"
                             )
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # 尚未搜尋
-    # -----------------------------------------------------
+    # =====================================================
 
     else:
 
@@ -920,7 +1213,9 @@ if page == "🔍 知識搜尋":
             "讓知識庫幫你找到可以參考的內容。"
         )
 
+
         example_col1, example_col2 = st.columns(2)
+
 
         with example_col1:
 
@@ -929,6 +1224,7 @@ if page == "🔍 知識搜尋":
                 "🔎 門市展示"
             )
 
+
         with example_col2:
 
             st.info(
@@ -936,9 +1232,10 @@ if page == "🔍 知識搜尋":
                 "🔎 配送問題"
             )
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # 客服小角落
-    # -----------------------------------------------------
+    # =====================================================
 
     st.divider()
 
@@ -969,15 +1266,17 @@ elif page == "🛠️ 資料維護":
 
     st.divider()
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # 重新讀取最新 Excel
-    # -----------------------------------------------------
+    # =====================================================
 
     df = load_data()
 
-    # -----------------------------------------------------
+
+    # =====================================================
     # 分頁
-    # -----------------------------------------------------
+    # =====================================================
 
     tab1, tab2, tab3 = st.tabs(
         [
@@ -986,6 +1285,7 @@ elif page == "🛠️ 資料維護":
             "✏️ 修改資料"
         ]
     )
+
 
     # =====================================================
     # ① 現有資料
@@ -1001,12 +1301,15 @@ elif page == "🛠️ 資料維護":
             f"目前共有 **{len(df)}** 筆資料。"
         )
 
+
         search = st.text_input(
             "搜尋資料",
             placeholder="可輸入商品名稱、商品編號、問題摘要..."
         )
 
+
         display_df = df.copy()
+
 
         if search:
 
@@ -1019,11 +1322,13 @@ elif page == "🛠️ 資料維護":
                 "關鍵字"
             ]
 
+
             search_columns = [
                 col
                 for col in search_columns
                 if col in display_df.columns
             ]
+
 
             mask = display_df[
                 search_columns
@@ -1037,19 +1342,23 @@ elif page == "🛠️ 資料維護":
                 axis=1
             )
 
+
             display_df = display_df[
                 mask
             ]
 
+
         st.write(
             f"符合條件：**{len(display_df)}** 筆"
         )
+
 
         st.dataframe(
             display_df,
             use_container_width=True,
             hide_index=True
         )
+
 
     # =====================================================
     # ② 新增資料
@@ -1065,6 +1374,7 @@ elif page == "🛠️ 資料維護":
             "填寫完成後按下「新增資料」，資料會直接寫入 Excel。"
         )
 
+
         problem_type_list = sorted(
             df["問題類型"]
             .astype(str)
@@ -1073,6 +1383,7 @@ elif page == "🛠️ 資料維護":
             .unique()
             .tolist()
         )
+
 
         problem_detail_list = sorted(
             df["問題細項"]
@@ -1083,6 +1394,7 @@ elif page == "🛠️ 資料維護":
             .tolist()
         )
 
+
         category_list = sorted(
             df["商品分類代碼"]
             .astype(str)
@@ -1092,9 +1404,11 @@ elif page == "🛠️ 資料維護":
             .tolist()
         )
 
+
         with st.form("add_form"):
 
             col1, col2 = st.columns(2)
+
 
             with col1:
 
@@ -1125,6 +1439,7 @@ elif page == "🛠️ 資料維護":
                     "商品編號"
                 )
 
+
             with col2:
 
                 add_summary = st.text_input(
@@ -1143,24 +1458,24 @@ elif page == "🛠️ 資料維護":
                     "建立人"
                 )
 
+
             add_answer = st.text_area(
                 "標準回覆",
                 height=180
             )
+
 
             add_basis = st.text_area(
                 "判斷依據",
                 height=150
             )
 
+
             submitted = st.form_submit_button(
                 "➕ 新增資料",
                 type="primary"
             )
 
-        # -------------------------------------------------
-        # 新增資料
-        # -------------------------------------------------
 
         if submitted:
 
@@ -1183,6 +1498,7 @@ elif page == "🛠️ 資料維護":
                     errors="coerce"
                 )
 
+
                 if numbers.notna().any():
 
                     new_id = int(
@@ -1193,9 +1509,11 @@ elif page == "🛠️ 資料維護":
 
                     new_id = 1
 
+
                 today = datetime.now().strftime(
                     "%Y-%m-%d"
                 )
+
 
                 new_row = {
 
@@ -1247,6 +1565,7 @@ elif page == "🛠️ 資料維護":
                         today
                 }
 
+
                 df = pd.concat(
                     [
                         df,
@@ -1256,6 +1575,7 @@ elif page == "🛠️ 資料維護":
                     ],
                     ignore_index=True
                 )
+
 
                 try:
 
@@ -1267,11 +1587,13 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
+
                 except Exception as e:
 
                     st.error(
                         f"儲存失敗：{e}"
                     )
+
 
     # =====================================================
     # ③ 修改資料
@@ -1287,6 +1609,7 @@ elif page == "🛠️ 資料維護":
             "先選擇「序號」，找到資料後再進行修改。"
         )
 
+
         id_list = sorted(
             pd.to_numeric(
                 df["序號"],
@@ -1297,12 +1620,14 @@ elif page == "🛠️ 資料維護":
             .tolist()
         )
 
+
         if id_list:
 
             selected_id = st.selectbox(
                 "選擇要修改的序號",
                 id_list
             )
+
 
             selected_rows = df[
                 pd.to_numeric(
@@ -1311,13 +1636,16 @@ elif page == "🛠️ 資料維護":
                 ) == selected_id
             ]
 
+
             if len(selected_rows) > 0:
 
                 row = selected_rows.iloc[0]
 
+
                 with st.form("edit_form"):
 
                     col1, col2 = st.columns(2)
+
 
                     with col1:
 
@@ -1331,6 +1659,7 @@ elif page == "🛠️ 資料維護":
                             )
                         )
 
+
                         edit_problem_detail = st.text_input(
                             "問題細項",
                             value=str(
@@ -1340,6 +1669,7 @@ elif page == "🛠️ 資料維護":
                                 )
                             )
                         )
+
 
                         edit_category = st.text_input(
                             "商品分類代碼",
@@ -1351,6 +1681,7 @@ elif page == "🛠️ 資料維護":
                             )
                         )
 
+
                         edit_product_name = st.text_input(
                             "商品名稱",
                             value=str(
@@ -1360,6 +1691,7 @@ elif page == "🛠️ 資料維護":
                                 )
                             )
                         )
+
 
                         edit_product_series = st.text_input(
                             "商品系列",
@@ -1371,6 +1703,7 @@ elif page == "🛠️ 資料維護":
                             )
                         )
 
+
                         edit_product_number = st.text_input(
                             "商品編號",
                             value=str(
@@ -1380,6 +1713,7 @@ elif page == "🛠️ 資料維護":
                                 )
                             )
                         )
+
 
                     with col2:
 
@@ -1393,6 +1727,7 @@ elif page == "🛠️ 資料維護":
                             )
                         )
 
+
                         edit_source = st.text_input(
                             "資料來源",
                             value=str(
@@ -1403,6 +1738,7 @@ elif page == "🛠️ 資料維護":
                             )
                         )
 
+
                         edit_keyword = st.text_input(
                             "關鍵字",
                             value=str(
@@ -1412,6 +1748,7 @@ elif page == "🛠️ 資料維護":
                                 )
                             )
                         )
+
 
                         edit_creator = st.text_input(
                             "建立人",
@@ -1424,6 +1761,7 @@ elif page == "🛠️ 資料維護":
                             disabled=True
                         )
 
+
                     edit_answer = st.text_area(
                         "標準回覆",
                         value=str(
@@ -1434,6 +1772,7 @@ elif page == "🛠️ 資料維護":
                         ),
                         height=180
                     )
+
 
                     edit_basis = st.text_area(
                         "判斷依據",
@@ -1446,18 +1785,17 @@ elif page == "🛠️ 資料維護":
                         height=150
                     )
 
+
                     edit_updater = st.text_input(
                         "更新人"
                     )
+
 
                     update_button = st.form_submit_button(
                         "💾 儲存修改",
                         type="primary"
                     )
 
-                # -------------------------------------------------
-                # 儲存修改
-                # -------------------------------------------------
 
                 if update_button:
 
@@ -1473,72 +1811,87 @@ elif page == "🛠️ 資料維護":
                             "%Y-%m-%d"
                         )
 
+
                         index = selected_rows.index[0]
+
 
                         df.loc[
                             index,
                             "問題類型"
                         ] = edit_problem_type
 
+
                         df.loc[
                             index,
                             "問題細項"
                         ] = edit_problem_detail
+
 
                         df.loc[
                             index,
                             "商品分類代碼"
                         ] = edit_category
 
+
                         df.loc[
                             index,
                             "商品名稱"
                         ] = edit_product_name
+
 
                         df.loc[
                             index,
                             "商品系列"
                         ] = edit_product_series
 
+
                         df.loc[
                             index,
                             "商品編號"
                         ] = edit_product_number
+
 
                         df.loc[
                             index,
                             "問題摘要"
                         ] = edit_summary
 
+
                         df.loc[
                             index,
                             "標準回覆"
                         ] = edit_answer
+
 
                         df.loc[
                             index,
                             "判斷依據"
                         ] = edit_basis
 
+
                         df.loc[
                             index,
                             "資料來源"
                         ] = edit_source
+
 
                         df.loc[
                             index,
                             "關鍵字"
                         ] = edit_keyword
 
+
                         df.loc[
                             index,
                             "更新人"
                         ] = edit_updater
 
+
                         df.loc[
                             index,
                             "更新日期"
                         ] = today
+
 
                         try:
 
@@ -1550,11 +1903,13 @@ elif page == "🛠️ 資料維護":
 
                             st.rerun()
 
+
                         except Exception as e:
 
                             st.error(
                                 f"儲存失敗：{e}"
                             )
+
 
         else:
 
