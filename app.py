@@ -20,6 +20,230 @@ st.set_page_config(
 
 
 # =========================================================
+# UI 外觀
+# =========================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* =========================
+       整體頁面
+       ========================= */
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1400px;
+    }
+
+    /* =========================
+       Sidebar
+       ========================= */
+
+    [data-testid="stSidebar"] {
+        border-right: 1px solid #e5e7eb;
+    }
+
+    [data-testid="stSidebar"] .block-container {
+        padding-top: 2rem;
+    }
+
+    .sidebar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.2rem;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 1.2rem;
+    }
+
+    .sidebar-count {
+        background: #f5f6f8;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+
+    /* =========================
+       主標題
+       ========================= */
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 750;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* =========================
+       搜尋區塊
+       ========================= */
+
+    .search-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 22px 24px 18px 24px;
+        background: #ffffff;
+        margin-bottom: 20px;
+    }
+
+    .search-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .search-card-description {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 15px;
+    }
+
+    /* =========================
+       結果區
+       ========================= */
+
+    .result-header {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-top: 8px;
+        margin-bottom: 4px;
+    }
+
+    .result-count {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+    }
+
+    /* =========================
+       知識卡片
+       ========================= */
+
+    .knowledge-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px 20px;
+        margin-bottom: 14px;
+        background: #ffffff;
+    }
+
+    .knowledge-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        line-height: 1.5;
+    }
+
+    .knowledge-meta {
+        font-size: 0.83rem;
+        color: #6b7280;
+        line-height: 1.8;
+    }
+
+    .answer-box {
+        background: #f7f8fa;
+        border-radius: 10px;
+        padding: 15px 17px;
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+
+    .answer-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .answer-text {
+        font-size: 0.92rem;
+        line-height: 1.7;
+        white-space: pre-wrap;
+    }
+
+    /* =========================
+       空白狀態
+       ========================= */
+
+    .empty-box {
+        border: 1px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 35px;
+        text-align: center;
+        color: #6b7280;
+        margin-top: 15px;
+    }
+
+    .empty-icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .empty-title {
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 5px;
+    }
+
+    /* =========================
+       維護頁
+       ========================= */
+
+    .maintenance-header {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        background: #ffffff;
+    }
+
+    .maintenance-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .maintenance-description {
+        color: #6b7280;
+        font-size: 0.88rem;
+    }
+
+    /* =========================
+       表單區
+       ========================= */
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* =========================
+       隱藏部分 Streamlit 元素
+       ========================= */
+
+    div[data-testid="stDecoration"] {
+        display: none;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# =========================================================
 # Excel 讀取
 # =========================================================
 
@@ -56,22 +280,15 @@ except Exception as e:
 
 def save_data(new_df):
 
-    # 使用 openpyxl 直接開啟原始 Excel
-    # 不會重新建立整本 Excel
-    # 因此可以保留「搜尋詞對照」等其他工作表
-
     wb = load_workbook(FILE_PATH)
 
-    # 取得第一個工作表
     ws = wb.worksheets[0]
 
-    # 清除第一個工作表原有內容
     ws.delete_rows(
         1,
         ws.max_row
     )
 
-    # 寫入欄位名稱
     for col_index, column_name in enumerate(
         new_df.columns,
         start=1
@@ -83,7 +300,6 @@ def save_data(new_df):
             value=column_name
         )
 
-    # 寫入資料
     for row_index, row in enumerate(
         new_df.itertuples(index=False),
         start=2
@@ -100,7 +316,6 @@ def save_data(new_df):
                 value=value
             )
 
-    # 儲存
     wb.save(FILE_PATH)
 
 
@@ -145,7 +360,6 @@ def find_standard_words(keyword):
                 )
             )
 
-    # 去除重複
     result = []
 
     seen = set()
@@ -176,7 +390,6 @@ def find_product_words(keyword):
 
     keyword = str(keyword).strip()
 
-    # 商品系列
     if "商品系列" in df.columns:
 
         for value in df["商品系列"].astype(str).unique():
@@ -187,7 +400,6 @@ def find_product_words(keyword):
 
                 words.append(value)
 
-    # 商品編號
     if "商品編號" in df.columns:
 
         for value in df["商品編號"].astype(str).unique():
@@ -198,7 +410,6 @@ def find_product_words(keyword):
 
                 words.append(value)
 
-    # 商品名稱
     if "商品名稱" in df.columns:
 
         for value in df["商品名稱"].astype(str).unique():
@@ -215,108 +426,159 @@ def find_product_words(keyword):
 
 
 # =========================================================
-# 頁面選擇
+# Sidebar
 # =========================================================
 
-st.title("🔍 客服知識庫")
+st.sidebar.markdown(
+    """
+    <div class="sidebar-title">🔍 客服知識庫</div>
+    <div class="sidebar-subtitle">
+        Customer Service Knowledge Base
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.sidebar.divider()
 
 page = st.sidebar.radio(
     "功能",
     [
         "🔍 知識搜尋",
         "🛠️ 資料維護"
-    ]
+    ],
+    label_visibility="collapsed"
+)
+
+st.sidebar.divider()
+
+st.sidebar.markdown(
+    f"""
+    <div class="sidebar-count">
+        📚 目前資料<br>
+        <strong>{len(df):,}</strong> 筆
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 
 # =========================================================
-# =========================================================
 # 🔍 知識搜尋
-# =========================================================
 # =========================================================
 
 if page == "🔍 知識搜尋":
 
-    st.write(
-        "輸入顧客問題，搜尋知識庫中的相關資料。"
+    st.markdown(
+        """
+        <div class="page-title">客服知識搜尋</div>
+        <div class="page-subtitle">
+            輸入顧客問題，快速找到可參考的標準資訊。
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # =====================================================
+    # 搜尋區塊
+    # =====================================================
+
+    st.markdown(
+        """
+        <div class="search-card">
+            <div class="search-card-title">🔎 顧客問題</div>
+            <div class="search-card-description">
+                可直接輸入顧客原話，例如「這張椅子幾公斤？」、
+                「可以退貨嗎？」或商品名稱。
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    keyword = st.text_input(
+        "顧客問題",
+        placeholder="例如：這張椅子幾公斤？",
+        label_visibility="collapsed"
     )
 
     # =====================================================
     # 篩選條件
     # =====================================================
 
-    col1, col2, col3 = st.columns(3)
+    with st.expander(
+        "⚙️ 篩選條件",
+        expanded=False
+    ):
 
-    with col1:
+        col1, col2 = st.columns(2)
 
-        problem_type_list = sorted(
-            df["問題類型"]
-            .astype(str)
-            .replace("", pd.NA)
-            .dropna()
-            .unique()
-            .tolist()
-        )
+        with col1:
 
-        problem_type = st.selectbox(
-            "問題類型",
-            ["全部"] + problem_type_list
-        )
+            problem_type_list = sorted(
+                df["問題類型"]
+                .astype(str)
+                .replace("", pd.NA)
+                .dropna()
+                .unique()
+                .tolist()
+            )
 
-    with col2:
+            problem_type = st.selectbox(
+                "問題類型",
+                ["全部"] + problem_type_list
+            )
 
-        problem_detail_list = sorted(
-            df["問題細項"]
-            .astype(str)
-            .replace("", pd.NA)
-            .dropna()
-            .unique()
-            .tolist()
-        )
+        with col2:
 
-        problem_detail = st.selectbox(
-            "問題細項",
-            ["全部"] + problem_detail_list
-        )
+            problem_detail_list = sorted(
+                df["問題細項"]
+                .astype(str)
+                .replace("", pd.NA)
+                .dropna()
+                .unique()
+                .tolist()
+            )
 
-    with col3:
+            problem_detail = st.selectbox(
+                "問題細項",
+                ["全部"] + problem_detail_list
+            )
 
-        product_category_list = sorted(
-            df["商品分類代碼"]
-            .astype(str)
-            .replace("", pd.NA)
-            .dropna()
-            .unique()
-            .tolist()
-        )
+        col3, col4 = st.columns(2)
 
-        product_category = st.selectbox(
-            "商品分類代碼",
-            ["全部"] + product_category_list
-        )
+        with col3:
 
-    product_series_list = sorted(
-        df["商品系列"]
-        .astype(str)
-        .replace("", pd.NA)
-        .dropna()
-        .unique()
-        .tolist()
-    )
+            product_category_list = sorted(
+                df["商品分類代碼"]
+                .astype(str)
+                .replace("", pd.NA)
+                .dropna()
+                .unique()
+                .tolist()
+            )
 
-    product_series = st.selectbox(
-        "商品系列",
-        ["全部"] + product_series_list
-    )
+            product_category = st.selectbox(
+                "商品分類代碼",
+                ["全部"] + product_category_list
+            )
 
-    # =====================================================
-    # 顧客問題
-    # =====================================================
+        with col4:
 
-    keyword = st.text_input(
-        "🔎 顧客問題",
-        placeholder="例如：這張椅子幾公斤？"
-    )
+            product_series_list = sorted(
+                df["商品系列"]
+                .astype(str)
+                .replace("", pd.NA)
+                .dropna()
+                .unique()
+                .tolist()
+            )
+
+            product_series = st.selectbox(
+                "商品系列",
+                ["全部"] + product_series_list
+            )
+
 
     # =====================================================
     # 開始搜尋
@@ -597,11 +859,20 @@ if page == "🔍 知識搜尋":
 
         st.divider()
 
-        st.write(
-            f"搜尋結果：{len(result)} 筆"
+        st.markdown(
+            f"""
+            <div class="result-header">
+                搜尋結果
+            </div>
+            <div class="result-count">
+                共找到 {len(result)} 筆相關資料
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
         # 搜尋詞辨識結果
+
         if matched_words:
 
             display_words = []
@@ -613,23 +884,32 @@ if page == "🔍 知識搜尋":
                 )
 
             st.caption(
-                "搜尋詞辨識："
+                "🔎 搜尋詞辨識："
                 + "、".join(display_words)
             )
 
         # 沒有結果
+
         if len(result) == 0:
 
-            st.warning(
-                "目前沒有找到相關的知識庫資料。"
-            )
-
-            st.info(
-                "可以嘗試更換顧客說法，"
-                "或取消部分篩選條件後再次搜尋。"
+            st.markdown(
+                """
+                <div class="empty-box">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">
+                        目前沒有找到相關資料
+                    </div>
+                    <div>
+                        可以嘗試更換顧客說法，
+                        或取消部分篩選條件後再次搜尋。
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
         # 有結果
+
         else:
 
             for _, row in result.head(20).iterrows():
@@ -639,53 +919,77 @@ if page == "🔍 知識搜尋":
                     "未設定問題摘要"
                 )
 
+                # =================================================
+                # 知識卡片
+                # =================================================
+
+                st.markdown(
+                    f"""
+                    <div class="knowledge-card">
+                        <div class="knowledge-title">
+                            {title}
+                        </div>
+
+                        <div class="knowledge-meta">
+                            <b>問題類型：</b>
+                            {row.get('問題類型', '')}
+                            &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                            <b>問題細項：</b>
+                            {row.get('問題細項', '')}
+                        </div>
+
+                        <div class="knowledge-meta">
+                            <b>商品名稱：</b>
+                            {row.get('商品名稱', '')}
+                            &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                            <b>商品系列：</b>
+                            {row.get('商品系列', '')}
+                        </div>
+
+                        <div class="knowledge-meta">
+                            <b>商品編號：</b>
+                            {row.get('商品編號', '')}
+                            &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                            <b>商品分類：</b>
+                            {row.get('商品分類代碼', '')}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # =================================================
+                # 標準回覆
+                # =================================================
+
+                st.markdown(
+                    f"""
+                    <div class="answer-box">
+                        <div class="answer-title">
+                            📋 標準回覆
+                        </div>
+
+                        <div class="answer-text">
+                            {str(row.get('標準回覆', '')).replace(chr(10), '<br>')}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # =================================================
+                # 其他資訊
+                # =================================================
+
                 with st.expander(
-                    f"{title}"
+                    "查看判斷依據與其他資訊"
                 ):
 
-                    st.write(
-                        f"**問題類型：** "
-                        f"{row.get('問題類型', '')}"
-                    )
-
-                    st.write(
-                        f"**問題細項：** "
-                        f"{row.get('問題細項', '')}"
-                    )
-
-                    st.write(
-                        f"**商品分類代碼：** "
-                        f"{row.get('商品分類代碼', '')}"
-                    )
-
-                    st.write(
-                        f"**商品名稱：** "
-                        f"{row.get('商品名稱', '')}"
-                    )
-
-                    st.write(
-                        f"**商品系列：** "
-                        f"{row.get('商品系列', '')}"
-                    )
-
-                    st.write(
-                        f"**商品編號：** "
-                        f"{row.get('商品編號', '')}"
-                    )
-
-                    st.subheader(
-                        "標準回覆"
-                    )
-
-                    st.write(
-                        row.get(
-                            "標準回覆",
-                            ""
-                        )
-                    )
-
-                    st.subheader(
-                        "判斷依據"
+                    st.markdown(
+                        "### 🧭 判斷依據"
                     )
 
                     st.write(
@@ -695,52 +999,102 @@ if page == "🔍 知識搜尋":
                         )
                     )
 
-                    st.write(
-                        f"**資料來源：** "
-                        f"{row.get('資料來源', '')}"
-                    )
+                    col1, col2 = st.columns(2)
 
-                    st.write(
-                        f"**關鍵字：** "
-                        f"{row.get('關鍵字', '')}"
-                    )
+                    with col1:
 
-                    st.write(
-                        f"**更新人：** "
-                        f"{row.get('更新人', '')}"
-                    )
+                        st.markdown(
+                            "### 📚 資料來源"
+                        )
 
-                    st.write(
-                        f"**更新日期：** "
-                        f"{row.get('更新日期', '')}"
-                    )
+                        st.write(
+                            row.get(
+                                "資料來源",
+                                ""
+                            )
+                        )
+
+                    with col2:
+
+                        st.markdown(
+                            "### 🏷️ 關鍵字"
+                        )
+
+                        st.write(
+                            row.get(
+                                "關鍵字",
+                                ""
+                            )
+                        )
+
+                    st.divider()
+
+                    col3, col4 = st.columns(2)
+
+                    with col3:
+
+                        st.caption(
+                            f"更新人：{row.get('更新人', '')}"
+                        )
+
+                    with col4:
+
+                        st.caption(
+                            f"更新日期：{row.get('更新日期', '')}"
+                        )
+
 
     else:
 
-        st.info(
-            "請輸入顧客問題開始搜尋。"
+        st.markdown(
+            """
+            <div class="empty-box">
+                <div class="empty-icon">🔎</div>
+                <div class="empty-title">
+                    請輸入顧客問題
+                </div>
+                <div>
+                    例如：這張椅子幾公斤？
+                    可以退貨嗎？床墊可以試躺嗎？
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
 
 # =========================================================
-# =========================================================
 # 🛠️ 資料維護
-# =========================================================
 # =========================================================
 
 elif page == "🛠️ 資料維護":
 
-    st.title("🛠️ 客服知識庫－維護")
-
-    st.write(
-        "此頁面用於新增及修改知識庫資料。"
+    st.markdown(
+        """
+        <div class="page-title">知識庫維護</div>
+        <div class="page-subtitle">
+            新增、查看及修改客服知識庫資料。
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    # =====================================================
-    # 重新讀取最新 Excel
-    # =====================================================
-
     df = load_data()
+
+    st.markdown(
+        f"""
+        <div class="maintenance-header">
+            <div class="maintenance-title">
+                🗂️ 知識庫資料管理
+            </div>
+            <div class="maintenance-description">
+                目前共有 <b>{len(df):,}</b> 筆資料，
+                可在下方進行查看、新增或修改。
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # =====================================================
     # 分頁
@@ -762,10 +1116,6 @@ elif page == "🛠️ 資料維護":
 
         st.subheader(
             "📋 現有知識庫資料"
-        )
-
-        st.write(
-            f"目前共有 **{len(df)}** 筆資料。"
         )
 
         search = st.text_input(
@@ -808,8 +1158,8 @@ elif page == "🛠️ 資料維護":
                 mask
             ]
 
-        st.write(
-            f"符合條件：**{len(display_df)}** 筆"
+        st.caption(
+            f"符合條件：{len(display_df):,} 筆"
         )
 
         st.dataframe(
@@ -861,6 +1211,11 @@ elif page == "🛠️ 資料維護":
 
         with st.form("add_form"):
 
+            st.markdown(
+                '<div class="form-section-title">📌 基本資訊</div>',
+                unsafe_allow_html=True
+            )
+
             col1, col2 = st.columns(2)
 
             with col1:
@@ -910,6 +1265,11 @@ elif page == "🛠️ 資料維護":
                     "建立人"
                 )
 
+            st.markdown(
+                '<div class="form-section-title">📝 回覆內容</div>',
+                unsafe_allow_html=True
+            )
+
             add_answer = st.text_area(
                 "標準回覆",
                 height=180
@@ -921,7 +1281,8 @@ elif page == "🛠️ 資料維護":
             )
 
             submitted = st.form_submit_button(
-                "➕ 新增資料"
+                "➕ 新增資料",
+                use_container_width=True
             )
 
         # =================================================
@@ -1049,8 +1410,8 @@ elif page == "🛠️ 資料維護":
             "✏️ 修改知識庫資料"
         )
 
-        st.write(
-            "先輸入「序號」，找到資料後再進行修改。"
+        st.caption(
+            "先選擇序號，找到資料後再進行修改。"
         )
 
         id_list = sorted(
@@ -1081,7 +1442,16 @@ elif page == "🛠️ 資料維護":
 
                 row = selected_rows.iloc[0]
 
+                st.info(
+                    f"目前正在編輯：序號 {selected_id}"
+                )
+
                 with st.form("edit_form"):
+
+                    st.markdown(
+                        '<div class="form-section-title">📌 基本資訊</div>',
+                        unsafe_allow_html=True
+                    )
 
                     col1, col2 = st.columns(2)
 
@@ -1190,6 +1560,11 @@ elif page == "🛠️ 資料維護":
                             disabled=True
                         )
 
+                    st.markdown(
+                        '<div class="form-section-title">📝 回覆內容</div>',
+                        unsafe_allow_html=True
+                    )
+
                     edit_answer = st.text_area(
                         "標準回覆",
                         value=str(
@@ -1217,7 +1592,8 @@ elif page == "🛠️ 資料維護":
                     )
 
                     update_button = st.form_submit_button(
-                        "💾 儲存修改"
+                        "💾 儲存修改",
+                        use_container_width=True
                     )
 
                 # =================================================
