@@ -5,6 +5,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 from openpyxl import load_workbook
+import re
+import html
 
 
 # ============================================================
@@ -62,6 +64,61 @@ st.markdown(
 
 
 # ============================================================
+# 公告內容清理
+# ============================================================
+
+def clean_announcement_content(text):
+
+    if pd.isna(text):
+        return ""
+
+    text = str(text)
+
+    # HTML entity 轉換
+    text = html.unescape(text)
+
+    # 移除 SVG 整段
+    text = re.sub(
+        r"<svg.*?</svg>",
+        "",
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # 常見 HTML 換行
+    text = re.sub(
+        r"<br\s*/?>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # 段落結束轉換成換行
+    text = re.sub(
+        r"</p\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # 移除其他 HTML 標籤
+    text = re.sub(
+        r"<[^>]+>",
+        "",
+        text
+    )
+
+    # 清理多餘空白
+    text = re.sub(
+        r"\n\s*\n\s*\n+",
+        "\n\n",
+        text
+    )
+
+    return text.strip()
+
+
+# ============================================================
 # 讀取資料
 # ============================================================
 
@@ -73,8 +130,19 @@ def load_data():
         sheet_name=0
     ).fillna("")
 
+    # 清除欄位名稱前後空白
+    df.columns = (
+        df.columns
+        .astype(str)
+        .str.strip()
+    )
+
     return df
 
+
+# ============================================================
+# 讀取搜尋詞對照
+# ============================================================
 
 @st.cache_data
 def load_synonyms():
@@ -86,12 +154,22 @@ def load_synonyms():
             sheet_name="搜尋詞對照"
         ).fillna("")
 
+        df.columns = (
+            df.columns
+            .astype(str)
+            .str.strip()
+        )
+
         return df
 
     except Exception:
 
         return pd.DataFrame()
 
+
+# ============================================================
+# 讀取內部公告
+# ============================================================
 
 @st.cache_data
 def load_announcements():
@@ -103,12 +181,43 @@ def load_announcements():
             sheet_name="內部公告"
         ).fillna("")
 
+        # 清除欄位名稱前後空白
+        df.columns = (
+            df.columns
+            .astype(str)
+            .str.strip()
+        )
+
+        required_columns = [
+            "公告編號",
+            "公告標題",
+            "公告內容",
+            "公告日期",
+            "活動期限",
+            "點數期限",
+            "顯示狀態"
+        ]
+
+        # 如果 Excel 缺少欄位，自動建立
+        for column in required_columns:
+
+            if column not in df.columns:
+
+                df[column] = ""
+
+        # 固定欄位順序
+        df = df[required_columns]
+
         return df
 
     except Exception:
 
         return pd.DataFrame()
 
+
+# ============================================================
+# 讀取常用工具
+# ============================================================
 
 @st.cache_data
 def load_tools():
@@ -119,6 +228,33 @@ def load_tools():
             FILE_PATH,
             sheet_name="常用工具"
         ).fillna("")
+
+        # 清除欄位名稱前後空白
+        df.columns = (
+            df.columns
+            .astype(str)
+            .str.strip()
+        )
+
+        required_columns = [
+            "工具編號",
+            "工具名稱",
+            "工具說明",
+            "工具網址",
+            "工具分類",
+            "顯示狀態",
+            "顯示順序"
+        ]
+
+        # 如果 Excel 缺少欄位，自動建立
+        for column in required_columns:
+
+            if column not in df.columns:
+
+                df[column] = ""
+
+        # 固定欄位順序
+        df = df[required_columns]
 
         return df
 
@@ -314,7 +450,6 @@ if page == "🏠 首頁":
             "快速查詢客服知識與常見問題。"
         )
 
-
     with col2:
 
         st.markdown(
@@ -325,7 +460,6 @@ if page == "🏠 首頁":
             "查詢門市位置、交通、停車等資訊。"
         )
 
-
     with col3:
 
         st.markdown(
@@ -335,7 +469,6 @@ if page == "🏠 首頁":
         st.write(
             "查看最新內部公告及常用系統。"
         )
-
 
     st.divider()
 
@@ -351,10 +484,19 @@ if page == "🏠 首頁":
 
     else:
 
-        show_announcements = announcement_df[
-            announcement_df["顯示狀態"].astype(str).str.strip()
-            == "顯示"
-        ]
+        # 確認顯示狀態欄位存在
+        if "顯示狀態" in announcement_df.columns:
+
+            show_announcements = announcement_df[
+                announcement_df["顯示狀態"]
+                .astype(str)
+                .str.strip()
+                == "顯示"
+            ]
+
+        else:
+
+            show_announcements = announcement_df.copy()
 
         if show_announcements.empty:
 
@@ -370,16 +512,37 @@ if page == "🏠 首頁":
 
             for _, row in show_announcements.iloc[::-1].iterrows():
 
+                title = str(
+                    row.get(
+                        "公告標題",
+                        ""
+                    )
+                )
+
+                content = clean_announcement_content(
+                    row.get(
+                        "公告內容",
+                        ""
+                    )
+                )
+
+                date = str(
+                    row.get(
+                        "公告日期",
+                        ""
+                    )
+                )
+
                 st.markdown(
                     f"""
                     <div class="announcement-card">
 
-                    <h4>📌 {row["公告標題"]}</h4>
+                    <h4>📌 {title}</h4>
 
-                    <p>{row["公告內容"]}</p>
+                    <p>{content.replace(chr(10), "<br>")}</p>
 
                     <small>
-                    公告日期：{row["公告日期"]}
+                    公告日期：{date}
                     </small>
 
                     </div>
@@ -404,19 +567,16 @@ elif page == "🔍 知識搜尋":
 
     st.divider()
 
-
     keyword = st.text_input(
         "請輸入搜尋內容",
         placeholder="例如：重量、床墊、退貨、配送、保固……"
     )
-
 
     if keyword:
 
         search_text = expand_search_word(
             keyword
         )
-
 
         search_columns = []
 
@@ -430,7 +590,6 @@ elif page == "🔍 知識搜尋":
             "小分類"
         ]
 
-
         for column in possible_columns:
 
             if column in df.columns:
@@ -439,207 +598,193 @@ elif page == "🔍 知識搜尋":
                     column
                 )
 
+        if not search_columns:
 
-        search_data = (
-            df[search_columns]
-            .astype(str)
-            .agg(
-                " ".join,
-                axis=1
+            st.error(
+                "知識庫沒有可以搜尋的欄位。"
             )
-        )
-
-
-        vectorizer = TfidfVectorizer(
-            analyzer="char",
-            ngram_range=(1, 3)
-        )
-
-
-        matrix = vectorizer.fit_transform(
-            search_data
-        )
-
-
-        query_vector = vectorizer.transform(
-            [search_text]
-        )
-
-
-        similarity = cosine_similarity(
-            query_vector,
-            matrix
-        ).flatten()
-
-
-        df_result = df.copy()
-
-        df_result["_score"] = similarity
-
-        df_result = df_result.sort_values(
-            "_score",
-            ascending=False
-        )
-
-
-        df_result = df_result[
-            df_result["_score"] > 0
-        ]
-
-
-        st.write(
-            f"找到 {len(df_result)} 筆相關資料"
-        )
-
-
-        if len(df_result) == 0:
-
-            st.warning(
-                "目前沒有找到相關資料，請換個關鍵字試試看。"
-            )
-
 
         else:
 
-            display_result = df_result.head(
-                10
+            search_data = (
+                df[search_columns]
+                .astype(str)
+                .agg(
+                    " ".join,
+                    axis=1
+                )
             )
 
+            vectorizer = TfidfVectorizer(
+                analyzer="char",
+                ngram_range=(1, 3)
+            )
 
-            for _, row in display_result.iterrows():
+            matrix = vectorizer.fit_transform(
+                search_data
+            )
 
-                score = row["_score"]
+            query_vector = vectorizer.transform(
+                [search_text]
+            )
 
+            similarity = cosine_similarity(
+                query_vector,
+                matrix
+            ).flatten()
 
-                if "問題簡述" in df.columns:
+            df_result = df.copy()
 
-                    title = row[
-                        "問題簡述"
-                    ]
+            df_result["_score"] = similarity
 
-                else:
+            df_result = df_result.sort_values(
+                "_score",
+                ascending=False
+            )
 
-                    title = "相關資料"
+            df_result = df_result[
+                df_result["_score"] > 0
+            ]
 
+            st.write(
+                f"找到 {len(df_result)} 筆相關資料"
+            )
 
-                st.markdown(
-                    f"""
-                    <div class="result-card">
+            if len(df_result) == 0:
 
-                    <h4>{title}</h4>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True
+                st.warning(
+                    "目前沒有找到相關資料，請換個關鍵字試試看。"
                 )
 
+            else:
 
-                info_col1, info_col2, info_col3 = st.columns(
-                    3
+                display_result = df_result.head(
+                    10
                 )
 
+                for _, row in display_result.iterrows():
 
-                with info_col1:
+                    score = row["_score"]
 
-                    if "大分類" in df.columns:
+                    if "問題簡述" in df.columns:
 
-                        st.caption(
-                            "大分類"
-                        )
+                        title = row[
+                            "問題簡述"
+                        ]
 
-                        st.write(
-                            row["大分類"]
-                        )
+                    else:
 
-
-                with info_col2:
-
-                    if "中分類" in df.columns:
-
-                        st.caption(
-                            "中分類"
-                        )
-
-                        st.write(
-                            row["中分類"]
-                        )
-
-
-                with info_col3:
-
-                    if "小分類" in df.columns:
-
-                        st.caption(
-                            "小分類"
-                        )
-
-                        st.write(
-                            row["小分類"]
-                        )
-
-
-                if "解答" in df.columns:
+                        title = "相關資料"
 
                     st.markdown(
-                        "**📌 解答**"
+                        f"""
+                        <div class="result-card">
+
+                        <h4>{title}</h4>
+
+                        </div>
+                        """,
+                        unsafe_allow_html=True
                     )
 
-                    st.write(
-                        row["解答"]
+                    info_col1, info_col2, info_col3 = st.columns(
+                        3
                     )
 
+                    with info_col1:
 
-                if "判斷方式" in df.columns:
+                        if "大分類" in df.columns:
 
-                    if str(
-                        row["判斷方式"]
-                    ).strip():
-
-                        st.markdown(
-                            "**🔎 判斷方式**"
-                        )
-
-                        st.write(
-                            row["判斷方式"]
-                        )
-
-
-                if "判斷使用的工具" in df.columns:
-
-                    if str(
-                        row["判斷使用的工具"]
-                    ).strip():
-
-                        st.markdown(
-                            "**🛠️ 判斷使用的工具**"
-                        )
-
-                        st.write(
-                            row[
-                                "判斷使用的工具"
-                            ]
-                        )
-
-
-                if "關鍵字" in df.columns:
-
-                    if str(
-                        row["關鍵字"]
-                    ).strip():
-
-                        st.caption(
-                            "關鍵字："
-                            + str(
-                                row["關鍵字"]
+                            st.caption(
+                                "大分類"
                             )
+
+                            st.write(
+                                row["大分類"]
+                            )
+
+                    with info_col2:
+
+                        if "中分類" in df.columns:
+
+                            st.caption(
+                                "中分類"
+                            )
+
+                            st.write(
+                                row["中分類"]
+                            )
+
+                    with info_col3:
+
+                        if "小分類" in df.columns:
+
+                            st.caption(
+                                "小分類"
+                            )
+
+                            st.write(
+                                row["小分類"]
+                            )
+
+                    if "解答" in df.columns:
+
+                        st.markdown(
+                            "**📌 解答**"
                         )
 
+                        st.write(
+                            row["解答"]
+                        )
 
-                st.caption(
-                    f"相關程度：{score:.1%}"
-                )
+                    if "判斷方式" in df.columns:
 
-                st.divider()
+                        if str(
+                            row["判斷方式"]
+                        ).strip():
+
+                            st.markdown(
+                                "**🔎 判斷方式**"
+                            )
+
+                            st.write(
+                                row["判斷方式"]
+                            )
+
+                    if "判斷使用的工具" in df.columns:
+
+                        if str(
+                            row["判斷使用的工具"]
+                        ).strip():
+
+                            st.markdown(
+                                "**🛠️ 判斷使用的工具**"
+                            )
+
+                            st.write(
+                                row[
+                                    "判斷使用的工具"
+                                ]
+                            )
+
+                    if "關鍵字" in df.columns:
+
+                        if str(
+                            row["關鍵字"]
+                        ).strip():
+
+                            st.caption(
+                                "關鍵字："
+                                + str(
+                                    row["關鍵字"]
+                                )
+                            )
+
+                    st.caption(
+                        f"相關程度：{score:.1%}"
+                    )
+
+                    st.divider()
 
 
 # ============================================================
@@ -657,7 +802,6 @@ elif page == "🗺️ 門市地圖":
     )
 
     st.divider()
-
 
     components.iframe(
         "https://app.powerbi.com/reportEmbed?reportId=851d09f1-f169-4049-9090-640f09cdc385&autoAuth=true&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55",
@@ -690,7 +834,6 @@ elif page == "📢 公告＆常用工具":
         "📢 內部公告"
     )
 
-
     if announcement_df.empty:
 
         st.info(
@@ -700,10 +843,11 @@ elif page == "📢 公告＆常用工具":
     else:
 
         show_announcements = announcement_df[
-            announcement_df["顯示狀態"].astype(str).str.strip()
+            announcement_df["顯示狀態"]
+            .astype(str)
+            .str.strip()
             == "顯示"
         ]
-
 
         if show_announcements.empty:
 
@@ -716,27 +860,66 @@ elif page == "📢 公告＆常用工具":
             # 最新公告放前面
             show_announcements = show_announcements.iloc[::-1]
 
-
             for _, row in show_announcements.iterrows():
+
+                title = str(
+                    row.get(
+                        "公告標題",
+                        ""
+                    )
+                )
+
+                content = clean_announcement_content(
+                    row.get(
+                        "公告內容",
+                        ""
+                    )
+                )
+
+                date = str(
+                    row.get(
+                        "公告日期",
+                        ""
+                    )
+                )
+
+                activity = str(
+                    row.get(
+                        "活動期限",
+                        ""
+                    )
+                )
+
+                point = str(
+                    row.get(
+                        "點數期限",
+                        ""
+                    )
+                )
+
+                content_html = content.replace(
+                    "\n",
+                    "<br>"
+                )
 
                 st.markdown(
                     f"""
                     <div class="announcement-card">
 
-                    <h4>📌 {row["公告標題"]}</h4>
+                    <h4>📌 {title}</h4>
 
-                    <p>{row["公告內容"]}</p>
+                    <p>{content_html}</p>
 
                     <p>
-                    📅 公告日期：{row["公告日期"]}
+                    📅 公告日期：{date}
                     </p>
 
                     <p>
-                    🗓️ 活動期限：{row["活動期限"]}
+                    🗓️ 活動期限：{activity}
                     </p>
 
                     <p>
-                    🪙 點數期限：{row["點數期限"]}
+                    🪙 點數期限：{point}
                     </p>
 
                     </div>
@@ -756,7 +939,6 @@ elif page == "📢 公告＆常用工具":
         "🔗 常用工具"
     )
 
-
     if tool_df.empty:
 
         st.info(
@@ -766,10 +948,11 @@ elif page == "📢 公告＆常用工具":
     else:
 
         show_tools = tool_df[
-            tool_df["顯示狀態"].astype(str).str.strip()
+            tool_df["顯示狀態"]
+            .astype(str)
+            .str.strip()
             == "顯示"
         ]
-
 
         if show_tools.empty:
 
@@ -783,31 +966,27 @@ elif page == "📢 公告＆常用工具":
                 "工具分類"
             ].astype(str).unique()
 
-
             for category in categories:
 
                 st.markdown(
                     f"### {category}"
                 )
 
-
                 category_tools = show_tools[
-                    show_tools["工具分類"].astype(str)
+                    show_tools["工具分類"]
+                    .astype(str)
                     == category
                 ]
-
 
                 category_tools = category_tools.sort_values(
                     by="顯示順序"
                 )
 
-
-                # 每三個工具一排
                 tools_list = category_tools.to_dict(
                     "records"
                 )
 
-
+                # 每三個工具一排
                 for i in range(
                     0,
                     len(tools_list),
@@ -818,23 +997,36 @@ elif page == "📢 公告＆常用工具":
                         3
                     )
 
-
                     for j, tool in enumerate(
                         tools_list[i:i + 3]
                     ):
 
                         with cols[j]:
 
+                            tool_name = str(
+                                tool.get(
+                                    "工具名稱",
+                                    ""
+                                )
+                            )
+
+                            tool_description = str(
+                                tool.get(
+                                    "工具說明",
+                                    ""
+                                )
+                            )
+
                             st.markdown(
                                 f"""
                                 <div class="tool-card">
 
                                 <h4>
-                                🔗 {tool["工具名稱"]}
+                                🔗 {tool_name}
                                 </h4>
 
                                 <p>
-                                {tool["工具說明"]}
+                                {tool_description}
                                 </p>
 
                                 </div>
@@ -842,13 +1034,25 @@ elif page == "📢 公告＆常用工具":
                                 unsafe_allow_html=True
                             )
 
-
                             url = str(
-                                tool["工具網址"]
+                                tool.get(
+                                    "工具網址",
+                                    ""
+                                )
                             ).strip()
 
+                            tool_id = str(
+                                tool.get(
+                                    "工具編號",
+                                    j
+                                )
+                            )
 
-                            if url and url != "待補":
+                            if (
+                                url
+                                and url != "待補"
+                                and url.lower() != "nan"
+                            ):
 
                                 st.link_button(
                                     "開啟",
@@ -862,7 +1066,7 @@ elif page == "📢 公告＆常用工具":
                                     "網址待補",
                                     disabled=True,
                                     use_container_width=True,
-                                    key=f"tool_{tool['工具編號']}"
+                                    key=f"tool_{tool_id}"
                                 )
 
 
@@ -916,14 +1120,11 @@ elif page == "🛠️ 資料維護":
 
         st.divider()
 
-
         st.subheader(
             "➕ 新增知識"
         )
 
-
         new_data = {}
-
 
         for column in df.columns:
 
@@ -931,18 +1132,15 @@ elif page == "🛠️ 資料維護":
 
                 continue
 
-
             new_data[column] = st.text_input(
                 column,
                 key=f"new_{column}"
             )
 
-
         if st.button(
             "➕ 新增資料",
             type="primary"
         ):
-
 
             if "序號" in df.columns:
 
@@ -954,7 +1152,6 @@ elif page == "🛠️ 資料維護":
                     )
 
                     max_number = numbers.max()
-
 
                     if pd.isna(max_number):
 
@@ -970,19 +1167,15 @@ elif page == "🛠️ 資料維護":
 
                     new_number = len(df) + 1
 
-
                 new_data["序號"] = new_number
-
 
             new_row = pd.DataFrame(
                 [new_data]
             )
 
-
             new_row = new_row.reindex(
                 columns=df.columns
             )
-
 
             df = pd.concat(
                 [
@@ -992,11 +1185,9 @@ elif page == "🛠️ 資料維護":
                 ignore_index=True
             )
 
-
             save_knowledge_data(
                 df
             )
-
 
             st.success(
                 "資料已新增！"
@@ -1004,14 +1195,11 @@ elif page == "🛠️ 資料維護":
 
             st.rerun()
 
-
         st.divider()
-
 
         st.subheader(
             "✏️ 修改知識"
         )
-
 
         if len(df) > 0:
 
@@ -1031,14 +1219,11 @@ elif page == "🛠️ 資料維護":
                     )
             )
 
-
             selected_row = df.loc[
                 selected_index
             ]
 
-
             edit_data = {}
-
 
             for column in df.columns:
 
@@ -1067,12 +1252,10 @@ elif page == "🛠️ 資料維護":
                         key=f"edit_knowledge_{selected_index}_{column}"
                     )
 
-
             if st.button(
                 "💾 儲存修改",
                 type="primary"
             ):
-
 
                 for column in edit_data:
 
@@ -1080,7 +1263,6 @@ elif page == "🛠️ 資料維護":
                         selected_index,
                         column
                     ] = edit_data[column]
-
 
                 if "更新日期" in df.columns:
 
@@ -1091,7 +1273,6 @@ elif page == "🛠️ 資料維護":
                         "%Y-%m-%d"
                     )
 
-
                 if "更新人" in df.columns:
 
                     df.loc[
@@ -1099,11 +1280,9 @@ elif page == "🛠️ 資料維護":
                         "更新人"
                     ] = "客服"
 
-
                 save_knowledge_data(
                     df
                 )
-
 
                 st.success(
                     "資料已更新！"
@@ -1122,7 +1301,6 @@ elif page == "🛠️ 資料維護":
             "📋 公告資料"
         )
 
-
         if announcement_df.empty:
 
             st.info(
@@ -1137,9 +1315,7 @@ elif page == "🛠️ 資料維護":
                 height=300
             )
 
-
         st.divider()
-
 
         # ====================================================
         # 新增公告
@@ -1149,18 +1325,15 @@ elif page == "🛠️ 資料維護":
             "➕ 新增公告"
         )
 
-
         announcement_title = st.text_input(
             "公告標題",
             key="announcement_title"
         )
 
-
         announcement_content = st.text_area(
             "公告內容",
             key="announcement_content"
         )
-
 
         announcement_date = st.text_input(
             "公告日期",
@@ -1170,20 +1343,17 @@ elif page == "🛠️ 資料維護":
             key="announcement_date"
         )
 
-
         activity_period = st.text_input(
             "活動期限",
             placeholder="例如：2026-09-24 ～ 2026-10-12",
             key="activity_period"
         )
 
-
         point_period = st.text_input(
             "點數期限",
             placeholder="例如：2026-11-30",
             key="point_period"
         )
-
 
         announcement_status = st.selectbox(
             "顯示狀態",
@@ -1194,12 +1364,10 @@ elif page == "🛠️ 資料維護":
             key="announcement_status"
         )
 
-
         if st.button(
             "➕ 新增公告",
             type="primary"
         ):
-
 
             if announcement_title.strip() == "":
 
@@ -1230,13 +1398,14 @@ elif page == "🛠️ 資料維護":
 
                     new_id = 1
 
-
                 new_announcement = pd.DataFrame(
                     [
                         {
                             "公告編號": new_id,
                             "公告標題": announcement_title,
-                            "公告內容": announcement_content,
+                            "公告內容": clean_announcement_content(
+                                announcement_content
+                            ),
                             "公告日期": announcement_date,
                             "活動期限": activity_period,
                             "點數期限": point_period,
@@ -1244,7 +1413,6 @@ elif page == "🛠️ 資料維護":
                         }
                     ]
                 )
-
 
                 announcement_df = pd.concat(
                     [
@@ -1254,12 +1422,10 @@ elif page == "🛠️ 資料維護":
                     ignore_index=True
                 )
 
-
                 save_sheet(
                     "內部公告",
                     announcement_df
                 )
-
 
                 st.success(
                     "公告已新增！"
@@ -1267,9 +1433,7 @@ elif page == "🛠️ 資料維護":
 
                 st.rerun()
 
-
         st.divider()
-
 
         # ====================================================
         # 修改公告
@@ -1278,7 +1442,6 @@ elif page == "🛠️ 資料維護":
         st.subheader(
             "✏️ 修改公告"
         )
-
 
         if not announcement_df.empty:
 
@@ -1299,56 +1462,64 @@ elif page == "🛠️ 資料維護":
                 key="selected_announcement"
             )
 
-
             selected_row = announcement_df.loc[
                 selected_announcement
             ]
 
-
             edit_title = st.text_input(
                 "公告標題",
                 value=str(
-                    selected_row["公告標題"]
+                    selected_row.get(
+                        "公告標題",
+                        ""
+                    )
                 ),
                 key="edit_announcement_title"
             )
 
-
             edit_content = st.text_area(
                 "公告內容",
-                value=str(
-                    selected_row["公告內容"]
+                value=clean_announcement_content(
+                    selected_row.get(
+                        "公告內容",
+                        ""
+                    )
                 ),
                 key="edit_announcement_content"
             )
 
-
             edit_date = st.text_input(
                 "公告日期",
                 value=str(
-                    selected_row["公告日期"]
+                    selected_row.get(
+                        "公告日期",
+                        ""
+                    )
                 ),
                 key="edit_announcement_date"
             )
 
-
             edit_activity = st.text_input(
                 "活動期限",
                 value=str(
-                    selected_row["活動期限"]
+                    selected_row.get(
+                        "活動期限",
+                        ""
+                    )
                 ),
                 key="edit_activity"
             )
 
-
             edit_point = st.text_input(
                 "點數期限",
                 value=str(
-                    selected_row["點數期限"]
+                    selected_row.get(
+                        "點數期限",
+                        ""
+                    )
                 ),
                 key="edit_point"
             )
-
 
             edit_status = st.selectbox(
                 "顯示狀態",
@@ -1359,61 +1530,58 @@ elif page == "🛠️ 資料維護":
                 index=(
                     0
                     if str(
-                        selected_row["顯示狀態"]
-                    ) == "顯示"
+                        selected_row.get(
+                            "顯示狀態",
+                            "顯示"
+                        )
+                    ).strip()
+                    == "顯示"
                     else 1
                 ),
                 key="edit_announcement_status"
             )
-
 
             if st.button(
                 "💾 儲存公告修改",
                 type="primary"
             ):
 
-
                 announcement_df.loc[
                     selected_announcement,
                     "公告標題"
                 ] = edit_title
 
-
                 announcement_df.loc[
                     selected_announcement,
                     "公告內容"
-                ] = edit_content
-
+                ] = clean_announcement_content(
+                    edit_content
+                )
 
                 announcement_df.loc[
                     selected_announcement,
                     "公告日期"
                 ] = edit_date
 
-
                 announcement_df.loc[
                     selected_announcement,
                     "活動期限"
                 ] = edit_activity
-
 
                 announcement_df.loc[
                     selected_announcement,
                     "點數期限"
                 ] = edit_point
 
-
                 announcement_df.loc[
                     selected_announcement,
                     "顯示狀態"
                 ] = edit_status
 
-
                 save_sheet(
                     "內部公告",
                     announcement_df
                 )
-
 
                 st.success(
                     "公告已更新！"
@@ -1432,7 +1600,6 @@ elif page == "🛠️ 資料維護":
             "📋 工具資料"
         )
 
-
         if tool_df.empty:
 
             st.info(
@@ -1447,9 +1614,7 @@ elif page == "🛠️ 資料維護":
                 height=300
             )
 
-
         st.divider()
-
 
         # ====================================================
         # 新增工具
@@ -1459,25 +1624,21 @@ elif page == "🛠️ 資料維護":
             "➕ 新增工具"
         )
 
-
         tool_name = st.text_input(
             "工具名稱",
             key="tool_name"
         )
-
 
         tool_description = st.text_input(
             "工具說明",
             key="tool_description"
         )
 
-
         tool_url = st.text_input(
             "工具網址",
             placeholder="https://",
             key="tool_url"
         )
-
 
         tool_category = st.selectbox(
             "工具分類",
@@ -1491,7 +1652,6 @@ elif page == "🛠️ 資料維護":
             key="tool_category"
         )
 
-
         tool_status = st.selectbox(
             "顯示狀態",
             [
@@ -1501,7 +1661,6 @@ elif page == "🛠️ 資料維護":
             key="tool_status"
         )
 
-
         tool_order = st.number_input(
             "顯示順序",
             min_value=1,
@@ -1510,12 +1669,10 @@ elif page == "🛠️ 資料維護":
             key="tool_order"
         )
 
-
         if st.button(
             "➕ 新增工具",
             type="primary"
         ):
-
 
             if tool_name.strip() == "":
 
@@ -1546,7 +1703,6 @@ elif page == "🛠️ 資料維護":
 
                     new_tool_id = 1
 
-
                 new_tool = pd.DataFrame(
                     [
                         {
@@ -1561,7 +1717,6 @@ elif page == "🛠️ 資料維護":
                     ]
                 )
 
-
                 tool_df = pd.concat(
                     [
                         tool_df,
@@ -1570,12 +1725,10 @@ elif page == "🛠️ 資料維護":
                     ignore_index=True
                 )
 
-
                 save_sheet(
                     "常用工具",
                     tool_df
                 )
-
 
                 st.success(
                     "工具已新增！"
@@ -1583,9 +1736,7 @@ elif page == "🛠️ 資料維護":
 
                 st.rerun()
 
-
         st.divider()
-
 
         # ====================================================
         # 修改工具
@@ -1594,7 +1745,6 @@ elif page == "🛠️ 資料維護":
         st.subheader(
             "✏️ 修改工具"
         )
-
 
         if not tool_df.empty:
 
@@ -1615,38 +1765,42 @@ elif page == "🛠️ 資料維護":
                 key="selected_tool"
             )
 
-
             selected_row = tool_df.loc[
                 selected_tool
             ]
 
-
             edit_tool_name = st.text_input(
                 "工具名稱",
                 value=str(
-                    selected_row["工具名稱"]
+                    selected_row.get(
+                        "工具名稱",
+                        ""
+                    )
                 ),
                 key="edit_tool_name"
             )
 
-
             edit_tool_description = st.text_input(
                 "工具說明",
                 value=str(
-                    selected_row["工具說明"]
+                    selected_row.get(
+                        "工具說明",
+                        ""
+                    )
                 ),
                 key="edit_tool_description"
             )
 
-
             edit_tool_url = st.text_input(
                 "工具網址",
                 value=str(
-                    selected_row["工具網址"]
+                    selected_row.get(
+                        "工具網址",
+                        ""
+                    )
                 ),
                 key="edit_tool_url"
             )
-
 
             category_options = [
                 "🏢 內部系統",
@@ -1656,11 +1810,12 @@ elif page == "🛠️ 資料維護":
                 "🔗 其他"
             ]
 
-
             current_category = str(
-                selected_row["工具分類"]
+                selected_row.get(
+                    "工具分類",
+                    ""
+                )
             )
-
 
             if current_category in category_options:
 
@@ -1672,14 +1827,12 @@ elif page == "🛠️ 資料維護":
 
                 category_index = 0
 
-
             edit_tool_category = st.selectbox(
                 "工具分類",
                 category_options,
                 index=category_index,
                 key="edit_tool_category"
             )
-
 
             edit_tool_status = st.selectbox(
                 "顯示狀態",
@@ -1690,79 +1843,78 @@ elif page == "🛠️ 資料維護":
                 index=(
                     0
                     if str(
-                        selected_row["顯示狀態"]
-                    ) == "顯示"
+                        selected_row.get(
+                            "顯示狀態",
+                            "顯示"
+                        )
+                    ).strip()
+                    == "顯示"
                     else 1
                 ),
                 key="edit_tool_status"
             )
 
+            current_order = pd.to_numeric(
+                selected_row.get(
+                    "顯示順序",
+                    1
+                ),
+                errors="coerce"
+            )
+
+            if pd.isna(current_order):
+
+                current_order = 1
 
             edit_tool_order = st.number_input(
                 "顯示順序",
                 min_value=1,
                 value=int(
-                    pd.to_numeric(
-                        selected_row["顯示順序"],
-                        errors="coerce"
-                    )
-                    if str(
-                        selected_row["顯示順序"]
-                    ).strip()
-                    else 1
+                    current_order
                 ),
                 step=1,
                 key="edit_tool_order"
             )
-
 
             if st.button(
                 "💾 儲存工具修改",
                 type="primary"
             ):
 
-
                 tool_df.loc[
                     selected_tool,
                     "工具名稱"
                 ] = edit_tool_name
-
 
                 tool_df.loc[
                     selected_tool,
                     "工具說明"
                 ] = edit_tool_description
 
-
                 tool_df.loc[
                     selected_tool,
                     "工具網址"
                 ] = edit_tool_url
-
 
                 tool_df.loc[
                     selected_tool,
                     "工具分類"
                 ] = edit_tool_category
 
-
                 tool_df.loc[
                     selected_tool,
                     "顯示狀態"
                 ] = edit_tool_status
-
 
                 tool_df.loc[
                     selected_tool,
                     "顯示順序"
                 ] = edit_tool_order
 
-
                 save_sheet(
                     "常用工具",
                     tool_df
                 )
-
 
                 st.success(
                     "工具已更新！"
