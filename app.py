@@ -23,38 +23,396 @@ st.set_page_config(
 
 
 # ============================================================
-# 頁面樣式
+# 日系貓咪風格
 # ============================================================
 
 st.markdown(
     """
     <style>
 
+    /* ========================================================
+       全站
+       ======================================================== */
+
+    .stApp {
+        background: #F7F4EE;
+        color: #5F5A53;
+    }
+
     .block-container {
         padding-top: 2rem;
-        padding-bottom: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1400px;
+    }
+
+    /* 標題 */
+    h1 {
+        color: #514C45 !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.03em;
+    }
+
+    h2 {
+        color: #5B554D !important;
+        font-weight: 650 !important;
+    }
+
+    h3 {
+        color: #655F57 !important;
+        font-weight: 650 !important;
+    }
+
+    h4 {
+        color: #625C54 !important;
+    }
+
+    p {
+        color: #706A62;
+    }
+
+
+    /* ========================================================
+       側邊欄
+       ======================================================== */
+
+    [data-testid="stSidebar"] {
+        background: #EEE8DD;
+        border-right: 1px solid #DED4C5;
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 1.5rem;
+    }
+
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #554F48 !important;
+    }
+
+    [data-testid="stSidebar"] .stRadio label {
+        color: #625C54 !important;
+        font-weight: 500;
+    }
+
+    [data-testid="stSidebar"] .stRadio label:hover {
+        color: #B56F55 !important;
+    }
+
+    /* ========================================================
+       按鈕
+       ======================================================== */
+
+    .stButton > button,
+    .stLinkButton > a {
+        border-radius: 12px !important;
+        border: 1px solid #D8C9B8 !important;
+        background: #FFFDF9 !important;
+        color: #665F57 !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease;
+    }
+
+    .stButton > button:hover,
+    .stLinkButton > a:hover {
+        border-color: #C98568 !important;
+        color: #B56F55 !important;
+        background: #FFF9F3 !important;
+        transform: translateY(-1px);
+    }
+
+    /* Primary */
+    button[kind="primary"] {
+        background: #C98568 !important;
+        border-color: #C98568 !important;
+        color: white !important;
+    }
+
+    button[kind="primary"]:hover {
+        background: #B8735B !important;
+        border-color: #B8735B !important;
+        color: white !important;
+    }
+
+
+    /* ========================================================
+       輸入框
+       ======================================================== */
+
+    div[data-baseweb="input"] > div,
+    div[data-baseweb="textarea"] > div {
+        background: #FFFDF9 !important;
+        border: 1px solid #DCCFC0 !important;
+        border-radius: 12px !important;
+    }
+
+    div[data-baseweb="input"] > div:focus-within,
+    div[data-baseweb="textarea"] > div:focus-within {
+        border-color: #C98568 !important;
+        box-shadow: 0 0 0 2px rgba(201, 133, 104, 0.12) !important;
+    }
+
+    input,
+    textarea {
+        color: #5E5952 !important;
+    }
+
+
+    /* ========================================================
+       首頁 Hero
+       ======================================================== */
+
+    .hero-card {
+        background:
+            linear-gradient(
+                135deg,
+                #FFFDF8 0%,
+                #F5EEE4 100%
+            );
+        border: 1px solid #E1D5C5;
+        border-radius: 24px;
+        padding: 35px 40px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(99, 82, 64, 0.06);
+    }
+
+    .hero-cat {
+        font-size: 76px;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .hero-title {
+        font-size: 34px;
+        font-weight: 750;
+        color: #514C45;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+        font-size: 15px;
+        color: #8A8177;
+        letter-spacing: 0.05em;
+    }
+
+    .hero-message {
+        margin-top: 18px;
+        display: inline-block;
+        background: #F2E2D8;
+        color: #8A5E4C;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+
+    /* ========================================================
+       快速入口
+       ======================================================== */
+
+    .quick-card {
+        background: #FFFDF9;
+        border: 1px solid #E1D8CB;
+        border-radius: 18px;
+        padding: 22px;
+        min-height: 145px;
+        box-shadow: 0 4px 14px rgba(90, 72, 52, 0.04);
+        transition: all 0.2s ease;
+    }
+
+    .quick-card:hover {
+        transform: translateY(-2px);
+        border-color: #D3B8A6;
+        box-shadow: 0 7px 18px rgba(90, 72, 52, 0.08);
+    }
+
+    .quick-icon {
+        font-size: 30px;
+        margin-bottom: 8px;
+    }
+
+    .quick-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #5B554D;
+        margin-bottom: 5px;
+    }
+
+    .quick-text {
+        font-size: 13px;
+        color: #8A837A;
+        line-height: 1.7;
+    }
+
+
+    /* ========================================================
+       公告卡片
+       ======================================================== */
+
+    .announcement-card {
+        background: #FFFDF9;
+        border: 1px solid #E3D9CC;
+        border-radius: 18px;
+        padding: 22px 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 15px rgba(90, 72, 52, 0.045);
+        position: relative;
+    }
+
+    .announcement-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 18px;
+        bottom: 18px;
+        width: 4px;
+        border-radius: 4px;
+        background: #C98568;
+    }
+
+    .announcement-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #5B554D;
+        margin-bottom: 10px;
+        padding-left: 5px;
+    }
+
+    .announcement-content {
+        color: #716A61;
+        line-height: 1.8;
+        white-space: pre-line;
+        padding-left: 5px;
+    }
+
+    .announcement-meta {
+        color: #9A9187;
+        font-size: 12px;
+        margin-top: 12px;
+        line-height: 1.8;
+        padding-left: 5px;
+    }
+
+
+    /* ========================================================
+       工具卡片
+       ======================================================== */
+
+    .tool-card {
+        background: #FFFDF9;
+        border: 1px solid #E2D8CB;
+        border-radius: 18px;
+        padding: 22px;
+        min-height: 155px;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 15px rgba(90, 72, 52, 0.045);
+        transition: all 0.2s ease;
+    }
+
+    .tool-card:hover {
+        transform: translateY(-3px);
+        border-color: #CFAE9A;
+        box-shadow: 0 8px 22px rgba(90, 72, 52, 0.09);
+    }
+
+    .tool-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .tool-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #5B554D;
+        margin-bottom: 7px;
+    }
+
+    .tool-description {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #8A837A;
+        min-height: 44px;
+    }
+
+    .tool-category-title {
+        color: #665F57;
+        font-size: 20px;
+        font-weight: 700;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        padding-left: 4px;
+    }
+
+
+    /* ========================================================
+       搜尋結果
+       ======================================================== */
+
+    .search-header {
+        background: #F2E7DB;
+        border-radius: 18px;
+        padding: 18px 22px;
+        margin-bottom: 20px;
+        border: 1px solid #E2D3C3;
     }
 
     .result-card {
-        padding: 18px;
-        border-radius: 12px;
-        border: 1px solid #dddddd;
-        margin-bottom: 12px;
+        background: #FFFDF9;
+        padding: 20px 22px;
+        border-radius: 16px;
+        border: 1px solid #E2D9CE;
+        margin-bottom: 8px;
+        box-shadow: 0 3px 12px rgba(90, 72, 52, 0.035);
     }
 
-    .announcement-card {
-        padding: 18px;
-        border-radius: 12px;
-        border: 1px solid #dddddd;
-        margin-bottom: 15px;
-        background-color: #fafafa;
+    .result-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #5B554D;
     }
 
-    .tool-card {
-        padding: 18px;
+    .score-badge {
+        display: inline-block;
+        background: #E6EFE7;
+        color: #667C69;
+        padding: 4px 9px;
+        border-radius: 10px;
+        font-size: 11px;
+        margin-top: 8px;
+    }
+
+
+    /* ========================================================
+       分類標籤
+       ======================================================== */
+
+    .section-label {
+        color: #8A5E4C;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin-bottom: 5px;
+    }
+
+
+    /* ========================================================
+       Streamlit Divider
+       ======================================================== */
+
+    hr {
+        border-color: #E5DDD3 !important;
+    }
+
+
+    /* ========================================================
+       Dataframe
+       ======================================================== */
+
+    [data-testid="stDataFrame"] {
+        border: 1px solid #DED5CA;
         border-radius: 12px;
-        border: 1px solid #dddddd;
-        margin-bottom: 12px;
+        overflow: hidden;
     }
 
     </style>
@@ -68,24 +426,6 @@ st.markdown(
 # ============================================================
 
 def clean_announcement_content(text):
-    """
-    將公告欄位中的 HTML / Markdown / SVG / 多餘標籤
-    全部轉成乾淨的純文字。
-
-    可處理例如：
-
-    <h4>📌 【2026週年慶活動】</h4>
-    <p>內容</p>
-    svg
-    ``` 
-    一般點數...
-    ```
-    </div>
-    """
-
-    # --------------------------------------------------------
-    # 1. 空值處理
-    # --------------------------------------------------------
 
     if text is None:
         return ""
@@ -101,45 +441,24 @@ def clean_announcement_content(text):
     if not text.strip():
         return ""
 
-
-    # --------------------------------------------------------
-    # 2. HTML entity 解碼
-    # --------------------------------------------------------
-
     text = html.unescape(text)
 
-
-    # --------------------------------------------------------
-    # 3. 移除 Markdown code fence
-    # --------------------------------------------------------
-
+    # Markdown code fence
     text = re.sub(
         r"```(?:html|HTML|text|TEXT)?",
         "",
         text
     )
 
-    text = text.replace(
-        "```",
-        ""
-    )
+    text = text.replace("```", "")
 
-
-    # --------------------------------------------------------
-    # 4. 移除完整 SVG 區塊
-    # --------------------------------------------------------
-
+    # SVG
     text = re.sub(
         r"<svg\b[^>]*>.*?</svg\s*>",
         "",
         text,
         flags=re.IGNORECASE | re.DOTALL
     )
-
-
-    # --------------------------------------------------------
-    # 5. 移除單獨的 svg
-    # --------------------------------------------------------
 
     text = re.sub(
         r"^\s*svg\s*$",
@@ -148,11 +467,7 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE | re.MULTILINE
     )
 
-
-    # --------------------------------------------------------
-    # 6. HTML 換行標籤轉成真正換行
-    # --------------------------------------------------------
-
+    # HTML 換行
     text = re.sub(
         r"<br\s*/?>",
         "\n",
@@ -188,11 +503,7 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
-
-    # --------------------------------------------------------
-    # 7. 移除所有剩餘 HTML 標籤
-    # --------------------------------------------------------
-
+    # 移除所有 HTML
     text = re.sub(
         r"<[^>]*>",
         "",
@@ -200,11 +511,7 @@ def clean_announcement_content(text):
         flags=re.DOTALL
     )
 
-
-    # --------------------------------------------------------
-    # 8. 移除殘留的 HTML 屬性
-    # --------------------------------------------------------
-
+    # 殘留屬性
     text = re.sub(
         r'\bid\s*=\s*"[^"]*"',
         "",
@@ -219,37 +526,9 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
-
-    # --------------------------------------------------------
-    # 9. 清理跳脫符號
-    # --------------------------------------------------------
-
-    text = text.replace(
-        "\\~",
-        "~"
-    )
-
-    text = text.replace(
-        "\\",
-        ""
-    )
-
-
-    # --------------------------------------------------------
-    # 10. 清理殘留的 HTML 文字
-    # --------------------------------------------------------
-
-    text = re.sub(
-        r"^\s*</?\s*(div|p|h[1-6]|span|section|article)\s*>\s*$",
-        "",
-        text,
-        flags=re.IGNORECASE | re.MULTILINE
-    )
-
-
-    # --------------------------------------------------------
-    # 11. 每一行整理空白
-    # --------------------------------------------------------
+    # 跳脫符號
+    text = text.replace("\\~", "~")
+    text = text.replace("\\", "")
 
     lines = []
 
@@ -260,7 +539,15 @@ def clean_announcement_content(text):
         if not line:
             continue
 
-        # 移除連續空白
+        if line.lower() in [
+            "svg",
+            "div",
+            "/div",
+            "p",
+            "/p"
+        ]:
+            continue
+
         line = re.sub(
             r"[ \t]+",
             " ",
@@ -269,24 +556,13 @@ def clean_announcement_content(text):
 
         lines.append(line)
 
-
-    # --------------------------------------------------------
-    # 12. 合併結果
-    # --------------------------------------------------------
-
     text = "\n".join(lines)
-
-
-    # --------------------------------------------------------
-    # 13. 避免連續換行
-    # --------------------------------------------------------
 
     text = re.sub(
         r"\n{3,}",
         "\n\n",
         text
     )
-
 
     return text.strip()
 
@@ -308,48 +584,34 @@ def clean_announcement_title(text):
 
     text = str(text)
 
-    # HTML entity
     text = html.unescape(text)
 
-    # 移除 code fence
     text = re.sub(
         r"```(?:html|HTML|text|TEXT)?",
         "",
         text
     )
 
-    text = text.replace(
-        "```",
-        ""
-    )
+    text = text.replace("```", "")
 
-    # 移除 HTML 標籤
     text = re.sub(
         r"<[^>]*>",
         "",
         text
     )
 
-    # 移除 📌
-    text = text.replace(
-        "📌",
-        ""
-    )
+    text = text.replace("📌", "")
 
     text = text.strip()
 
-    # 如果是【標題】，去掉外面的括號
-    if (
-        text.startswith("【")
-        and text.endswith("】")
-    ):
+    if text.startswith("【") and text.endswith("】"):
         text = text[1:-1].strip()
 
     return text
 
 
 # ============================================================
-# HTML 顯示安全處理
+# HTML 安全
 # ============================================================
 
 def safe_html_text(text):
@@ -363,9 +625,7 @@ def safe_html_text(text):
     except Exception:
         pass
 
-    return html.escape(
-        str(text)
-    )
+    return html.escape(str(text))
 
 
 # ============================================================
@@ -390,7 +650,7 @@ def load_data():
 
 
 # ============================================================
-# 讀取搜尋詞對照
+# 搜尋詞
 # ============================================================
 
 @st.cache_data
@@ -417,7 +677,7 @@ def load_synonyms():
 
 
 # ============================================================
-# 讀取內部公告
+# 公告
 # ============================================================
 
 @st.cache_data
@@ -449,12 +709,30 @@ def load_announcements():
         for column in required_columns:
 
             if column not in df.columns:
-
                 df[column] = ""
 
-        df = df[
-            required_columns
-        ]
+        df = df[required_columns]
+
+        # 直接在載入時清理公告
+        df["公告標題"] = df["公告標題"].apply(
+            clean_announcement_title
+        )
+
+        df["公告內容"] = df["公告內容"].apply(
+            clean_announcement_content
+        )
+
+        df["公告日期"] = df["公告日期"].apply(
+            clean_announcement_content
+        )
+
+        df["活動期限"] = df["活動期限"].apply(
+            clean_announcement_content
+        )
+
+        df["點數期限"] = df["點數期限"].apply(
+            clean_announcement_content
+        )
 
         return df
 
@@ -464,7 +742,7 @@ def load_announcements():
 
 
 # ============================================================
-# 讀取常用工具
+# 常用工具
 # ============================================================
 
 @st.cache_data
@@ -496,14 +774,9 @@ def load_tools():
         for column in required_columns:
 
             if column not in df.columns:
-
                 df[column] = ""
 
-        df = df[
-            required_columns
-        ]
-
-        return df
+        return df[required_columns]
 
     except Exception:
 
@@ -511,15 +784,12 @@ def load_tools():
 
 
 # ============================================================
-# 載入資料
+# 載入
 # ============================================================
 
 df = load_data()
-
 synonym_df = load_synonyms()
-
 announcement_df = load_announcements()
-
 tool_df = load_tools()
 
 
@@ -529,13 +799,10 @@ tool_df = load_tools()
 
 def save_sheet(sheet_name, data):
 
-    wb = load_workbook(
-        FILE_PATH
-    )
+    wb = load_workbook(FILE_PATH)
 
     ws = wb[sheet_name]
 
-    # 清除原本資料
     if ws.max_row > 0:
 
         ws.delete_rows(
@@ -543,7 +810,6 @@ def save_sheet(sheet_name, data):
             ws.max_row
         )
 
-    # 寫入標題
     for col_num, column_name in enumerate(
         data.columns,
         1
@@ -555,7 +821,6 @@ def save_sheet(sheet_name, data):
             value=column_name
         )
 
-    # 寫入資料
     for row_num, row_data in enumerate(
         data.itertuples(index=False),
         2
@@ -572,16 +837,10 @@ def save_sheet(sheet_name, data):
                 value=value
             )
 
-    wb.save(
-        FILE_PATH
-    )
+    wb.save(FILE_PATH)
 
     st.cache_data.clear()
 
-
-# ============================================================
-# 儲存知識庫
-# ============================================================
 
 def save_knowledge_data(data):
 
@@ -597,17 +856,12 @@ def save_knowledge_data(data):
 
 def expand_search_word(keyword):
 
-    keyword = str(
-        keyword
-    ).strip()
+    keyword = str(keyword).strip()
 
     if keyword == "":
-
         return keyword
 
-    expanded_words = [
-        keyword
-    ]
+    expanded_words = [keyword]
 
     if not synonym_df.empty:
 
@@ -624,19 +878,16 @@ def expand_search_word(keyword):
                 ).strip()
 
                 if original == keyword:
-
                     expanded_words.append(
                         synonym
                     )
 
                 elif synonym == keyword:
-
                     expanded_words.append(
                         original
                     )
 
             except Exception:
-
                 pass
 
     return " ".join(
@@ -652,12 +903,31 @@ def expand_search_word(keyword):
 # 側邊欄
 # ============================================================
 
-st.sidebar.title(
-    "🐱 客服作業系統"
-)
-
-st.sidebar.caption(
-    "NITORI Customer Service"
+st.sidebar.markdown(
+    """
+    <div style="
+        text-align:center;
+        padding:10px 0 18px 0;
+    ">
+        <div style="font-size:52px;">🐱</div>
+        <div style="
+            font-size:20px;
+            font-weight:700;
+            color:#554F48;
+        ">
+            客服作業系統
+        </div>
+        <div style="
+            font-size:11px;
+            color:#91887E;
+            letter-spacing:0.08em;
+            margin-top:4px;
+        ">
+            NITORI CUSTOMER SERVICE
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 st.sidebar.divider()
@@ -673,6 +943,24 @@ page = st.sidebar.radio(
     ]
 )
 
+st.sidebar.divider()
+
+st.sidebar.markdown(
+    """
+    <div style="
+        text-align:center;
+        color:#9A9187;
+        font-size:12px;
+        line-height:1.7;
+        padding:5px;
+    ">
+        🐾 今天也一起<br>
+        把顧客問題解決掉吧！
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # ============================================================
 # ① 首頁
@@ -680,69 +968,97 @@ page = st.sidebar.radio(
 
 if page == "🏠 首頁":
 
-    st.title(
-        "🐱 歡迎來到客服作業系統"
+    st.markdown(
+        """
+        <div class="hero-card">
+
+            <div class="hero-cat">
+                🐱
+            </div>
+
+            <div class="hero-title">
+                客服作業系統
+            </div>
+
+            <div class="hero-subtitle">
+                NITORI CUSTOMER SERVICE WORKSPACE
+            </div>
+
+            <div class="hero-message">
+                🌿 今天也辛苦了，讓小貓陪你一起找資料
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.subheader(
-        "今天也辛苦了！"
+    st.markdown(
+        '<div class="section-label">QUICK ACCESS</div>',
+        unsafe_allow_html=True
     )
 
-    st.divider()
-
-    st.info(
-        "這裡可以快速查詢客服知識、門市資訊、內部公告及常用工具。"
-    )
-
-    st.divider()
-
-    st.subheader(
-        "🚀 快速入口"
-    )
+    st.subheader("快速入口")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
 
         st.markdown(
-            "### 🔍 知識搜尋"
-        )
-
-        st.write(
-            "快速查詢客服知識與常見問題。"
+            """
+            <div class="quick-card">
+                <div class="quick-icon">🔍</div>
+                <div class="quick-title">知識搜尋</div>
+                <div class="quick-text">
+                    快速查詢客服知識、商品問題與常見處理方式。
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
     with col2:
 
         st.markdown(
-            "### 🗺️ 門市地圖"
-        )
-
-        st.write(
-            "查詢門市位置、交通、停車等資訊。"
+            """
+            <div class="quick-card">
+                <div class="quick-icon">🗺️</div>
+                <div class="quick-title">門市地圖</div>
+                <div class="quick-text">
+                    查詢門市地址、交通、停車及相關資訊。
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
     with col3:
 
         st.markdown(
-            "### 📢 公告＆工具"
+            """
+            <div class="quick-card">
+                <div class="quick-icon">📢</div>
+                <div class="quick-title">公告＆工具</div>
+                <div class="quick-text">
+                    查看最新內部公告，以及日常工作常用工具。
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
-        st.write(
-            "查看最新內部公告及常用系統。"
-        )
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    st.divider()
-
-    st.subheader(
-        "📢 最新公告"
+    st.markdown(
+        '<div class="section-label">LATEST NEWS</div>',
+        unsafe_allow_html=True
     )
+
+    st.subheader("最新公告")
 
     if announcement_df.empty:
 
-        st.write(
-            "目前沒有公告。"
-        )
+        st.info("目前沒有公告。")
 
     else:
 
@@ -755,56 +1071,46 @@ if page == "🏠 首頁":
 
         if show_announcements.empty:
 
-            st.write(
-                "目前沒有公告。"
-            )
+            st.info("目前沒有公告。")
 
         else:
 
-            show_announcements = show_announcements.tail(
-                3
-            )
+            show_announcements = show_announcements.tail(3)
 
             for _, row in show_announcements.iloc[::-1].iterrows():
 
                 title = clean_announcement_title(
-                    row.get(
-                        "公告標題",
-                        ""
-                    )
+                    row.get("公告標題", "")
                 )
 
                 content = clean_announcement_content(
-                    row.get(
-                        "公告內容",
-                        ""
-                    )
+                    row.get("公告內容", "")
                 )
 
                 date = clean_announcement_content(
-                    row.get(
-                        "公告日期",
-                        ""
-                    )
+                    row.get("公告日期", "")
                 )
 
                 st.markdown(
-                    f"### 📌 {title}"
+                    f"""
+                    <div class="announcement-card">
+
+                        <div class="announcement-title">
+                            📌 {safe_html_text(title)}
+                        </div>
+
+                        <div class="announcement-content">
+                            {safe_html_text(content).replace(chr(10), "<br>")}
+                        </div>
+
+                        <div class="announcement-meta">
+                            📅 公告日期：{safe_html_text(date)}
+                        </div>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
                 )
-
-                if content:
-
-                    st.write(
-                        content
-                    )
-
-                if date:
-
-                    st.caption(
-                        f"📅 公告日期：{date}"
-                    )
-
-                st.divider()
 
 
 # ============================================================
@@ -813,26 +1119,34 @@ if page == "🏠 首頁":
 
 elif page == "🔍 知識搜尋":
 
-    st.title(
-        "🔍 客服知識搜尋"
+    st.markdown(
+        '<div class="section-label">KNOWLEDGE SEARCH</div>',
+        unsafe_allow_html=True
     )
 
-    st.caption(
-        "輸入顧客問題或關鍵字，快速找到相關客服資訊"
-    )
+    st.title("🔍 客服知識搜尋")
 
-    st.divider()
+    st.markdown(
+        """
+        <div class="search-header">
+            🐱 <b>小貓幫你找資料</b><br>
+            <span style="font-size:13px;color:#8A8177;">
+            輸入顧客問題、商品名稱或關鍵字即可開始搜尋
+            </span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     keyword = st.text_input(
-        "請輸入搜尋內容",
-        placeholder="例如：重量、床墊、退貨、配送、保固……"
+        "搜尋",
+        placeholder="例如：重量、床墊、退貨、配送、保固……",
+        label_visibility="collapsed"
     )
 
     if keyword:
 
-        search_text = expand_search_word(
-            keyword
-        )
+        search_text = expand_search_word(keyword)
 
         search_columns = []
 
@@ -849,10 +1163,7 @@ elif page == "🔍 知識搜尋":
         for column in possible_columns:
 
             if column in df.columns:
-
-                search_columns.append(
-                    column
-                )
+                search_columns.append(column)
 
         if not search_columns:
 
@@ -865,10 +1176,7 @@ elif page == "🔍 知識搜尋":
             search_data = (
                 df[search_columns]
                 .astype(str)
-                .agg(
-                    " ".join,
-                    axis=1
-                )
+                .agg(" ".join, axis=1)
             )
 
             vectorizer = TfidfVectorizer(
@@ -902,8 +1210,8 @@ elif page == "🔍 知識搜尋":
                 df_result["_score"] > 0
             ]
 
-            st.write(
-                f"找到 {len(df_result)} 筆相關資料"
+            st.caption(
+                f"🔎 找到 {len(df_result)} 筆相關資料"
             )
 
             if len(df_result) == 0:
@@ -914,9 +1222,7 @@ elif page == "🔍 知識搜尋":
 
             else:
 
-                display_result = df_result.head(
-                    10
-                )
+                display_result = df_result.head(10)
 
                 for _, row in display_result.iterrows():
 
@@ -930,61 +1236,47 @@ elif page == "🔍 知識搜尋":
                     st.markdown(
                         f"""
                         <div class="result-card">
-                        <h4>{safe_html_text(title)}</h4>
+
+                            <div class="result-title">
+                                📌 {safe_html_text(title)}
+                            </div>
+
+                            <div class="score-badge">
+                                相關程度 {score:.1%}
+                            </div>
+
                         </div>
                         """,
                         unsafe_allow_html=True
                     )
 
-                    info_col1, info_col2, info_col3 = st.columns(
-                        3
-                    )
+                    info_col1, info_col2, info_col3 = st.columns(3)
 
                     with info_col1:
 
                         if "大分類" in df.columns:
 
-                            st.caption(
-                                "大分類"
-                            )
-
-                            st.write(
-                                row["大分類"]
-                            )
+                            st.caption("大分類")
+                            st.write(row["大分類"])
 
                     with info_col2:
 
                         if "中分類" in df.columns:
 
-                            st.caption(
-                                "中分類"
-                            )
-
-                            st.write(
-                                row["中分類"]
-                            )
+                            st.caption("中分類")
+                            st.write(row["中分類"])
 
                     with info_col3:
 
                         if "小分類" in df.columns:
 
-                            st.caption(
-                                "小分類"
-                            )
-
-                            st.write(
-                                row["小分類"]
-                            )
+                            st.caption("小分類")
+                            st.write(row["小分類"])
 
                     if "解答" in df.columns:
 
-                        st.markdown(
-                            "**📌 解答**"
-                        )
-
-                        st.write(
-                            row["解答"]
-                        )
+                        st.markdown("**📌 解答**")
+                        st.write(row["解答"])
 
                     if "判斷方式" in df.columns:
 
@@ -1011,9 +1303,7 @@ elif page == "🔍 知識搜尋":
                             )
 
                             st.write(
-                                row[
-                                    "判斷使用的工具"
-                                ]
+                                row["判斷使用的工具"]
                             )
 
                     if "關鍵字" in df.columns:
@@ -1023,15 +1313,9 @@ elif page == "🔍 知識搜尋":
                         ).strip():
 
                             st.caption(
-                                "關鍵字："
-                                + str(
-                                    row["關鍵字"]
-                                )
+                                "關鍵字：" +
+                                str(row["關鍵字"])
                             )
-
-                    st.caption(
-                        f"相關程度：{score:.1%}"
-                    )
 
                     st.divider()
 
@@ -1042,15 +1326,16 @@ elif page == "🔍 知識搜尋":
 
 elif page == "🗺️ 門市地圖":
 
-    st.title(
-        "🗺️ 門市地圖"
+    st.markdown(
+        '<div class="section-label">STORE MAP</div>',
+        unsafe_allow_html=True
     )
+
+    st.title("🗺️ 門市地圖")
 
     st.caption(
         "宜得利家居門市資訊查詢"
     )
-
-    st.divider()
 
     components.iframe(
         "https://app.powerbi.com/reportEmbed?reportId=851d09f1-f169-4049-9090-640f09cdc385&autoAuth=true&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55",
@@ -1064,9 +1349,12 @@ elif page == "🗺️ 門市地圖":
 
 elif page == "📢 公告＆常用工具":
 
-    st.title(
-        "📢 公告＆常用工具"
+    st.markdown(
+        '<div class="section-label">INFORMATION & TOOLS</div>',
+        unsafe_allow_html=True
     )
+
+    st.title("📢 公告＆常用工具")
 
     st.caption(
         "查看內部公告及常用系統、表單與文件"
@@ -1076,18 +1364,14 @@ elif page == "📢 公告＆常用工具":
 
 
     # ========================================================
-    # 內部公告
+    # 公告
     # ========================================================
 
-    st.subheader(
-        "📢 內部公告"
-    )
+    st.subheader("📢 內部公告")
 
     if announcement_df.empty:
 
-        st.info(
-            "目前沒有公告資料。"
-        )
+        st.info("目前沒有公告資料。")
 
     else:
 
@@ -1100,9 +1384,7 @@ elif page == "📢 公告＆常用工具":
 
         if show_announcements.empty:
 
-            st.info(
-                "目前沒有公告資料。"
-            )
+            st.info("目前沒有公告資料。")
 
         else:
 
@@ -1111,110 +1393,74 @@ elif page == "📢 公告＆常用工具":
             for _, row in show_announcements.iterrows():
 
                 title = clean_announcement_title(
-                    row.get(
-                        "公告標題",
-                        ""
-                    )
+                    row.get("公告標題", "")
                 )
 
                 content = clean_announcement_content(
-                    row.get(
-                        "公告內容",
-                        ""
-                    )
+                    row.get("公告內容", "")
                 )
 
                 date = clean_announcement_content(
-                    row.get(
-                        "公告日期",
-                        ""
-                    )
+                    row.get("公告日期", "")
                 )
 
                 activity = clean_announcement_content(
-                    row.get(
-                        "活動期限",
-                        ""
-                    )
+                    row.get("活動期限", "")
                 )
 
                 point = clean_announcement_content(
-                    row.get(
-                        "點數期限",
-                        ""
-                    )
+                    row.get("點數期限", "")
                 )
 
-
-                # ------------------------------------------------
-                # 公告標題
-                # ------------------------------------------------
-
-                st.markdown(
-                    f"### 📌 {title}"
-                )
-
-
-                # ------------------------------------------------
-                # 公告內容
-                # ------------------------------------------------
-
-                if content:
-
-                    st.write(
-                        content
-                    )
-
-
-                # ------------------------------------------------
-                # 公告日期
-                # ------------------------------------------------
+                meta = ""
 
                 if date:
-
-                    st.caption(
-                        f"📅 公告日期：{date}"
-                    )
-
-
-                # ------------------------------------------------
-                # 活動期限
-                # ------------------------------------------------
+                    meta += f"📅 公告日期：{safe_html_text(date)}<br>"
 
                 if activity:
-
-                    st.caption(
-                        f"🗓️ 活動期限：{activity}"
-                    )
-
-
-                # ------------------------------------------------
-                # 點數期限
-                # ------------------------------------------------
+                    meta += f"🗓️ 活動期限：{safe_html_text(activity)}<br>"
 
                 if point:
+                    meta += f"🪙 點數期限：{safe_html_text(point)}"
 
-                    st.caption(
-                        f"🪙 點數期限：{point}"
-                    )
+                st.markdown(
+                    f"""
+                    <div class="announcement-card">
 
+                        <div class="announcement-title">
+                            📌 {safe_html_text(title)}
+                        </div>
 
-                st.divider()
+                        <div class="announcement-content">
+                            {safe_html_text(content).replace(chr(10), "<br>")}
+                        </div>
+
+                        <div class="announcement-meta">
+                            {meta}
+                        </div>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
 
     # ========================================================
     # 常用工具
     # ========================================================
 
-    st.subheader(
-        "🔗 常用工具"
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="section-label">QUICK TOOLS</div>',
+        unsafe_allow_html=True
     )
+
+    st.subheader("🔗 常用工具")
 
     if tool_df.empty:
 
-        st.info(
-            "目前沒有常用工具。"
-        )
+        st.info("目前沒有常用工具。")
 
     else:
 
@@ -1227,9 +1473,7 @@ elif page == "📢 公告＆常用工具":
 
         if show_tools.empty:
 
-            st.info(
-                "目前沒有常用工具。"
-            )
+            st.info("目前沒有常用工具。")
 
         else:
 
@@ -1240,7 +1484,11 @@ elif page == "📢 公告＆常用工具":
             for category in categories:
 
                 st.markdown(
-                    f"### {safe_html_text(category)}",
+                    f"""
+                    <div class="tool-category-title">
+                        {safe_html_text(category)}
+                    </div>
+                    """,
                     unsafe_allow_html=True
                 )
 
@@ -1264,7 +1512,10 @@ elif page == "📢 公告＆常用工具":
                     3
                 ):
 
-                    cols = st.columns(3)
+                    cols = st.columns(
+                        3,
+                        gap="medium"
+                    )
 
                     for j, tool in enumerate(
                         tools_list[i:i + 3]
@@ -1286,17 +1537,37 @@ elif page == "📢 公告＆常用工具":
                                 )
                             )
 
+                            # 工具圖示
+                            if "地圖" in tool_name:
+                                icon = "🗺️"
+                            elif "Power BI" in tool_name:
+                                icon = "📊"
+                            elif "交接" in tool_name:
+                                icon = "📋"
+                            elif "信箱" in tool_name:
+                                icon = "📧"
+                            elif "Excel" in tool_name:
+                                icon = "📗"
+                            elif "Teams" in tool_name:
+                                icon = "💬"
+                            else:
+                                icon = "🔗"
+
                             st.markdown(
                                 f"""
                                 <div class="tool-card">
 
-                                <h4>
-                                🔗 {safe_html_text(tool_name)}
-                                </h4>
+                                    <div class="tool-icon">
+                                        {icon}
+                                    </div>
 
-                                <p>
-                                {safe_html_text(tool_description)}
-                                </p>
+                                    <div class="tool-title">
+                                        {safe_html_text(tool_name)}
+                                    </div>
+
+                                    <div class="tool-description">
+                                        {safe_html_text(tool_description)}
+                                    </div>
 
                                 </div>
                                 """,
@@ -1324,7 +1595,7 @@ elif page == "📢 公告＆常用工具":
                             ):
 
                                 st.link_button(
-                                    "開啟",
+                                    "開啟工具 →",
                                     url,
                                     use_container_width=True
                                 )
@@ -1345,20 +1616,18 @@ elif page == "📢 公告＆常用工具":
 
 elif page == "🛠️ 資料維護":
 
-    st.title(
-        "🛠️ 資料維護"
+    st.markdown(
+        '<div class="section-label">DATA MANAGEMENT</div>',
+        unsafe_allow_html=True
     )
+
+    st.title("🛠️ 資料維護")
 
     st.caption(
         "管理客服知識、內部公告及常用工具"
     )
 
     st.divider()
-
-
-    # ========================================================
-    # 維護項目選擇
-    # ========================================================
 
     maintenance_type = st.radio(
         "請選擇要維護的資料",
@@ -1372,14 +1641,12 @@ elif page == "🛠️ 資料維護":
 
 
     # ========================================================
-    # 知識庫維護
+    # 知識庫
     # ========================================================
 
     if maintenance_type == "📚 知識庫":
 
-        st.subheader(
-            "📋 目前知識庫資料"
-        )
+        st.subheader("📋 目前知識庫資料")
 
         st.dataframe(
             df,
@@ -1389,9 +1656,7 @@ elif page == "🛠️ 資料維護":
 
         st.divider()
 
-        st.subheader(
-            "➕ 新增知識"
-        )
+        st.subheader("➕ 新增知識")
 
         new_data = {}
 
@@ -1422,14 +1687,9 @@ elif page == "🛠️ 資料維護":
                     max_number = numbers.max()
 
                     if pd.isna(max_number):
-
                         new_number = 1
-
                     else:
-
-                        new_number = (
-                            int(max_number) + 1
-                        )
+                        new_number = int(max_number) + 1
 
                 except Exception:
 
@@ -1437,9 +1697,7 @@ elif page == "🛠️ 資料維護":
 
                 new_data["序號"] = new_number
 
-            new_row = pd.DataFrame(
-                [new_data]
-            )
+            new_row = pd.DataFrame([new_data])
 
             new_row = new_row.reindex(
                 columns=df.columns
@@ -1453,21 +1711,15 @@ elif page == "🛠️ 資料維護":
                 ignore_index=True
             )
 
-            save_knowledge_data(
-                df
-            )
+            save_knowledge_data(df)
 
-            st.success(
-                "資料已新增！"
-            )
+            st.success("資料已新增！")
 
             st.rerun()
 
         st.divider()
 
-        st.subheader(
-            "✏️ 修改知識"
-        )
+        st.subheader("✏️ 修改知識")
 
         if len(df) > 0:
 
@@ -1475,21 +1727,18 @@ elif page == "🛠️ 資料維護":
                 "請選擇要修改的資料",
                 options=df.index,
                 format_func=lambda x:
-                    f"{x + 1}｜"
-                    + str(
+                    f"{x + 1}｜" +
+                    str(
                         df.loc[
                             x,
                             "問題簡述"
                         ]
-                        if "問題簡述"
-                        in df.columns
+                        if "問題簡述" in df.columns
                         else ""
                     )
             )
 
-            selected_row = df.loc[
-                selected_index
-            ]
+            selected_row = df.loc[selected_index]
 
             edit_data = {}
 
@@ -1500,9 +1749,7 @@ elif page == "🛠️ 資料維護":
                     st.text_input(
                         column,
                         value=str(
-                            selected_row[
-                                column
-                            ]
+                            selected_row[column]
                         ),
                         disabled=True,
                         key=f"edit_knowledge_{column}"
@@ -1513,9 +1760,7 @@ elif page == "🛠️ 資料維護":
                     edit_data[column] = st.text_area(
                         column,
                         value=str(
-                            selected_row[
-                                column
-                            ]
+                            selected_row[column]
                         ),
                         key=f"edit_knowledge_{selected_index}_{column}"
                     )
@@ -1548,32 +1793,24 @@ elif page == "🛠️ 資料維護":
                         "更新人"
                     ] = "客服"
 
-                save_knowledge_data(
-                    df
-                )
+                save_knowledge_data(df)
 
-                st.success(
-                    "資料已更新！"
-                )
+                st.success("資料已更新！")
 
                 st.rerun()
 
 
     # ========================================================
-    # 內部公告維護
+    # 公告維護
     # ========================================================
 
     elif maintenance_type == "📢 內部公告":
 
-        st.subheader(
-            "📋 公告資料"
-        )
+        st.subheader("📋 公告資料")
 
         if announcement_df.empty:
 
-            st.info(
-                "目前沒有公告資料。"
-            )
+            st.info("目前沒有公告資料。")
 
         else:
 
@@ -1585,14 +1822,7 @@ elif page == "🛠️ 資料維護":
 
         st.divider()
 
-
-        # ====================================================
-        # 新增公告
-        # ====================================================
-
-        st.subheader(
-            "➕ 新增公告"
-        )
+        st.subheader("➕ 新增公告")
 
         announcement_title = st.text_input(
             "公告標題",
@@ -1626,10 +1856,7 @@ elif page == "🛠️ 資料維護":
 
         announcement_status = st.selectbox(
             "顯示狀態",
-            [
-                "顯示",
-                "隱藏"
-            ],
+            ["顯示", "隱藏"],
             key="announcement_status"
         )
 
@@ -1654,13 +1881,8 @@ elif page == "🛠️ 資料維護":
                     )
 
                     if numbers.notna().any():
-
-                        new_id = int(
-                            numbers.max()
-                        ) + 1
-
+                        new_id = int(numbers.max()) + 1
                     else:
-
                         new_id = 1
 
                 else:
@@ -1704,40 +1926,27 @@ elif page == "🛠️ 資料維護":
                     announcement_df
                 )
 
-                st.success(
-                    "公告已新增！"
-                )
+                st.success("公告已新增！")
 
                 st.rerun()
 
-
         st.divider()
 
-
-        # ====================================================
-        # 修改公告
-        # ====================================================
-
-        st.subheader(
-            "✏️ 修改公告"
-        )
+        st.subheader("✏️ 修改公告")
 
         if not announcement_df.empty:
 
             selected_announcement = st.selectbox(
                 "選擇要修改的公告",
-
                 options=announcement_df.index,
-
                 format_func=lambda x:
-                    f"{x + 1}｜"
-                    + str(
+                    f"{x + 1}｜" +
+                    str(
                         announcement_df.loc[
                             x,
                             "公告標題"
                         ]
                     ),
-
                 key="selected_announcement"
             )
 
@@ -1802,10 +2011,7 @@ elif page == "🛠️ 資料維護":
 
             edit_status = st.selectbox(
                 "顯示狀態",
-                [
-                    "顯示",
-                    "隱藏"
-                ],
+                ["顯示", "隱藏"],
                 index=(
                     0
                     if str(
@@ -1813,8 +2019,7 @@ elif page == "🛠️ 資料維護":
                             "顯示狀態",
                             "顯示"
                         )
-                    ).strip()
-                    == "顯示"
+                    ).strip() == "顯示"
                     else 1
                 ),
                 key="edit_announcement_status"
@@ -1870,9 +2075,7 @@ elif page == "🛠️ 資料維護":
                     announcement_df
                 )
 
-                st.success(
-                    "公告已更新！"
-                )
+                st.success("公告已更新！")
 
                 st.rerun()
 
@@ -1883,15 +2086,11 @@ elif page == "🛠️ 資料維護":
 
     elif maintenance_type == "🔗 常用工具":
 
-        st.subheader(
-            "📋 工具資料"
-        )
+        st.subheader("📋 工具資料")
 
         if tool_df.empty:
 
-            st.info(
-                "目前沒有工具資料。"
-            )
+            st.info("目前沒有工具資料。")
 
         else:
 
@@ -1903,14 +2102,7 @@ elif page == "🛠️ 資料維護":
 
         st.divider()
 
-
-        # ====================================================
-        # 新增工具
-        # ====================================================
-
-        st.subheader(
-            "➕ 新增工具"
-        )
+        st.subheader("➕ 新增工具")
 
         tool_name = st.text_input(
             "工具名稱",
@@ -1942,10 +2134,7 @@ elif page == "🛠️ 資料維護":
 
         tool_status = st.selectbox(
             "顯示狀態",
-            [
-                "顯示",
-                "隱藏"
-            ],
+            ["顯示", "隱藏"],
             key="tool_status"
         )
 
@@ -1978,13 +2167,10 @@ elif page == "🛠️ 資料維護":
                     )
 
                     if numbers.notna().any():
-
                         new_tool_id = int(
                             numbers.max()
                         ) + 1
-
                     else:
-
                         new_tool_id = 1
 
                 else:
@@ -2018,40 +2204,27 @@ elif page == "🛠️ 資料維護":
                     tool_df
                 )
 
-                st.success(
-                    "工具已新增！"
-                )
+                st.success("工具已新增！")
 
                 st.rerun()
 
-
         st.divider()
 
-
-        # ====================================================
-        # 修改工具
-        # ====================================================
-
-        st.subheader(
-            "✏️ 修改工具"
-        )
+        st.subheader("✏️ 修改工具")
 
         if not tool_df.empty:
 
             selected_tool = st.selectbox(
                 "選擇要修改的工具",
-
                 options=tool_df.index,
-
                 format_func=lambda x:
-                    f"{x + 1}｜"
-                    + str(
+                    f"{x + 1}｜" +
+                    str(
                         tool_df.loc[
                             x,
                             "工具名稱"
                         ]
                     ),
-
                 key="selected_tool"
             )
 
@@ -2108,13 +2281,10 @@ elif page == "🛠️ 資料維護":
             )
 
             if current_category in category_options:
-
                 category_index = category_options.index(
                     current_category
                 )
-
             else:
-
                 category_index = 0
 
             edit_tool_category = st.selectbox(
@@ -2126,10 +2296,7 @@ elif page == "🛠️ 資料維護":
 
             edit_tool_status = st.selectbox(
                 "顯示狀態",
-                [
-                    "顯示",
-                    "隱藏"
-                ],
+                ["顯示", "隱藏"],
                 index=(
                     0
                     if str(
@@ -2137,8 +2304,7 @@ elif page == "🛠️ 資料維護":
                             "顯示狀態",
                             "顯示"
                         )
-                    ).strip()
-                    == "顯示"
+                    ).strip() == "顯示"
                     else 1
                 ),
                 key="edit_tool_status"
@@ -2153,15 +2319,12 @@ elif page == "🛠️ 資料維護":
             )
 
             if pd.isna(current_order):
-
                 current_order = 1
 
             edit_tool_order = st.number_input(
                 "顯示順序",
                 min_value=1,
-                value=int(
-                    current_order
-                ),
+                value=int(current_order),
                 step=1,
                 key="edit_tool_order"
             )
@@ -2206,8 +2369,6 @@ elif page == "🛠️ 資料維護":
                     tool_df
                 )
 
-                st.success(
-                    "工具已更新！"
-                )
+                st.success("工具已更新！")
 
                 st.rerun()
