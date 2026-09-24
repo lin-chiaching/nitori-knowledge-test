@@ -157,6 +157,7 @@ def expand_search_word(keyword):
                     expanded_words.append(original)
 
             except Exception:
+
                 pass
 
     return " ".join(
@@ -290,217 +291,208 @@ if page == "🔍 知識搜尋":
             ngram_range=(1, 3)
         )
 
+        matrix = vectorizer.fit_transform(
+            search_data
+        )
 
-        try:
+        query_vector = vectorizer.transform(
+            [search_text]
+        )
 
-            matrix = vectorizer.fit_transform(
-                search_data
+        similarity = cosine_similarity(
+            query_vector,
+            matrix
+        ).flatten()
+
+
+        # -------------------------------------------------
+        # 排序
+        # -------------------------------------------------
+
+        df_result = df.copy()
+
+        df_result["_score"] = similarity
+
+        df_result = df_result.sort_values(
+            "_score",
+            ascending=False
+        )
+
+
+        # -------------------------------------------------
+        # 只顯示有相關性的結果
+        # -------------------------------------------------
+
+        df_result = df_result[
+            df_result["_score"] > 0
+        ]
+
+
+        st.write(
+            f"找到 {len(df_result)} 筆相關資料"
+        )
+
+
+        # -------------------------------------------------
+        # 顯示結果
+        # -------------------------------------------------
+
+        if len(df_result) == 0:
+
+            st.warning(
+                "目前沒有找到相關資料，請換個關鍵字試試看。"
             )
 
-            query_vector = vectorizer.transform(
-                [search_text]
-            )
+        else:
 
-            similarity = cosine_similarity(
-                query_vector,
-                matrix
-            ).flatten()
+            display_result = df_result.head(10)
 
 
-            # -------------------------------------------------
-            # 排序
-            # -------------------------------------------------
+            for index, row in display_result.iterrows():
 
-            df_result = df.copy()
-
-            df_result["_score"] = similarity
-
-            df_result = df_result.sort_values(
-                "_score",
-                ascending=False
-            )
+                score = row["_score"]
 
 
-            # -------------------------------------------------
-            # 只顯示有一定相關性的結果
-            # -------------------------------------------------
+                # -----------------------------------------
+                # 商品 / 問題標題
+                # -----------------------------------------
 
-            df_result = df_result[
-                df_result["_score"] > 0
-            ]
+                if "問題簡述" in df.columns:
+
+                    title = row["問題簡述"]
+
+                else:
+
+                    title = "相關資料"
 
 
-            st.write(
-                f"找到 {len(df_result)} 筆相關資料"
-            )
-
-
-            # -------------------------------------------------
-            # 顯示結果
-            # -------------------------------------------------
-
-            if len(df_result) == 0:
-
-                st.warning(
-                    "目前沒有找到相關資料，請換個關鍵字試試看。"
+                st.markdown(
+                    f"""
+                    <div class="result-card">
+                    <h4>{title}</h4>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
                 )
 
-            else:
 
-                # 最多顯示前 10 筆
-                display_result = df_result.head(10)
+                # -----------------------------------------
+                # 分類
+                # -----------------------------------------
 
-
-                for index, row in display_result.iterrows():
-
-                    score = row["_score"]
+                info_col1, info_col2, info_col3 = st.columns(3)
 
 
-                    # -----------------------------------------
-                    # 商品 / 問題標題
-                    # -----------------------------------------
+                with info_col1:
 
-                    if "問題簡述" in df.columns:
+                    if "大分類" in df.columns:
 
-                        title = row["問題簡述"]
-
-                    else:
-
-                        title = "相關資料"
-
-
-                    st.markdown(
-                        f"""
-                        <div class="result-card">
-                        <h4>{title}</h4>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-
-                    # -----------------------------------------
-                    # 分類
-                    # -----------------------------------------
-
-                    info_col1, info_col2, info_col3 = st.columns(3)
-
-
-                    with info_col1:
-
-                        if "大分類" in df.columns:
-
-                            st.caption("大分類")
-
-                            st.write(
-                                row["大分類"]
-                            )
-
-
-                    with info_col2:
-
-                        if "中分類" in df.columns:
-
-                            st.caption("中分類")
-
-                            st.write(
-                                row["中分類"]
-                            )
-
-
-                    with info_col3:
-
-                        if "小分類" in df.columns:
-
-                            st.caption("小分類")
-
-                            st.write(
-                                row["小分類"]
-                            )
-
-
-                    # -----------------------------------------
-                    # 解答
-                    # -----------------------------------------
-
-                    if "解答" in df.columns:
-
-                        st.markdown("**📌 解答**")
+                        st.caption("大分類")
 
                         st.write(
-                            row["解答"]
+                            row["大分類"]
                         )
 
 
-                    # -----------------------------------------
-                    # 判斷方式
-                    # -----------------------------------------
+                with info_col2:
 
-                    if "判斷方式" in df.columns:
+                    if "中分類" in df.columns:
 
-                        if str(row["判斷方式"]).strip():
+                        st.caption("中分類")
 
-                            st.markdown(
-                                "**🔎 判斷方式**"
-                            )
-
-                            st.write(
-                                row["判斷方式"]
-                            )
+                        st.write(
+                            row["中分類"]
+                        )
 
 
-                    # -----------------------------------------
-                    # 判斷工具
-                    # -----------------------------------------
+                with info_col3:
 
-                    if "判斷使用的工具" in df.columns:
+                    if "小分類" in df.columns:
 
-                        if str(
-                            row["判斷使用的工具"]
-                        ).strip():
+                        st.caption("小分類")
 
-                            st.markdown(
-                                "**🛠️ 判斷使用的工具**"
-                            )
-
-                            st.write(
-                                row["判斷使用的工具"]
-                            )
+                        st.write(
+                            row["小分類"]
+                        )
 
 
-                    # -----------------------------------------
-                    # 關鍵字
-                    # -----------------------------------------
+                # -----------------------------------------
+                # 解答
+                # -----------------------------------------
 
-                    if "關鍵字" in df.columns:
+                if "解答" in df.columns:
 
-                        if str(
-                            row["關鍵字"]
-                        ).strip():
+                    st.markdown("**📌 解答**")
 
-                            st.caption(
-                                "關鍵字："
-                                + str(row["關鍵字"])
-                            )
-
-
-                    # -----------------------------------------
-                    # 相似度
-                    # -----------------------------------------
-
-                                        st.caption(
-                        f"相關程度：{score:.1%}"
+                    st.write(
+                        row["解答"]
                     )
 
 
-                    st.divider()
+                # -----------------------------------------
+                # 判斷方式
+                # -----------------------------------------
+
+                if "判斷方式" in df.columns:
+
+                    if str(
+                        row["判斷方式"]
+                    ).strip():
+
+                        st.markdown(
+                            "**🔎 判斷方式**"
+                        )
+
+                        st.write(
+                            row["判斷方式"]
+                        )
 
 
-        except Exception as e:
+                # -----------------------------------------
+                # 判斷工具
+                # -----------------------------------------
 
-            st.error(
-                f"搜尋時發生錯誤：{e}"
-            )
+                if "判斷使用的工具" in df.columns:
+
+                    if str(
+                        row["判斷使用的工具"]
+                    ).strip():
+
+                        st.markdown(
+                            "**🛠️ 判斷使用的工具**"
+                        )
+
+                        st.write(
+                            row["判斷使用的工具"]
+                        )
+
+
+                # -----------------------------------------
+                # 關鍵字
+                # -----------------------------------------
+
+                if "關鍵字" in df.columns:
+
+                    if str(
+                        row["關鍵字"]
+                    ).strip():
+
+                        st.caption(
+                            "關鍵字："
+                            + str(row["關鍵字"])
+                        )
+
+
+                # -----------------------------------------
+                # 相似度
+                # -----------------------------------------
+
+                st.caption(
+                    f"相關程度：{score:.1%}"
+                )
+
+
+                st.divider()
 
 
 # =========================================================
@@ -508,24 +500,6 @@ if page == "🔍 知識搜尋":
 # =========================================================
 
 elif page == "🗺️ 門市地圖":
-
-    st.title("🗺️ 門市地圖")
-
-    st.caption(
-        "宜得利家居門市資訊查詢"
-    )
-
-    st.divider()
-
-
-    # -----------------------------------------------------
-    # Power BI
-    # -----------------------------------------------------
-
-    components.iframe(
-        "https://app.powerbi.com/groups/me/reports/851d09f1-f169-4049-9090-640f09cdc385/3b82b83a4737660969c9?experience=power-bi",
-        height=800
-    )
 
     st.title("🗺️ 門市地圖")
 
@@ -582,7 +556,6 @@ elif page == "🛠️ 資料維護":
     # -----------------------------------------------------
 
     st.subheader("➕ 新增資料")
-
 
     new_data = {}
 
@@ -728,7 +701,6 @@ elif page == "🛠️ 資料維護":
             "💾 儲存修改",
             type="primary"
         ):
-
 
             for column in edit_data:
 
