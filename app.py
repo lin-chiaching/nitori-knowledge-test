@@ -68,50 +68,269 @@ st.markdown(
 # ============================================================
 
 def clean_announcement_content(text):
-    """清理公告內容中的 HTML 標籤、svg、特殊符號，讓頁面正常顯示"""
-    
-    if pd.isna(text) or text is None:
+    """
+    將公告中的 HTML / 編輯器殘留清除，
+    只留下正常文字。
+    """
+
+    if text is None:
         return ""
+
+    try:
+        if pd.isna(text):
+            return ""
+    except Exception:
+        pass
 
     text = str(text)
 
-    # HTML entity 解碼
+    # --------------------------------------------------------
+    # 1. HTML entity 解碼
+    # 例如 &lt;p&gt; → <p>
+    # --------------------------------------------------------
+
     text = html.unescape(text)
 
-    # 移除 SVG 完整區塊
-    text = re.sub(r"<svg.*?</svg>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    # --------------------------------------------------------
+    # 2. 移除 Markdown 程式碼框
+    # --------------------------------------------------------
 
-    # 移除單獨出現的 svg
-    text = re.sub(r"\bsvg\b", "", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"```(?:html|HTML)?",
+        "",
+        text
+    )
 
-    # <br>、</p>、</div> 等轉成換行
-    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
-    text = re.sub(r"</p\s*>", "\n", text, flags=re.IGNORECASE)
-    text = re.sub(r"</div\s*>", "\n", text, flags=re.IGNORECASE)
-    text = re.sub(r"</h[1-6]\s*>", "\n", text, flags=re.IGNORECASE)
+    text = text.replace(
+        "```",
+        ""
+    )
 
-    # 移除所有剩餘 HTML 標籤
-    text = re.sub(r"<[^>]+>", "", text)
+    # --------------------------------------------------------
+    # 3. 移除完整 SVG 區塊
+    # --------------------------------------------------------
 
-    # 清理常見殘留
-    text = text.replace("\\~", "~")
-    text = text.replace("\\", "")
-    
-    # 清除 HTML 中常見的特殊殘留
-    text = re.sub(r'id="[^"]*"', "", text)
-    text = re.sub(r'class="[^"]*"', "", text)
+    text = re.sub(
+        r"<svg\b[^>]*>.*?</svg>",
+        "",
+        text,
+        flags=re.IGNORECASE | re.DOTALL
+    )
 
-    # 清除多餘空白，但保留換行
+    # --------------------------------------------------------
+    # 4. 移除單獨出現的 svg
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"^\s*svg\s*$",
+        "",
+        text,
+        flags=re.IGNORECASE | re.MULTILINE
+    )
+
+    # --------------------------------------------------------
+    # 5. 移除 HTML 標籤前，先處理換行標籤
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"<br\s*/?>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"</p\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"</div\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"</h[1-6]\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # --------------------------------------------------------
+    # 6. 移除所有 HTML 標籤
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"<[^>]*>",
+        "",
+        text
+    )
+
+    # --------------------------------------------------------
+    # 7. 移除殘留的 HTML 屬性
+    # 例如：
+    # id="d2ucqz"
+    # class="xxx"
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r'\bid\s*=\s*"[^"]*"',
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"\bid\s*=\s*'[^']*'",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r'\bclass\s*=\s*"[^"]*"',
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"\bclass\s*=\s*'[^']*'",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # --------------------------------------------------------
+    # 8. 清理跳脫字元
+    # --------------------------------------------------------
+
+    text = text.replace(
+        r"\~",
+        "~"
+    )
+
+    text = text.replace(
+        "\\",
+        ""
+    )
+
+    # --------------------------------------------------------
+    # 9. 如果內容裡還有標題 HTML 文字
+    # 例如：
+    # 📌 【2026週年慶活動】
+    #
+    # 因為 APP 外面已經會另外顯示標題，
+    # 所以這裡把標題行移除。
+    # --------------------------------------------------------
+
     lines = []
+
     for line in text.splitlines():
-        line = re.sub(r"[ \t]+", " ", line).strip()
-        if line:
-            lines.append(line)
+
+        line = line.strip()
+
+        if not line:
+            continue
+
+        # 移除公告標題
+        if re.match(
+            r"^📌?\s*【.*?】\s*$",
+            line
+        ):
+            continue
+
+        # 移除單獨的 h4 / h3 等殘留文字
+        if re.fullmatch(
+            r"h[1-6]",
+            line,
+            flags=re.IGNORECASE
+        ):
+            continue
+
+        # 移除單獨的 div
+        if re.fullmatch(
+            r"/?div",
+            line,
+            flags=re.IGNORECASE
+        ):
+            continue
+
+        lines.append(line)
 
     text = "\n".join(lines)
 
-    # 避免太多連續換行
-    text = re.sub(r"\n{3,}", "\n\n", text)
+    # --------------------------------------------------------
+    # 10. 移除內容中的公告日期
+    # 因為 APP 下方會另外顯示
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"^📅\s*公告日期\s*[:：].*$",
+        "",
+        text,
+        flags=re.MULTILINE
+    )
+
+    # --------------------------------------------------------
+    # 11. 移除內容中的活動期限
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"^🗓️?\s*活動期限\s*[:：].*$",
+        "",
+        text,
+        flags=re.MULTILINE
+    )
+
+    # --------------------------------------------------------
+    # 12. 移除內容中的點數期限
+    # 注意：
+    # 這裡只移除「單獨一行的 🪙 點數期限」
+    # 不會刪除下一行的一般點數內容。
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"^🪙\s*點數期限\s*[:：].*$",
+        "",
+        text,
+        flags=re.MULTILINE
+    )
+
+    # --------------------------------------------------------
+    # 13. 清理每一行前後空白
+    # --------------------------------------------------------
+
+    clean_lines = []
+
+    for line in text.splitlines():
+
+        line = re.sub(
+            r"[ \t]+",
+            " ",
+            line
+        ).strip()
+
+        if line:
+            clean_lines.append(line)
+
+    text = "\n".join(
+        clean_lines
+    )
+
+    # --------------------------------------------------------
+    # 14. 避免連續太多空白行
+    # --------------------------------------------------------
+
+    text = re.sub(
+        r"\n{3,}",
+        "\n\n",
+        text
+    )
 
     return text.strip()
 
@@ -122,8 +341,14 @@ def clean_announcement_content(text):
 
 def safe_html_text(text):
 
-    if pd.isna(text):
+    if text is None:
         return ""
+
+    try:
+        if pd.isna(text):
+            return ""
+    except Exception:
+        pass
 
     return html.escape(
         str(text)
@@ -142,7 +367,6 @@ def load_data():
         sheet_name=0
     ).fillna("")
 
-    # 清除欄位名稱前後空白
     df.columns = (
         df.columns
         .astype(str)
@@ -193,7 +417,6 @@ def load_announcements():
             sheet_name="內部公告"
         ).fillna("")
 
-        # 清除欄位名稱前後空白
         df.columns = (
             df.columns
             .astype(str)
@@ -210,14 +433,11 @@ def load_announcements():
             "顯示狀態"
         ]
 
-        # 如果 Excel 缺少欄位，自動建立
         for column in required_columns:
 
             if column not in df.columns:
-
                 df[column] = ""
 
-        # 固定欄位順序
         df = df[required_columns]
 
         return df
@@ -241,7 +461,6 @@ def load_tools():
             sheet_name="常用工具"
         ).fillna("")
 
-        # 清除欄位名稱前後空白
         df.columns = (
             df.columns
             .astype(str)
@@ -258,14 +477,11 @@ def load_tools():
             "顯示順序"
         ]
 
-        # 如果 Excel 缺少欄位，自動建立
         for column in required_columns:
 
             if column not in df.columns:
-
                 df[column] = ""
 
-        # 固定欄位順序
         df = df[required_columns]
 
         return df
@@ -291,15 +507,19 @@ tool_df = load_tools()
 
 def save_sheet(sheet_name, data):
 
-    wb = load_workbook(FILE_PATH)
+    wb = load_workbook(
+        FILE_PATH
+    )
 
     ws = wb[sheet_name]
 
     # 清除原本資料
-    ws.delete_rows(
-        1,
-        ws.max_row
-    )
+    if ws.max_row > 0:
+
+        ws.delete_rows(
+            1,
+            ws.max_row
+        )
 
     # 寫入標題
     for col_num, column_name in enumerate(
@@ -330,9 +550,10 @@ def save_sheet(sheet_name, data):
                 value=value
             )
 
-    wb.save(FILE_PATH)
+    wb.save(
+        FILE_PATH
+    )
 
-    # 清除 Streamlit 快取
     st.cache_data.clear()
 
 
@@ -354,7 +575,9 @@ def save_knowledge_data(data):
 
 def expand_search_word(keyword):
 
-    keyword = str(keyword).strip()
+    keyword = str(
+        keyword
+    ).strip()
 
     if keyword == "":
         return keyword
@@ -415,7 +638,6 @@ st.sidebar.caption(
 )
 
 st.sidebar.divider()
-
 
 page = st.sidebar.radio(
     "功能",
@@ -501,7 +723,6 @@ if page == "🏠 首頁":
 
     else:
 
-        # 只顯示「顯示」的公告
         show_announcements = announcement_df[
             announcement_df["顯示狀態"]
             .astype(str)
@@ -517,7 +738,6 @@ if page == "🏠 首頁":
 
         else:
 
-            # 最新公告放前面
             show_announcements = show_announcements.tail(
                 3
             )
@@ -566,11 +786,15 @@ if page == "🏠 首頁":
 
                     <h4>📌 {safe_title}</h4>
 
-                    <p>{safe_content}</p>
+                    <div>
+                    {safe_content}
+                    </div>
 
+                    <p>
                     <small>
-                    公告日期：{safe_date}
+                    📅 公告日期：{safe_date}
                     </small>
+                    </p>
 
                     </div>
                     """,
@@ -852,7 +1076,6 @@ elif page == "📢 公告＆常用工具":
 
     st.divider()
 
-
     # ========================================================
     # 內部公告
     # ========================================================
@@ -884,7 +1107,6 @@ elif page == "📢 公告＆常用工具":
 
         else:
 
-            # 最新公告放前面
             show_announcements = show_announcements.iloc[::-1]
 
             for _, row in show_announcements.iterrows():
@@ -924,7 +1146,6 @@ elif page == "📢 公告＆常用工具":
                     )
                 )
 
-                # HTML 安全處理
                 safe_title = safe_html_text(
                     title
                 )
@@ -954,7 +1175,9 @@ elif page == "📢 公告＆常用工具":
 
                     <h4>📌 {safe_title}</h4>
 
-                    <p>{content_html}</p>
+                    <div>
+                    {content_html}
+                    </div>
 
                     <p>
                     📅 公告日期：{safe_date}
@@ -1033,7 +1256,6 @@ elif page == "📢 公告＆常用工具":
                     "records"
                 )
 
-                # 每三個工具一排
                 for i in range(
                     0,
                     len(tools_list),
@@ -1133,7 +1355,6 @@ elif page == "🛠️ 資料維護":
 
     st.divider()
 
-
     # ========================================================
     # 維護項目選擇
     # ========================================================
@@ -1176,7 +1397,6 @@ elif page == "🛠️ 資料維護":
         for column in df.columns:
 
             if column == "序號":
-
                 continue
 
             new_data[column] = st.text_input(
@@ -1380,7 +1600,12 @@ elif page == "🛠️ 資料維護":
 
         announcement_content = st.text_area(
             "公告內容",
-            key="announcement_content"
+            key="announcement_content",
+            height=180
+        )
+
+        st.caption(
+            "※ 如果貼入含有 <p>、<br>、svg、</div> 等 HTML 原始內容，儲存時會自動清理。"
         )
 
         announcement_date = st.text_input(
@@ -1446,14 +1671,17 @@ elif page == "🛠️ 資料維護":
 
                     new_id = 1
 
+                # 儲存前再次清理
+                cleaned_content = clean_announcement_content(
+                    announcement_content
+                )
+
                 new_announcement = pd.DataFrame(
                     [
                         {
                             "公告編號": new_id,
                             "公告標題": announcement_title,
-                            "公告內容": clean_announcement_content(
-                                announcement_content
-                            ),
+                            "公告內容": cleaned_content,
                             "公告日期": announcement_date,
                             "活動期限": activity_period,
                             "點數期限": point_period,
@@ -1535,7 +1763,8 @@ elif page == "🛠️ 資料維護":
                         ""
                     )
                 ),
-                key="edit_announcement_content"
+                key="edit_announcement_content",
+                height=180
             )
 
             edit_date = st.text_input(
@@ -1601,6 +1830,7 @@ elif page == "🛠️ 資料維護":
                     "公告標題"
                 ] = edit_title
 
+                # 儲存前清理
                 announcement_df.loc[
                     selected_announcement,
                     "公告內容"
