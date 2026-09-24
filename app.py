@@ -19,7 +19,6 @@ st.set_page_config(
     page_icon="🐱",
     layout="wide"
 )
-
 st.write("TEST 123")
 
 EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
