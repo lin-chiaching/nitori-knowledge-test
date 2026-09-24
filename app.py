@@ -193,25 +193,229 @@ def save_knowledge_data(data):
 # ============================================================
 # 搜尋
 # ============================================================
+
+def normalize_search_text(value):
+    """統一搜尋文字格式，避免大小寫、空白、符號影響搜尋。"""
+    if pd.isna(value):
+        return ""
+
+    text = str(value).strip().lower()
+
+    # 移除多餘空白
+    text = re.sub(r"\s+", "", text)
+
+    # 統一常見符號
+    text = text.replace("台", "臺")
+    text = text.replace("－", "-")
+    text = text.replace("—", "-")
+    text = text.replace("–", "-")
+
+    return text
+
+
 def expand_search_word(keyword):
+    """搜尋同義詞／關鍵字對照。"""
     keyword = clean_text(keyword)
+
     if not keyword:
         return ""
+
     synonym_df = load_synonyms()
+
     words = [keyword]
+
     if not synonym_df.empty and len(synonym_df.columns) >= 2:
         a, b = synonym_df.columns[:2]
+
         for _, row in synonym_df.iterrows():
             left = clean_text(row[a])
             right = clean_text(row[b])
-            if keyword in left or keyword == left:
-                words.extend(re.split(r"[,，、/／\s]+", right))
-            elif keyword in right or keyword == right:
+
+            if not left and not right:
+                continue
+
+            # 關鍵字命中左側
+            if keyword in left:
+                words.append(right)
+
+            # 關鍵字命中右側
+            elif keyword in right:
                 words.append(left)
-    return " ".join(dict.fromkeys([x for x in words if x]))
+
+    # 拆開逗號、頓號、斜線等
+    expanded = []
+
+    for word in words:
+        if not word:
+            continue
+
+        parts = re.split(r"[,，、/／\s]+", word)
+
+        for part in parts:
+            part = clean_text(part)
+
+            if part:
+                expanded.append(part)
+
+    return " ".join(dict.fromkeys(expanded))
 
 
 def search_knowledge(keyword, top_n=10):
+    """
+    知識庫搜尋：
+    1. 先找真正包含關鍵字的資料
+    2. 再用 TF-IDF 模糊搜尋補充
+    3. 關鍵字直接命中的結果優先
+    """
+
+    df = load_data()
+
+    if df.empty:
+        return pd.DataFrame()
+
+    keyword = clean_text(keyword)
+
+    if not keyword:
+        return df.head(top_n).copy()
+
+    # --------------------------------------------------------
+    # 可搜尋欄位
+    # --------------------------------------------------------
+    fields = [
+        "問題簡述",
+        "解答",
+        "判斷方式",
+        "判斷使用的工具",
+        "關鍵字",
+        "大分類",
+        "中分類",
+        "小分類"
+    ]
+
+    fields = [c for c in fields if c in df.columns]
+
+    if not fields:
+        return pd.DataFrame()
+
+    # --------------------------------------------------------
+    # 建立搜尋文字
+    # --------------------------------------------------------
+    search_df = df.copy()
+
+    search_df["_search_text"] = (
+        search_df[fields]
+        .fillna("")
+        .astype(str)
+        .agg(" ".join, axis=1)
+        .map(normalize_search_text)
+    )
+
+    # --------------------------------------------------------
+    # 展開同義詞
+    # --------------------------------------------------------
+    expanded_query = expand_search_word(keyword)
+
+    query_words = [
+        normalize_search_text(x)
+        for x in re.split(r"\s+", expanded_query)
+        if normalize_search_text(x)
+    ]
+
+    # --------------------------------------------------------
+    # 第一層：直接關鍵字命中
+    # --------------------------------------------------------
+    direct_scores = []
+
+    normalized_keyword = normalize_search_text(keyword)
+
+    for text in search_df["_search_text"]:
+
+        score = 0
+
+        # 完整關鍵字命中
+        if normalized_keyword and normalized_keyword in text:
+            score += 100
+
+        # 同義詞命中
+        for word in query_words:
+            if word and word in text:
+                score += 20
+
+        direct_scores.append(score)
+
+    search_df["_direct_score"] = direct_scores
+
+    # --------------------------------------------------------
+    # 第二層：TF-IDF 模糊搜尋
+    # --------------------------------------------------------
+    corpus = search_df["_search_text"].tolist()
+
+    try:
+        vectorizer = TfidfVectorizer(
+            analyzer="char",
+            ngram_range=(1, 3),
+            min_df=1,
+            sublinear_tf=True
+        )
+
+        matrix = vectorizer.fit_transform(
+            corpus + [normalize_search_text(expanded_query)]
+        )
+
+        scores = cosine_similarity(
+            matrix[-1],
+            matrix[:-1]
+        ).ravel()
+
+    except Exception:
+        scores = np.zeros(len(search_df))
+
+    search_df["_tfidf_score"] = scores
+
+    # --------------------------------------------------------
+    # 第三層：綜合分數
+    # --------------------------------------------------------
+    search_df["_score"] = (
+        search_df["_direct_score"]
+        + search_df["_tfidf_score"] * 10
+    )
+
+    # --------------------------------------------------------
+    # 排序
+    # --------------------------------------------------------
+    result = (
+        search_df
+        .sort_values(
+            ["_direct_score", "_tfidf_score"],
+            ascending=False
+        )
+        .head(top_n)
+        .copy()
+    )
+
+    # --------------------------------------------------------
+    # 清除搜尋用欄位
+    # --------------------------------------------------------
+    result = result.drop(
+        columns=[
+            "_search_text",
+            "_direct_score",
+            "_tfidf_score"
+        ],
+        errors="ignore"
+    )
+
+    # 保留原本的 _score 顯示相關度
+    if "_score" in result.columns:
+        # 原本的分數可能超過 1，因此轉成 0~1 顯示
+        max_score = result["_score"].max()
+
+        if max_score > 0:
+            result["_score"] = result["_score"] / max_score
+        else:
+            result["_score"] = 0
+
+    return result
     df = load_data()
     if df.empty:
         return pd.DataFrame()
