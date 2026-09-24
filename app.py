@@ -514,10 +514,10 @@ elif page == "🗺️ 門市地圖":
     # Power BI
     # -----------------------------------------------------
 
-    components.iframe(
-        "https://app.powerbi.com/groups/me/reports/851d09f1-f169-4049-9090-640f09cdc385/3b82b83a4737660969c9?experience=power-bi",
-        height=800
-    )
+   components.iframe(
+    "https://app.powerbi.com/reportEmbed?reportId=851d09f1-f169-4049-9090-640f09cdc385&autoAuth=true&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55",
+    height=800
+)
 
 
 # =========================================================
