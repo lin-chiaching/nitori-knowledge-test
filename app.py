@@ -9,9 +9,11 @@ import openpyxl
 import re
 import html
 
+
 # ============================================================
 # 基本設定
 # ============================================================
+
 st.set_page_config(
     page_title="客服作業系統",
     page_icon="🐱",
@@ -27,11 +29,14 @@ POWER_BI_URL = (
     "&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55"
 )
 
+
 # ============================================================
 # 日系貓咪 UI
 # ============================================================
+
 st.markdown("""
 <style>
+
 .stApp {
     background:#F7F4EE;
     color:#5F5A53;
@@ -204,6 +209,7 @@ textarea,
     margin-top:5px;
     font-size:12px;
     color:#A19588;
+    line-height:1.8;
 }
 
 .result-answer {
@@ -237,50 +243,103 @@ hr {
     border-radius:12px;
     overflow:hidden;
 }
+
 </style>
 """, unsafe_allow_html=True)
+
 
 # ============================================================
 # 共用工具
 # ============================================================
 
 def clean_text(value):
-    if pd.isna(value):
+    """將 Excel 儲存格內容安全轉成文字。"""
+
+    if value is None:
         return ""
+
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
+
     return str(value).strip()
 
 
 def normalize_search_text(value):
     """
-    統一搜尋文字格式。
-    讓：
+    統一搜尋文字。
+
+    例如：
     重量
     重 量
     重量！
-    等情況比較容易被搜尋到。
+    重量？
+    
+    都盡量轉成接近的形式。
     """
-    if pd.isna(value):
+
+    if value is None:
         return ""
+
+    try:
+        if pd.isna(value):
+            return ""
+    except Exception:
+        pass
 
     text = str(value).strip().lower()
 
-    # 移除所有空白
+    # 全形空白
+    text = text.replace("\u3000", "")
+
+    # 移除一般空白
     text = re.sub(r"\s+", "", text)
 
-    # 常見符號統一
+    # 中文常見字統一
     text = text.replace("台", "臺")
+
+    # 符號統一
     text = text.replace("－", "-")
     text = text.replace("—", "-")
     text = text.replace("–", "-")
+    text = text.replace("～", "~")
+
+    # 移除常見標點
+    text = re.sub(
+        r"[，。！？、；：,.!?;:（）()\[\]【】「」『』《》<>\"'`]+",
+        "",
+        text
+    )
 
     return text
 
 
-def clean_announcement_content(text):
-    """將公告中的 HTML / Markdown / SVG / 多餘標籤整理成純文字。"""
+def safe_html_text(value):
+    return html.escape(
+        clean_text(value)
+    ).replace("\n", "<br>")
 
-    if text is None or pd.isna(text):
+
+# ============================================================
+# 公告清理
+# ============================================================
+
+def clean_announcement_content(text):
+    """
+    將公告中的 HTML / Markdown / SVG /
+    多餘標籤整理成純文字。
+    """
+
+    if text is None:
         return ""
+
+    try:
+        if pd.isna(text):
+            return ""
+    except Exception:
+        pass
 
     text = html.unescape(str(text))
 
@@ -333,14 +392,8 @@ def clean_announcement_content(text):
         text
     )
 
-    text = re.sub(
-        r"\b(?:id|class)\s*=\s*['\"][^'\"]*['\"]",
-        "",
-        text,
-        flags=re.I
-    )
-
-    text = text.replace("\\~", "~").replace("\\", "")
+    text = text.replace("\\~", "~")
+    text = text.replace("\\", "")
 
     text = re.sub(
         r"\n\s*\n\s*\n+",
@@ -358,19 +411,15 @@ def clean_announcement_content(text):
 
 
 def clean_announcement_title(text):
+
     text = clean_announcement_content(text)
+
     text = text.replace("📌", "").strip()
 
     if text.startswith("【") and text.endswith("】"):
         text = text[1:-1].strip()
 
     return text
-
-
-def safe_html_text(value):
-    return html.escape(
-        clean_text(value)
-    ).replace("\n", "<br>")
 
 
 # ============================================================
@@ -384,41 +433,59 @@ def get_excel_sheets():
         return []
 
     try:
+
         return pd.ExcelFile(
             EXCEL_PATH
         ).sheet_names
 
     except Exception:
+
         return []
 
 
-def find_sheet(candidates, fallback_index=None):
+def find_sheet(
+    candidates,
+    fallback_index=None
+):
 
     sheets = get_excel_sheets()
 
+    # 優先找指定名稱
     for name in candidates:
+
         if name in sheets:
             return name
 
+    # 找不到才使用順位
     if (
         fallback_index is not None
         and len(sheets) > fallback_index
     ):
+
         return sheets[fallback_index]
 
     return None
 
 
+# ============================================================
+# 知識庫
+# ============================================================
+
 @st.cache_data(ttl=60)
 def load_data():
 
     if not EXCEL_PATH.exists():
+
         return pd.DataFrame()
 
     try:
 
         sheet = find_sheet(
-            ["知識庫", "問題集", "Sheet1"],
+            [
+                "知識庫",
+                "問題集",
+                "Sheet1"
+            ],
             0
         )
 
@@ -431,7 +498,6 @@ def load_data():
             dtype=str
         ).fillna("")
 
-        # 清除欄位名稱前後空白
         df.columns = [
             str(c).strip()
             for c in df.columns
@@ -448,6 +514,10 @@ def load_data():
         return pd.DataFrame()
 
 
+# ============================================================
+# 搜尋詞對照
+# ============================================================
+
 @st.cache_data(ttl=60)
 def load_synonyms():
 
@@ -457,32 +527,10 @@ def load_synonyms():
     try:
 
         sheet = find_sheet(
-            ["搜尋詞對照", "關鍵字對照"]
-        )
-
-        if not sheet:
-            return pd.DataFrame()
-
-        return pd.read_excel(
-            EXCEL_PATH,
-            sheet_name=sheet,
-            dtype=str
-        ).fillna("")
-
-    except Exception:
-        return pd.DataFrame()
-
-
-@st.cache_data(ttl=60)
-def load_announcements():
-
-    if not EXCEL_PATH.exists():
-        return pd.DataFrame()
-
-    try:
-
-        sheet = find_sheet(
-            ["內部公告", "公告"]
+            [
+                "搜尋詞對照",
+                "關鍵字對照"
+            ]
         )
 
         if not sheet:
@@ -494,12 +542,62 @@ def load_announcements():
             dtype=str
         ).fillna("")
 
+        df.columns = [
+            str(c).strip()
+            for c in df.columns
+        ]
+
+        return df
+
+    except Exception:
+
+        return pd.DataFrame()
+
+
+# ============================================================
+# 公告
+# ============================================================
+
+@st.cache_data(ttl=60)
+def load_announcements():
+
+    if not EXCEL_PATH.exists():
+        return pd.DataFrame()
+
+    try:
+
+        sheet = find_sheet(
+            [
+                "內部公告",
+                "公告"
+            ]
+        )
+
+        if not sheet:
+            return pd.DataFrame()
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet,
+            dtype=str
+        ).fillna("")
+
+        df.columns = [
+            str(c).strip()
+            for c in df.columns
+        ]
+
         for col in df.columns:
 
             if any(
                 x in str(col)
-                for x in ["內容", "說明", "公告"]
+                for x in [
+                    "內容",
+                    "說明",
+                    "公告"
+                ]
             ):
+
                 df[col] = df[col].map(
                     clean_announcement_content
                 )
@@ -507,6 +605,7 @@ def load_announcements():
         for col in df.columns:
 
             if "標題" in str(col):
+
                 df[col] = df[col].map(
                     clean_announcement_title
                 )
@@ -514,8 +613,13 @@ def load_announcements():
         return df
 
     except Exception:
+
         return pd.DataFrame()
 
+
+# ============================================================
+# 常用工具
+# ============================================================
 
 @st.cache_data(ttl=60)
 def load_tools():
@@ -526,27 +630,41 @@ def load_tools():
     try:
 
         sheet = find_sheet(
-            ["常用工具", "工具"]
+            [
+                "常用工具",
+                "工具"
+            ]
         )
 
         if not sheet:
             return pd.DataFrame()
 
-        return pd.read_excel(
+        df = pd.read_excel(
             EXCEL_PATH,
             sheet_name=sheet,
             dtype=str
         ).fillna("")
 
+        df.columns = [
+            str(c).strip()
+            for c in df.columns
+        ]
+
+        return df
+
     except Exception:
+
         return pd.DataFrame()
 
 
 # ============================================================
-# 儲存
+# 儲存 Excel
 # ============================================================
 
-def save_sheet(sheet_name, data):
+def save_sheet(
+    sheet_name,
+    data
+):
 
     if not EXCEL_PATH.exists():
 
@@ -572,7 +690,7 @@ def save_sheet(sheet_name, data):
             sheet_name
         )
 
-        # 寫入欄位名稱
+        # 欄位名稱
         for c, col in enumerate(
             data.columns,
             1
@@ -581,10 +699,10 @@ def save_sheet(sheet_name, data):
             ws.cell(
                 1,
                 c,
-                col
+                str(col)
             )
 
-        # 寫入資料
+        # 資料
         for r, row in enumerate(
             data.itertuples(index=False),
             2
@@ -595,7 +713,6 @@ def save_sheet(sheet_name, data):
                 1
             ):
 
-                # 避免 NaN 被寫進 Excel
                 if pd.isna(value):
                     value = ""
 
@@ -605,7 +722,9 @@ def save_sheet(sheet_name, data):
                     value
                 )
 
-        wb.save(EXCEL_PATH)
+        wb.save(
+            EXCEL_PATH
+        )
 
         st.cache_data.clear()
 
@@ -623,11 +742,16 @@ def save_sheet(sheet_name, data):
 def save_knowledge_data(data):
 
     sheet = find_sheet(
-        ["知識庫", "問題集", "Sheet1"],
+        [
+            "知識庫",
+            "問題集",
+            "Sheet1"
+        ],
         0
     )
 
     if sheet:
+
         return save_sheet(
             sheet,
             data
@@ -637,19 +761,21 @@ def save_knowledge_data(data):
 
 
 # ============================================================
-# 搜尋
+# 同義詞擴充
 # ============================================================
 
-def expand_search_word(keyword):
+def expand_search_words(keyword):
 
     keyword = clean_text(keyword)
 
     if not keyword:
-        return ""
+        return []
 
     synonym_df = load_synonyms()
 
-    words = [keyword]
+    words = [
+        keyword
+    ]
 
     if (
         not synonym_df.empty
@@ -671,24 +797,39 @@ def expand_search_word(keyword):
             if not left and not right:
                 continue
 
-            if keyword in left:
+            left_normal = normalize_search_text(
+                left
+            )
+
+            right_normal = normalize_search_text(
+                right
+            )
+
+            keyword_normal = normalize_search_text(
+                keyword
+            )
+
+            if (
+                keyword_normal
+                and keyword_normal in left_normal
+            ):
 
                 words.append(right)
 
-            elif keyword in right:
+            elif (
+                keyword_normal
+                and keyword_normal in right_normal
+            ):
 
                 words.append(left)
 
-    expanded = []
+    result = []
 
     for word in words:
 
-        if not word:
-            continue
-
         parts = re.split(
             r"[,，、/／\s]+",
-            word
+            clean_text(word)
         )
 
         for part in parts:
@@ -696,192 +837,358 @@ def expand_search_word(keyword):
             part = clean_text(part)
 
             if part:
-                expanded.append(part)
 
-    return " ".join(
-        dict.fromkeys(expanded)
+                normalized = normalize_search_text(
+                    part
+                )
+
+                if normalized:
+                    result.append(normalized)
+
+    return list(
+        dict.fromkeys(result)
     )
 
 
-def search_knowledge(keyword, top_n=10):
+# ============================================================
+# 產生搜尋欄位
+# ============================================================
+
+def get_search_fields(df):
+
+    """
+    只使用目前 Excel 真正存在的欄位。
+
+    欄位：
+    問題類型
+    問題細項
+    商品分類代碼
+    商品名稱
+    商品系列
+    商品編號
+    問題摘要
+    標準回覆
+    判斷方式
+    判斷使用的工具
+    關鍵字
+    """
+
+    fields = [
+
+        "問題類型",
+
+        "問題細項",
+
+        "商品分類代碼",
+
+        "商品名稱",
+
+        "商品系列",
+
+        "商品編號",
+
+        "問題摘要",
+
+        "標準回覆",
+
+        "判斷方式",
+
+        "判斷使用的工具",
+
+        "關鍵字"
+    ]
+
+    return [
+        c
+        for c in fields
+        if c in df.columns
+    ]
+
+
+# ============================================================
+# 搜尋
+# ============================================================
+
+def search_knowledge(
+    keyword,
+    top_n=10
+):
 
     df = load_data()
 
     if df.empty:
         return pd.DataFrame()
 
-    keyword = clean_text(keyword)
+    keyword = clean_text(
+        keyword
+    )
 
     if not keyword:
+
         return df.head(
             top_n
         ).copy()
 
-    # ========================================================
-    # 目前 Excel 真正使用的欄位
-    # ========================================================
-
-    fields = [
-        "問題類型",
-        "問題細項",
-        "商品分類代碼",
-        "商品名稱",
-        "商品系列",
-        "商品編號",
-        "問題摘要",
-        "標準回覆",
-        "判斷依據",
-        "資料來源",
-        "關鍵字"
-    ]
-
-    fields = [
-        c for c in fields
-        if c in df.columns
-    ]
+    fields = get_search_fields(
+        df
+    )
 
     if not fields:
+
         return pd.DataFrame()
 
     search_df = df.copy()
 
-    # ========================================================
-    # 建立搜尋文字
-    # ========================================================
+    # --------------------------------------------------------
+    # 正規化所有搜尋欄位
+    # --------------------------------------------------------
 
-    search_df["_search_text"] = (
-        search_df[fields]
-        .fillna("")
-        .astype(str)
-        .agg(" ".join, axis=1)
-        .map(normalize_search_text)
-    )
+    for col in fields:
+
+        search_df[
+            f"_norm_{col}"
+        ] = (
+            search_df[col]
+            .fillna("")
+            .astype(str)
+            .map(normalize_search_text)
+        )
 
     normalized_keyword = normalize_search_text(
         keyword
     )
 
-    expanded_query = expand_search_word(
+    query_words = expand_search_words(
         keyword
     )
 
-    query_words = [
-        normalize_search_text(x)
-        for x in re.split(
-            r"\s+",
-            expanded_query
-        )
-        if normalize_search_text(x)
-    ]
+    if not query_words:
 
-    # ========================================================
-    # 第一層：直接命中
-    # ========================================================
+        query_words = [
+            normalized_keyword
+        ]
+
+    # --------------------------------------------------------
+    # 建立 TF-IDF 文字
+    #
+    # 不讓所有欄位完全等權。
+    # --------------------------------------------------------
+
+    weighted_parts = []
+
+    for _, row in search_df.iterrows():
+
+        parts = []
+
+        def repeat_field(
+            column,
+            times
+        ):
+
+            if column not in search_df.columns:
+                return
+
+            value = clean_text(
+                row.get(column, "")
+            )
+
+            if not value:
+                return
+
+            for _ in range(times):
+                parts.append(value)
+
+        # 問題本身最重要
+        repeat_field(
+            "問題摘要",
+            5
+        )
+
+        # 關鍵字
+        repeat_field(
+            "關鍵字",
+            4
+        )
+
+        # 商品名稱
+        repeat_field(
+            "商品名稱",
+            4
+        )
+
+        # 商品系列
+        repeat_field(
+            "商品系列",
+            3
+        )
+
+        # 商品編號
+        repeat_field(
+            "商品編號",
+            3
+        )
+
+        # 問題類型
+        repeat_field(
+            "問題類型",
+            2
+        )
+
+        # 問題細項
+        repeat_field(
+            "問題細項",
+            2
+        )
+
+        # 標準回覆只作輔助
+        repeat_field(
+            "標準回覆",
+            1
+        )
+
+        weighted_parts.append(
+            normalize_search_text(
+                " ".join(parts)
+            )
+        )
+
+    # --------------------------------------------------------
+    # 第一層：精準命中分數
+    # --------------------------------------------------------
 
     direct_scores = []
+
+    hit_types = []
 
     for _, row in search_df.iterrows():
 
         score = 0
 
-        problem = normalize_search_text(
-            row.get("問題摘要", "")
+        hits = []
+
+        problem = row.get(
+            "_norm_問題摘要",
+            ""
         )
 
-        keywords = normalize_search_text(
-            row.get("關鍵字", "")
+        keywords = row.get(
+            "_norm_關鍵字",
+            ""
         )
 
-        product_name = normalize_search_text(
-            row.get("商品名稱", "")
+        product_name = row.get(
+            "_norm_商品名稱",
+            ""
         )
 
-        series = normalize_search_text(
-            row.get("商品系列", "")
+        series = row.get(
+            "_norm_商品系列",
+            ""
         )
 
-        product_id = normalize_search_text(
-            row.get("商品編號", "")
+        product_id = row.get(
+            "_norm_商品編號",
+            ""
         )
 
-        answer = normalize_search_text(
-            row.get("標準回覆", "")
+        category = row.get(
+            "_norm_問題類型",
+            ""
         )
 
-        basis = normalize_search_text(
-            row.get("判斷依據", "")
+        detail = row.get(
+            "_norm_問題細項",
+            ""
         )
 
-        category = normalize_search_text(
-            row.get("問題類型", "")
+        answer = row.get(
+            "_norm_標準回覆",
+            ""
         )
 
-        detail = normalize_search_text(
-            row.get("問題細項", "")
-        )
+        # ====================================================
+        # 原始搜尋詞
+        # ====================================================
 
-        # 問題摘要
-        if (
-            normalized_keyword
-            and normalized_keyword in problem
-        ):
-            score += 100
+        if normalized_keyword:
 
-        # 關鍵字
-        if (
-            normalized_keyword
-            and normalized_keyword in keywords
-        ):
-            score += 90
+            # 商品編號
+            if (
+                normalized_keyword
+                == product_id
+                and product_id
+            ):
 
-        # 商品名稱
-        if (
-            normalized_keyword
-            and normalized_keyword in product_name
-        ):
-            score += 80
+                score += 300
+                hits.append(
+                    "商品編號"
+                )
 
-        # 商品系列
-        if (
-            normalized_keyword
-            and normalized_keyword in series
-        ):
-            score += 70
+            elif (
+                normalized_keyword in product_id
+                and product_id
+            ):
 
-        # 商品編號
-        if (
-            normalized_keyword
-            and normalized_keyword in product_id
-        ):
-            score += 70
+                score += 220
+                hits.append(
+                    "商品編號"
+                )
 
-        # 標準回覆
-        if (
-            normalized_keyword
-            and normalized_keyword in answer
-        ):
-            score += 40
+            # 問題摘要
+            if normalized_keyword in problem:
 
-        # 判斷依據
-        if (
-            normalized_keyword
-            and normalized_keyword in basis
-        ):
-            score += 30
+                score += 150
+                hits.append(
+                    "問題摘要"
+                )
 
-        # 問題類型
-        if (
-            normalized_keyword
-            and normalized_keyword in category
-        ):
-            score += 30
+            # 關鍵字
+            if normalized_keyword in keywords:
 
-        # 問題細項
-        if (
-            normalized_keyword
-            and normalized_keyword in detail
-        ):
-            score += 30
+                score += 140
+                hits.append(
+                    "關鍵字"
+                )
+
+            # 商品名稱
+            if normalized_keyword in product_name:
+
+                score += 120
+                hits.append(
+                    "商品名稱"
+                )
+
+            # 商品系列
+            if normalized_keyword in series:
+
+                score += 110
+                hits.append(
+                    "商品系列"
+                )
+
+            # 問題細項
+            if normalized_keyword in detail:
+
+                score += 70
+                hits.append(
+                    "問題細項"
+                )
+
+            # 問題類型
+            if normalized_keyword in category:
+
+                score += 60
+                hits.append(
+                    "問題類型"
+                )
+
+            # 標準回覆
+            if normalized_keyword in answer:
+
+                score += 25
+                hits.append(
+                    "標準回覆"
+                )
 
         # ====================================================
         # 同義詞
@@ -892,31 +1199,72 @@ def search_knowledge(keyword, top_n=10):
             if not word:
                 continue
 
+            if word == normalized_keyword:
+                continue
+
             if word in problem:
-                score += 30
+
+                score += 60
+                hits.append(
+                    "同義詞→問題摘要"
+                )
 
             if word in keywords:
-                score += 25
+
+                score += 55
+                hits.append(
+                    "同義詞→關鍵字"
+                )
 
             if word in product_name:
-                score += 20
 
-            if word in answer:
-                score += 10
+                score += 50
+                hits.append(
+                    "同義詞→商品名稱"
+                )
 
-        direct_scores.append(score)
+            if word in series:
 
-    search_df["_direct_score"] = (
-        direct_scores
-    )
+                score += 45
+                hits.append(
+                    "同義詞→商品系列"
+                )
 
-    # ========================================================
-    # 第二層：TF-IDF 模糊搜尋
-    # ========================================================
+            if word in detail:
 
-    corpus = search_df[
-        "_search_text"
-    ].tolist()
+                score += 30
+                hits.append(
+                    "同義詞→問題細項"
+                )
+
+            if word in category:
+
+                score += 25
+                hits.append(
+                    "同義詞→問題類型"
+                )
+
+        direct_scores.append(
+            score
+        )
+
+        hit_types.append(
+            list(
+                dict.fromkeys(hits)
+            )
+        )
+
+    search_df[
+        "_direct_score"
+    ] = direct_scores
+
+    search_df[
+        "_hit_types"
+    ] = hit_types
+
+    # --------------------------------------------------------
+    # 第二層：TF-IDF
+    # --------------------------------------------------------
 
     try:
 
@@ -927,11 +1275,14 @@ def search_knowledge(keyword, top_n=10):
             sublinear_tf=True
         )
 
+        query_text = normalize_search_text(
+            " ".join(query_words)
+        )
+
         matrix = vectorizer.fit_transform(
-            corpus + [
-                normalize_search_text(
-                    expanded_query
-                )
+            weighted_parts
+            + [
+                query_text
             ]
         )
 
@@ -946,28 +1297,92 @@ def search_knowledge(keyword, top_n=10):
             len(search_df)
         )
 
-    search_df["_tfidf_score"] = (
-        tfidf_scores
-    )
+    search_df[
+        "_tfidf_score"
+    ] = tfidf_scores
 
-    # ========================================================
-    # 綜合分數
-    # ========================================================
+    # --------------------------------------------------------
+    # 第三層：搜尋詞長度修正
+    #
+    # 像「重量」只有兩個字時，
+    # TF-IDF 很容易產生很多模糊結果。
+    #
+    # 所以短詞主要依賴「真正命中」。
+    # --------------------------------------------------------
 
-    search_df["_score"] = (
-        search_df["_direct_score"]
-        + search_df["_tfidf_score"] * 10
-    )
+    if len(normalized_keyword) <= 2:
 
-    # ========================================================
+        search_df[
+            "_score"
+        ] = (
+            search_df[
+                "_direct_score"
+            ]
+            + search_df[
+                "_tfidf_score"
+            ] * 2
+        )
+
+    elif len(normalized_keyword) <= 4:
+
+        search_df[
+            "_score"
+        ] = (
+            search_df[
+                "_direct_score"
+            ]
+            + search_df[
+                "_tfidf_score"
+            ] * 5
+        )
+
+    else:
+
+        search_df[
+            "_score"
+        ] = (
+            search_df[
+                "_direct_score"
+            ]
+            + search_df[
+                "_tfidf_score"
+            ] * 10
+        )
+
+    # --------------------------------------------------------
+    # 沒有任何直接命中時
+    #
+    # 如果是非常短的搜尋詞，
+    # 不要讓純 TF-IDF 的結果看起來像高度相關。
+    # --------------------------------------------------------
+
+    if len(normalized_keyword) <= 2:
+
+        has_direct = (
+            search_df[
+                "_direct_score"
+            ] > 0
+        )
+
+        if has_direct.any():
+
+            search_df.loc[
+                ~has_direct,
+                "_score"
+            ] = 0
+
+    # --------------------------------------------------------
     # 排序
-    # ========================================================
+    #
+    # 先看真正命中，再看 TF-IDF。
+    # --------------------------------------------------------
 
     result = (
         search_df
         .sort_values(
             [
                 "_direct_score",
+                "_score",
                 "_tfidf_score"
             ],
             ascending=False
@@ -976,9 +1391,9 @@ def search_knowledge(keyword, top_n=10):
         .copy()
     )
 
-    # ========================================================
+    # --------------------------------------------------------
     # 顯示用相關度
-    # ========================================================
+    # --------------------------------------------------------
 
     if not result.empty:
 
@@ -988,25 +1403,40 @@ def search_knowledge(keyword, top_n=10):
 
         if max_score > 0:
 
-            result["_score"] = (
-                result["_score"]
-                / max_score
+            result[
+                "_display_score"
+            ] = (
+                result[
+                    "_score"
+                ] / max_score
             )
 
         else:
 
-            result["_score"] = 0
+            result[
+                "_display_score"
+            ] = 0
 
-    # ========================================================
-    # 移除內部欄位
-    # ========================================================
+    # --------------------------------------------------------
+    # 清除內部欄位
+    # --------------------------------------------------------
+
+    internal_columns = [
+        "_direct_score",
+        "_tfidf_score",
+        "_score",
+        "_display_score",
+        "_hit_types"
+    ]
+
+    internal_columns += [
+        c
+        for c in result.columns
+        if str(c).startswith("_norm_")
+    ]
 
     result = result.drop(
-        columns=[
-            "_search_text",
-            "_direct_score",
-            "_tfidf_score"
-        ],
+        columns=internal_columns,
         errors="ignore"
     )
 
@@ -1020,19 +1450,38 @@ def search_knowledge(keyword, top_n=10):
 with st.sidebar:
 
     st.markdown(
-        "<div style='text-align:center;font-size:42px;'>🐱</div>",
+        """
+        <div style="
+            text-align:center;
+            font-size:42px;
+        ">
+            🐱
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
     st.markdown(
-        "<h2 style='text-align:center;margin-top:0;'>客服作業系統</h2>",
+        """
+        <h2 style="
+            text-align:center;
+            margin-top:0;
+        ">
+            客服作業系統
+        </h2>
+        """,
         unsafe_allow_html=True
     )
 
     st.markdown(
-        "<p style='text-align:center;color:#95897D;'>"
-        "NITORI CUSTOMER SERVICE"
-        "</p>",
+        """
+        <p style="
+            text-align:center;
+            color:#95897D;
+        ">
+            NITORI CUSTOMER SERVICE
+        </p>
+        """,
         unsafe_allow_html=True
     )
 
@@ -1063,21 +1512,37 @@ with st.sidebar:
 
 if page == "🏠 首頁":
 
-    st.markdown("""
-    <div class="hero">
-        <div class="hero-cat">🐱</div>
-        <div class="hero-title">客服作業系統</div>
-        <div class="hero-subtitle">
-            NITORI CUSTOMER SERVICE WORKSPACE
+    st.markdown(
+        """
+        <div class="hero">
+
+            <div class="hero-cat">
+                🐱
+            </div>
+
+            <div class="hero-title">
+                客服作業系統
+            </div>
+
+            <div class="hero-subtitle">
+                NITORI CUSTOMER SERVICE WORKSPACE
+            </div>
+
+            <div class="hero-message">
+                🌿 今天也辛苦了，讓小貓陪你一起找資料
+            </div>
+
         </div>
-        <div class="hero-message">
-            🌿 今天也辛苦了，讓小貓陪你一起找資料
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown(
-        '<div class="section-label">QUICK ACCESS</div>',
+        """
+        <div class="section-label">
+            QUICK ACCESS
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -1088,11 +1553,19 @@ if page == "🏠 首頁":
         st.markdown(
             """
             <div class="tool-card">
-                <div class="tool-icon">🔍</div>
-                <div class="tool-name">知識庫搜尋</div>
+
+                <div class="tool-icon">
+                    🔍
+                </div>
+
+                <div class="tool-name">
+                    知識庫搜尋
+                </div>
+
                 <div class="tool-desc">
                     輸入顧客問題，快速找出相關作業資訊與罐頭回覆。
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -1103,11 +1576,19 @@ if page == "🏠 首頁":
         st.markdown(
             """
             <div class="tool-card">
-                <div class="tool-icon">🗺️</div>
-                <div class="tool-name">宜得利小地圖</div>
+
+                <div class="tool-icon">
+                    🗺️
+                </div>
+
+                <div class="tool-name">
+                    宜得利小地圖
+                </div>
+
                 <div class="tool-desc">
                     查詢門市地址、交通、停車及門市相關資訊。
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -1118,18 +1599,30 @@ if page == "🏠 首頁":
         st.markdown(
             """
             <div class="tool-card">
-                <div class="tool-icon">📢</div>
-                <div class="tool-name">公告＆常用工具</div>
+
+                <div class="tool-icon">
+                    📢
+                </div>
+
+                <div class="tool-name">
+                    公告＆常用工具
+                </div>
+
                 <div class="tool-desc">
                     查看最新內部公告與工作中常用的連結工具。
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
         )
 
     st.markdown(
-        '<div class="section-label">LATEST ANNOUNCEMENTS</div>',
+        """
+        <div class="section-label">
+            LATEST ANNOUNCEMENTS
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -1143,43 +1636,46 @@ if page == "🏠 首頁":
 
     else:
 
+        cols = list(
+            ann.columns
+        )
+
+        title_col = next(
+            (
+                c
+                for c in cols
+                if "標題" in str(c)
+            ),
+            cols[0]
+        )
+
+        content_col = next(
+            (
+                c
+                for c in cols
+                if any(
+                    x in str(c)
+                    for x in [
+                        "內容",
+                        "說明"
+                    ]
+                )
+            ),
+            cols[1]
+            if len(cols) > 1
+            else cols[0]
+        )
+
+        date_col = next(
+            (
+                c
+                for c in cols
+                if "日期" in str(c)
+            ),
+            None
+        )
+
         for _, row in ann.head(5).iterrows():
-
-            cols = list(
-                ann.columns
-            )
-
-            title_col = next(
-                (
-                    c for c in cols
-                    if "標題" in str(c)
-                ),
-                cols[0]
-            )
-
-            content_col = next(
-                (
-                    c for c in cols
-                    if any(
-                        x in str(c)
-                        for x in [
-                            "內容",
-                            "說明"
-                        ]
-                    )
-                ),
-                cols[1]
-                if len(cols) > 1
-                else cols[0]
-            )
-
-            date_col = next(
-                (
-                    c for c in cols
-                    if "日期" in str(c)
-                ),
-                None
-            )
 
             title = clean_announcement_title(
                 row[title_col]
@@ -1211,6 +1707,7 @@ if page == "🏠 首頁":
             st.markdown(
                 f"""
                 <div class='card'>
+
                     <div class='card-title'>
                         📌 {safe_html_text(title)}
                     </div>
@@ -1220,6 +1717,7 @@ if page == "🏠 首頁":
                     </div>
 
                     {date_html}
+
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -1242,7 +1740,9 @@ elif page == "🔍 知識搜尋":
 
     keyword = st.text_input(
         "搜尋關鍵字",
-        placeholder="例如：重量、床包尺寸、退貨、配送、商品編號……"
+        placeholder=(
+            "例如：重量、床包尺寸、退貨、配送、商品編號……"
+        )
     )
 
     top_n = st.slider(
@@ -1267,8 +1767,21 @@ elif page == "🔍 知識搜尋":
 
         else:
 
+            # 顯示真正有分數的資料數量
+            score_column = (
+                "_display_score"
+                if "_display_score" in result.columns
+                else None
+            )
+
+            # 由於 search_knowledge 最後會移除分數，
+            # 這裡重新計算顯示用命中資訊。
             st.caption(
                 f"共找到 {len(result)} 筆相關資料"
+            )
+
+            normalized_keyword = normalize_search_text(
+                keyword
             )
 
             for _, row in result.iterrows():
@@ -1276,42 +1789,52 @@ elif page == "🔍 知識搜尋":
                 title = clean_text(
                     row.get(
                         "問題摘要",
-                        "未命名問題"
+                        ""
                     )
                 )
 
-                score = float(
-                    row.get(
-                        "_score",
-                        0
+                if not title:
+
+                    title = (
+                        clean_text(
+                            row.get(
+                                "問題細項",
+                                ""
+                            )
+                        )
+                        or "未命名問題"
                     )
-                )
 
                 meta_parts = [
+
                     clean_text(
                         row.get(
                             "問題類型",
                             ""
                         )
                     ),
+
                     clean_text(
                         row.get(
                             "問題細項",
                             ""
                         )
                     ),
+
                     clean_text(
                         row.get(
                             "商品名稱",
                             ""
                         )
                     ),
+
                     clean_text(
                         row.get(
                             "商品系列",
                             ""
                         )
                     ),
+
                     clean_text(
                         row.get(
                             "商品編號",
@@ -1337,14 +1860,21 @@ elif page == "🔍 知識搜尋":
 
                 judgment = clean_text(
                     row.get(
-                        "判斷依據",
+                        "判斷方式",
                         ""
                     )
                 )
 
-                source = clean_text(
+                judgment_tool = clean_text(
                     row.get(
-                        "資料來源",
+                        "判斷使用的工具",
+                        ""
+                    )
+                )
+
+                keywords = clean_text(
+                    row.get(
+                        "關鍵字",
                         ""
                     )
                 )
@@ -1354,22 +1884,18 @@ elif page == "🔍 知識搜尋":
                 if judgment:
 
                     extra += (
-                        "\n\n【判斷依據】\n"
+                        "\n\n【判斷方式】\n"
                         + judgment
                     )
 
-                if source:
+                if judgment_tool:
 
                     extra += (
-                        "\n\n【資料來源】\n"
-                        + source
+                        "\n\n【判斷使用的工具】\n"
+                        + judgment_tool
                     )
 
                 hit_text = ""
-
-                normalized_keyword = normalize_search_text(
-                    keyword
-                )
 
                 searchable_text = normalize_search_text(
                     " ".join(
@@ -1385,7 +1911,8 @@ elif page == "🔍 知識搜尋":
                                 "關鍵字",
                                 "商品名稱",
                                 "商品系列",
-                                "商品編號"
+                                "商品編號",
+                                "問題細項"
                             ]
                         ]
                     )
@@ -1403,6 +1930,18 @@ elif page == "🔍 知識搜尋":
                         "</span>"
                     )
 
+                # 關鍵字欄位若有資料，額外顯示
+                keyword_html = ""
+
+                if keywords:
+
+                    keyword_html = (
+                        "<div class='card-meta'>"
+                        "🔑 關鍵字："
+                        + safe_html_text(keywords)
+                        + "</div>"
+                    )
+
                 st.markdown(
                     f"""
                     <div class='result-card'>
@@ -1413,11 +1952,10 @@ elif page == "🔍 知識搜尋":
 
                         <div class='result-meta'>
                             {safe_html_text(meta)}
-                            <span class='score'>
-                                相關度 {score:.1%}
-                            </span>
                             {hit_text}
                         </div>
+
+                        {keyword_html}
 
                         <div class='result-answer'>
                             {safe_html_text(answer + extra)}
@@ -1434,7 +1972,9 @@ elif page == "🔍 知識搜尋":
             """
             <div class='card'
                  style='text-align:center;padding:40px;'>
+
                 🐾 輸入關鍵字開始搜尋
+
             </div>
             """,
             unsafe_allow_html=True
@@ -1463,7 +2003,7 @@ elif page == "🗺️ 門市地圖":
 
 
 # ============================================================
-# 公告＆工具
+# 公告＆常用工具
 # ============================================================
 
 elif page == "📢 公告＆常用工具":
@@ -1479,9 +2019,9 @@ elif page == "📢 公告＆常用工具":
         ]
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 公告
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab1:
 
@@ -1495,43 +2035,46 @@ elif page == "📢 公告＆常用工具":
 
         else:
 
+            cols = list(
+                ann.columns
+            )
+
+            title_col = next(
+                (
+                    c
+                    for c in cols
+                    if "標題" in str(c)
+                ),
+                cols[0]
+            )
+
+            content_col = next(
+                (
+                    c
+                    for c in cols
+                    if any(
+                        x in str(c)
+                        for x in [
+                            "內容",
+                            "說明"
+                        ]
+                    )
+                ),
+                cols[1]
+                if len(cols) > 1
+                else cols[0]
+            )
+
+            date_col = next(
+                (
+                    c
+                    for c in cols
+                    if "日期" in str(c)
+                ),
+                None
+            )
+
             for _, row in ann.iterrows():
-
-                cols = list(
-                    ann.columns
-                )
-
-                title_col = next(
-                    (
-                        c for c in cols
-                        if "標題" in str(c)
-                    ),
-                    cols[0]
-                )
-
-                content_col = next(
-                    (
-                        c for c in cols
-                        if any(
-                            x in str(c)
-                            for x in [
-                                "內容",
-                                "說明"
-                            ]
-                        )
-                    ),
-                    cols[1]
-                    if len(cols) > 1
-                    else cols[0]
-                )
-
-                date_col = next(
-                    (
-                        c for c in cols
-                        if "日期" in str(c)
-                    ),
-                    None
-                )
 
                 title = clean_announcement_title(
                     row[title_col]
@@ -1579,9 +2122,9 @@ elif page == "📢 公告＆常用工具":
                     unsafe_allow_html=True
                 )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 常用工具
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab2:
 
@@ -1601,7 +2144,8 @@ elif page == "📢 公告＆常用工具":
 
             name_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
                         for x in [
@@ -1616,7 +2160,8 @@ elif page == "📢 公告＆常用工具":
 
             url_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
                         for x in [
@@ -1632,7 +2177,8 @@ elif page == "📢 公告＆常用工具":
 
             desc_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
                         for x in [
@@ -1725,9 +2271,9 @@ elif page == "🛠️ 資料維護":
         ]
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 知識庫
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab1:
 
@@ -1764,9 +2310,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-    # --------------------------------------------------------
+    # ========================================================
     # 公告
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab2:
 
@@ -1795,7 +2341,10 @@ elif page == "🛠️ 資料維護":
             ):
 
                 sheet = find_sheet(
-                    ["內部公告", "公告"]
+                    [
+                        "內部公告",
+                        "公告"
+                    ]
                 )
 
                 if (
@@ -1812,9 +2361,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-    # --------------------------------------------------------
+    # ========================================================
     # 常用工具
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab3:
 
@@ -1843,7 +2392,10 @@ elif page == "🛠️ 資料維護":
             ):
 
                 sheet = find_sheet(
-                    ["常用工具", "工具"]
+                    [
+                        "常用工具",
+                        "工具"
+                    ]
                 )
 
                 if (
