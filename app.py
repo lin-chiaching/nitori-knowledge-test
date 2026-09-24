@@ -19,7 +19,7 @@ st.set_page_config(
     page_icon="🐱",
     layout="wide"
 )
-
+st.error("版本測試999")
 
 EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
 
