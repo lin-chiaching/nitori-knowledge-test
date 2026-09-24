@@ -68,130 +68,50 @@ st.markdown(
 # ============================================================
 
 def clean_announcement_content(text):
-
-    if pd.isna(text):
+    """清理公告內容中的 HTML 標籤、svg、特殊符號，讓頁面正常顯示"""
+    
+    if pd.isna(text) or text is None:
         return ""
 
     text = str(text)
 
-    # --------------------------------------------------------
-    # HTML entity 轉換
-    # 例如 &nbsp; → 空白
-    # --------------------------------------------------------
-
+    # HTML entity 解碼
     text = html.unescape(text)
 
-    # --------------------------------------------------------
-    # 移除 SVG
-    # --------------------------------------------------------
+    # 移除 SVG 完整區塊
+    text = re.sub(r"<svg.*?</svg>", "", text, flags=re.IGNORECASE | re.DOTALL)
 
-    text = re.sub(
-        r"<svg.*?</svg>",
-        "",
-        text,
-        flags=re.IGNORECASE | re.DOTALL
-    )
+    # 移除單獨出現的 svg
+    text = re.sub(r"\bsvg\b", "", text, flags=re.IGNORECASE)
 
-    # 移除單獨出現的 svg 文字
-    text = re.sub(
-        r"\bsvg\b",
-        "",
-        text,
-        flags=re.IGNORECASE
-    )
+    # <br>、</p>、</div> 等轉成換行
+    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"</p\s*>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"</div\s*>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"</h[1-6]\s*>", "\n", text, flags=re.IGNORECASE)
 
-    # --------------------------------------------------------
-    # HTML 標籤處理
-    # --------------------------------------------------------
+    # 移除所有剩餘 HTML 標籤
+    text = re.sub(r"<[^>]+>", "", text)
 
-    # h1～h6 開始標籤
-    text = re.sub(
-        r"<\s*h[1-6][^>]*>",
-        "",
-        text,
-        flags=re.IGNORECASE
-    )
+    # 清理常見殘留
+    text = text.replace("\\~", "~")
+    text = text.replace("\\", "")
+    
+    # 清除 HTML 中常見的特殊殘留
+    text = re.sub(r'id="[^"]*"', "", text)
+    text = re.sub(r'class="[^"]*"', "", text)
 
-    # h1～h6 結束標籤
-    text = re.sub(
-        r"</\s*h[1-6]\s*>",
-        "\n",
-        text,
-        flags=re.IGNORECASE
-    )
+    # 清除多餘空白，但保留換行
+    lines = []
+    for line in text.splitlines():
+        line = re.sub(r"[ \t]+", " ", line).strip()
+        if line:
+            lines.append(line)
 
-    # p 開始標籤
-    text = re.sub(
-        r"<\s*p[^>]*>",
-        "",
-        text,
-        flags=re.IGNORECASE
-    )
+    text = "\n".join(lines)
 
-    # p 結束標籤
-    text = re.sub(
-        r"</\s*p\s*>",
-        "\n",
-        text,
-        flags=re.IGNORECASE
-    )
-
-    # br → 換行
-    text = re.sub(
-        r"<\s*br\s*/?\s*>",
-        "\n",
-        text,
-        flags=re.IGNORECASE
-    )
-
-    # div 開始標籤
-    text = re.sub(
-        r"<\s*div[^>]*>",
-        "",
-        text,
-        flags=re.IGNORECASE
-    )
-
-    # div 結束標籤
-    text = re.sub(
-        r"</\s*div\s*>",
-        "\n",
-        text,
-        flags=re.IGNORECASE
-    )
-
-    # --------------------------------------------------------
-    # 移除剩餘 HTML 標籤
-    # --------------------------------------------------------
-
-    text = re.sub(
-        r"<[^>]+>",
-        "",
-        text
-    )
-
-    # --------------------------------------------------------
-    # 空白整理
-    # --------------------------------------------------------
-
-    text = re.sub(
-        r"[ \t]+",
-        " ",
-        text
-    )
-
-    text = re.sub(
-        r"\n[ \t]+",
-        "\n",
-        text
-    )
-
-    # 連續 3 行以上 → 最多保留 2 行
-    text = re.sub(
-        r"\n\s*\n\s*\n+",
-        "\n\n",
-        text
-    )
+    # 避免太多連續換行
+    text = re.sub(r"\n{3,}", "\n\n", text)
 
     return text.strip()
 
