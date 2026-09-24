@@ -77,7 +77,7 @@ def clean_announcement_content(text):
     # HTML entity 轉換
     text = html.unescape(text)
 
-    # 移除 SVG 整段
+    # 移除 SVG 開始與結束標籤
     text = re.sub(
         r"<svg.*?</svg>",
         "",
@@ -85,30 +85,75 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE | re.DOTALL
     )
 
-    # 常見 HTML 換行
+    # 移除單獨出現的 svg 文字
     text = re.sub(
-        r"<br\s*/?>",
+        r"\bsvg\b",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # HTML 的段落標籤改成換行
+    text = re.sub(
+        r"<\s*p[^>]*>",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"</\s*p\s*>",
         "\n",
         text,
         flags=re.IGNORECASE
     )
 
-    # 段落結束轉換成換行
+    # h1～h6 標籤
     text = re.sub(
-        r"</p\s*>",
+        r"<\s*h[1-6][^>]*>",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    text = re.sub(
+        r"</\s*h[1-6]\s*>",
         "\n",
         text,
         flags=re.IGNORECASE
     )
 
-    # 移除其他 HTML 標籤
+    # br 改成換行
+    text = re.sub(
+        r"<\s*br\s*/?\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # div 結束改成換行
+    text = re.sub(
+        r"</\s*div\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # 移除剩下所有 HTML 標籤
     text = re.sub(
         r"<[^>]+>",
         "",
         text
     )
 
-    # 清理多餘空白
+    # 清除多餘空白
+    text = re.sub(
+        r"[ \t]+",
+        " ",
+        text
+    )
+
+    # 清除連續太多空行
     text = re.sub(
         r"\n\s*\n\s*\n+",
         "\n\n",
