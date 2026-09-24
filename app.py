@@ -961,27 +961,11 @@ with st.sidebar:
 if page == "🏠 首頁":
 
     st.markdown(
-        """
-        <div class="hero">
-
-            <div class="hero-cat">🐱</div>
-
-            <div class="hero-title">
-                客服作業系統
-            </div>
-
-            <div class="hero-subtitle">
-                宜得利家居 Customer Service
-            </div>
-
-            <div class="hero-message">
-                今天也一起把顧客問題快速找到吧！
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """
+    <h1>🐱 測試 HERO</h1>
+    """,
+    unsafe_allow_html=True
+)
 
     col1, col2, col3 = st.columns(3)
 
