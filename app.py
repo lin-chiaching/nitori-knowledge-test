@@ -1,4 +1,3 @@
-````python
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -1860,4 +1859,3 @@ elif page == "🛠️ 資料維護":
                     )
 
                     st.rerun()
-````
