@@ -7,9 +7,9 @@ from datetime import datetime
 from openpyxl import load_workbook
 
 
-# =========================================================
+# =========================
 # 基本設定
-# =========================================================
+# =========================
 
 FILE_PATH = "DATA/知識庫實驗品.xlsx"
 
@@ -20,36 +20,36 @@ st.set_page_config(
 )
 
 
-# =========================================================
-# CSS
-# =========================================================
+# =========================
+# 頁面樣式
+# =========================
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
+        .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
 
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
-
-    .result-card {
-        padding: 18px;
-        border-radius: 12px;
-        border: 1px solid #dddddd;
-        margin-bottom: 12px;
-    }
-
-</style>
-""", unsafe_allow_html=True)
+        .result-card {
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid #dddddd;
+            margin-bottom: 12px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
-# =========================================================
-# 讀取資料
-# =========================================================
+# =========================
+# 讀取知識庫
+# =========================
 
 @st.cache_data
 def load_data():
-
     df = pd.read_excel(
         FILE_PATH,
         sheet_name=0
@@ -58,11 +58,14 @@ def load_data():
     return df
 
 
+# =========================
+# 讀取搜尋詞對照表
+# =========================
+
 @st.cache_data
 def load_synonyms():
 
     try:
-
         df = pd.read_excel(
             FILE_PATH,
             sheet_name="搜尋詞對照"
@@ -71,7 +74,6 @@ def load_synonyms():
         return df
 
     except Exception:
-
         return pd.DataFrame()
 
 
@@ -79,9 +81,9 @@ df = load_data()
 synonym_df = load_synonyms()
 
 
-# =========================================================
+# =========================
 # 儲存資料
-# =========================================================
+# =========================
 
 def save_data(df):
 
@@ -89,22 +91,23 @@ def save_data(df):
 
     ws = wb[wb.sheetnames[0]]
 
-    # 清除原本資料
     ws.delete_rows(
         1,
         ws.max_row
     )
 
-    # 寫入欄位名稱
-    for col_num, column_name in enumerate(df.columns, 1):
-
+    # 標題列
+    for col_num, column_name in enumerate(
+        df.columns,
+        1
+    ):
         ws.cell(
             row=1,
             column=col_num,
             value=column_name
         )
 
-    # 寫入資料
+    # 資料
     for row_num, row_data in enumerate(
         df.itertuples(index=False),
         2
@@ -126,9 +129,9 @@ def save_data(df):
     st.cache_data.clear()
 
 
-# =========================================================
-# 搜尋詞處理
-# =========================================================
+# =========================
+# 搜尋詞擴充
+# =========================
 
 def expand_search_word(keyword):
 
@@ -145,29 +148,43 @@ def expand_search_word(keyword):
 
             try:
 
-                original = str(row.iloc[0]).strip()
-                synonym = str(row.iloc[1]).strip()
+                original = str(
+                    row.iloc[0]
+                ).strip()
+
+                synonym = str(
+                    row.iloc[1]
+                ).strip()
 
                 if original == keyword:
 
-                    expanded_words.append(synonym)
+                    expanded_words.append(
+                        synonym
+                    )
 
                 elif synonym == keyword:
 
-                    expanded_words.append(original)
+                    expanded_words.append(
+                        original
+                    )
 
             except Exception:
-
                 pass
 
+    expanded_words = list(
+        dict.fromkeys(
+            expanded_words
+        )
+    )
+
     return " ".join(
-        list(dict.fromkeys(expanded_words))
+        expanded_words
     )
 
 
-# =========================================================
-# 商品名稱 / 商品編號相關
-# =========================================================
+# =========================
+# 商品關鍵字搜尋
+# =========================
 
 def find_product_matches(keyword):
 
@@ -179,7 +196,8 @@ def find_product_matches(keyword):
     result = df[
         df.astype(str)
         .apply(
-            lambda row: row.str.contains(
+            lambda row:
+            row.str.contains(
                 keyword,
                 case=False,
                 regex=False
@@ -191,11 +209,13 @@ def find_product_matches(keyword):
     return result
 
 
-# =========================================================
+# =========================
 # 側邊欄
-# =========================================================
+# =========================
 
-st.sidebar.title("🏠 客服作業系統")
+st.sidebar.title(
+    "🏠 客服作業系統"
+)
 
 st.sidebar.caption(
     "NITORI Customer Service"
@@ -214,13 +234,15 @@ page = st.sidebar.radio(
 )
 
 
-# =========================================================
+# ============================================================
 # ① 知識搜尋
-# =========================================================
+# ============================================================
 
 if page == "🔍 知識搜尋":
 
-    st.title("🔍 客服知識搜尋")
+    st.title(
+        "🔍 客服知識搜尋"
+    )
 
     st.caption(
         "輸入顧客問題或關鍵字，快速找到相關客服資訊"
@@ -229,10 +251,7 @@ if page == "🔍 知識搜尋":
     st.divider()
 
 
-    # -----------------------------------------------------
     # 搜尋框
-    # -----------------------------------------------------
-
     keyword = st.text_input(
         "請輸入搜尋內容",
         placeholder="例如：重量、床墊、退貨、配送、保固……"
@@ -241,16 +260,15 @@ if page == "🔍 知識搜尋":
 
     if keyword:
 
-        # -------------------------------------------------
         # 搜尋詞擴充
-        # -------------------------------------------------
+        search_text = expand_search_word(
+            keyword
+        )
 
-        search_text = expand_search_word(keyword)
 
-
-        # -------------------------------------------------
-        # 建立搜尋欄位
-        # -------------------------------------------------
+        # =========================
+        # 決定搜尋欄位
+        # =========================
 
         search_columns = []
 
@@ -268,36 +286,44 @@ if page == "🔍 知識搜尋":
 
             if column in df.columns:
 
-                search_columns.append(column)
+                search_columns.append(
+                    column
+                )
 
 
-        # -------------------------------------------------
+        # =========================
         # 組合搜尋文字
-        # -------------------------------------------------
+        # =========================
 
         search_data = (
             df[search_columns]
             .astype(str)
-            .agg(" ".join, axis=1)
+            .agg(
+                " ".join,
+                axis=1
+            )
         )
 
 
-        # -------------------------------------------------
+        # =========================
         # TF-IDF
-        # -------------------------------------------------
+        # =========================
 
         vectorizer = TfidfVectorizer(
             analyzer="char",
             ngram_range=(1, 3)
         )
 
+
         matrix = vectorizer.fit_transform(
             search_data
         )
 
+
         query_vector = vectorizer.transform(
             [search_text]
         )
+
 
         similarity = cosine_similarity(
             query_vector,
@@ -305,9 +331,9 @@ if page == "🔍 知識搜尋":
         ).flatten()
 
 
-        # -------------------------------------------------
+        # =========================
         # 排序
-        # -------------------------------------------------
+        # =========================
 
         df_result = df.copy()
 
@@ -318,24 +344,19 @@ if page == "🔍 知識搜尋":
             ascending=False
         )
 
-
-        # -------------------------------------------------
-        # 只顯示有相關性的結果
-        # -------------------------------------------------
-
         df_result = df_result[
             df_result["_score"] > 0
         ]
 
 
+        # =========================
+        # 搜尋結果
+        # =========================
+
         st.write(
             f"找到 {len(df_result)} 筆相關資料"
         )
 
-
-        # -------------------------------------------------
-        # 顯示結果
-        # -------------------------------------------------
 
         if len(df_result) == 0:
 
@@ -343,9 +364,12 @@ if page == "🔍 知識搜尋":
                 "目前沒有找到相關資料，請換個關鍵字試試看。"
             )
 
+
         else:
 
-            display_result = df_result.head(10)
+            display_result = df_result.head(
+                10
+            )
 
 
             for index, row in display_result.iterrows():
@@ -353,13 +377,15 @@ if page == "🔍 知識搜尋":
                 score = row["_score"]
 
 
-                # -----------------------------------------
-                # 商品 / 問題標題
-                # -----------------------------------------
+                # =========================
+                # 問題標題
+                # =========================
 
                 if "問題簡述" in df.columns:
 
-                    title = row["問題簡述"]
+                    title = row[
+                        "問題簡述"
+                    ]
 
                 else:
 
@@ -369,25 +395,29 @@ if page == "🔍 知識搜尋":
                 st.markdown(
                     f"""
                     <div class="result-card">
-                    <h4>{title}</h4>
+                        <h4>{title}</h4>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
 
-                # -----------------------------------------
+                # =========================
                 # 分類
-                # -----------------------------------------
+                # =========================
 
-                info_col1, info_col2, info_col3 = st.columns(3)
+                info_col1, info_col2, info_col3 = st.columns(
+                    3
+                )
 
 
                 with info_col1:
 
                     if "大分類" in df.columns:
 
-                        st.caption("大分類")
+                        st.caption(
+                            "大分類"
+                        )
 
                         st.write(
                             row["大分類"]
@@ -398,7 +428,9 @@ if page == "🔍 知識搜尋":
 
                     if "中分類" in df.columns:
 
-                        st.caption("中分類")
+                        st.caption(
+                            "中分類"
+                        )
 
                         st.write(
                             row["中分類"]
@@ -409,29 +441,33 @@ if page == "🔍 知識搜尋":
 
                     if "小分類" in df.columns:
 
-                        st.caption("小分類")
+                        st.caption(
+                            "小分類"
+                        )
 
                         st.write(
                             row["小分類"]
                         )
 
 
-                # -----------------------------------------
+                # =========================
                 # 解答
-                # -----------------------------------------
+                # =========================
 
                 if "解答" in df.columns:
 
-                    st.markdown("**📌 解答**")
+                    st.markdown(
+                        "**📌 解答**"
+                    )
 
                     st.write(
                         row["解答"]
                     )
 
 
-                # -----------------------------------------
+                # =========================
                 # 判斷方式
-                # -----------------------------------------
+                # =========================
 
                 if "判斷方式" in df.columns:
 
@@ -448,9 +484,9 @@ if page == "🔍 知識搜尋":
                         )
 
 
-                # -----------------------------------------
+                # =========================
                 # 判斷工具
-                # -----------------------------------------
+                # =========================
 
                 if "判斷使用的工具" in df.columns:
 
@@ -467,9 +503,9 @@ if page == "🔍 知識搜尋":
                         )
 
 
-                # -----------------------------------------
+                # =========================
                 # 關鍵字
-                # -----------------------------------------
+                # =========================
 
                 if "關鍵字" in df.columns:
 
@@ -479,29 +515,32 @@ if page == "🔍 知識搜尋":
 
                         st.caption(
                             "關鍵字："
-                            + str(row["關鍵字"])
+                            + str(
+                                row["關鍵字"]
+                            )
                         )
 
 
-                # -----------------------------------------
-                # 相似度
-                # -----------------------------------------
+                # =========================
+                # 相關程度
+                # =========================
 
                 st.caption(
                     f"相關程度：{score:.1%}"
                 )
 
-
                 st.divider()
 
 
-# =========================================================
+# ============================================================
 # ② 門市地圖
-# =========================================================
+# ============================================================
 
 elif page == "🗺️ 門市地圖":
 
-    st.title("🗺️ 門市地圖")
+    st.title(
+        "🗺️ 門市地圖"
+    )
 
     st.caption(
         "宜得利家居門市資訊查詢"
@@ -510,23 +549,22 @@ elif page == "🗺️ 門市地圖":
     st.divider()
 
 
-    # -----------------------------------------------------
-    # Power BI
-    # -----------------------------------------------------
-
-   components.iframe(
-    "https://app.powerbi.com/reportEmbed?reportId=851d09f1-f169-4049-9090-640f09cdc385&autoAuth=true&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55",
-    height=800
-)
+    # Power BI 安全內嵌網址
+    components.iframe(
+        "https://app.powerbi.com/reportEmbed?reportId=851d09f1-f169-4049-9090-640f09cdc385&autoAuth=true&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55",
+        height=800
+    )
 
 
-# =========================================================
+# ============================================================
 # ③ 資料維護
-# =========================================================
+# ============================================================
 
 elif page == "🛠️ 資料維護":
 
-    st.title("🛠️ 資料維護")
+    st.title(
+        "🛠️ 資料維護"
+    )
 
     st.caption(
         "新增、修改及管理客服知識庫資料"
@@ -535,11 +573,13 @@ elif page == "🛠️ 資料維護":
     st.divider()
 
 
-    # -----------------------------------------------------
-    # 顯示目前資料
-    # -----------------------------------------------------
+    # =========================
+    # 目前資料
+    # =========================
 
-    st.subheader("📋 目前資料")
+    st.subheader(
+        "📋 目前資料"
+    )
 
     st.dataframe(
         df,
@@ -547,15 +587,16 @@ elif page == "🛠️ 資料維護":
         height=400
     )
 
-
     st.divider()
 
 
-    # -----------------------------------------------------
+    # =========================
     # 新增資料
-    # -----------------------------------------------------
+    # =========================
 
-    st.subheader("➕ 新增資料")
+    st.subheader(
+        "➕ 新增資料"
+    )
 
     new_data = {}
 
@@ -565,6 +606,7 @@ elif page == "🛠️ 資料維護":
         if column == "序號":
 
             continue
+
 
         new_data[column] = st.text_input(
             column,
@@ -577,7 +619,11 @@ elif page == "🛠️ 資料維護":
         type="primary"
     ):
 
+
+        # =========================
         # 自動產生序號
+        # =========================
+
         if "序號" in df.columns:
 
             try:
@@ -589,45 +635,55 @@ elif page == "🛠️ 資料維護":
 
                 max_number = numbers.max()
 
+
                 if pd.isna(max_number):
 
                     new_number = 1
 
                 else:
 
-                    new_number = int(
-                        max_number
-                    ) + 1
+                    new_number = (
+                        int(max_number) + 1
+                    )
+
 
             except Exception:
 
-                new_number = len(df) + 1
+                new_number = (
+                    len(df) + 1
+                )
 
 
-            new_data["序號"] = new_number
+            new_data["序號"] = (
+                new_number
+            )
 
 
-        # 建立新資料
+        # =========================
+        # 新增一列
+        # =========================
+
         new_row = pd.DataFrame(
             [new_data]
         )
 
-
-        # 調整欄位順序
         new_row = new_row.reindex(
             columns=df.columns
         )
 
 
-        # 加入資料
         df = pd.concat(
-            [df, new_row],
+            [
+                df,
+                new_row
+            ],
             ignore_index=True
         )
 
 
-        # 儲存
-        save_data(df)
+        save_data(
+            df
+        )
 
 
         st.success(
@@ -640,18 +696,23 @@ elif page == "🛠️ 資料維護":
     st.divider()
 
 
-    # -----------------------------------------------------
+    # =========================
     # 修改資料
-    # -----------------------------------------------------
+    # =========================
 
-    st.subheader("✏️ 修改資料")
+    st.subheader(
+        "✏️ 修改資料"
+    )
 
 
     if len(df) > 0:
 
+
         selected_index = st.selectbox(
             "請選擇要修改的資料",
+
             options=df.index,
+
             format_func=lambda x:
                 f"{x + 1}｜"
                 + str(
@@ -659,7 +720,8 @@ elif page == "🛠️ 資料維護":
                         x,
                         "問題簡述"
                     ]
-                    if "問題簡述" in df.columns
+                    if "問題簡述"
+                    in df.columns
                     else ""
                 )
         )
@@ -673,47 +735,66 @@ elif page == "🛠️ 資料維護":
         edit_data = {}
 
 
+        # =========================
+        # 編輯欄位
+        # =========================
+
         for column in df.columns:
+
 
             if column == "序號":
 
                 st.text_input(
                     column,
+
                     value=str(
-                        selected_row[column]
+                        selected_row[
+                            column
+                        ]
                     ),
+
                     disabled=True,
+
                     key=f"edit_{column}"
                 )
+
 
             else:
 
                 edit_data[column] = st.text_area(
                     column,
+
                     value=str(
-                        selected_row[column]
+                        selected_row[
+                            column
+                        ]
                     ),
+
                     key=f"edit_{selected_index}_{column}"
                 )
 
+
+        # =========================
+        # 儲存修改
+        # =========================
 
         if st.button(
             "💾 儲存修改",
             type="primary"
         ):
 
+
             for column in edit_data:
 
                 df.loc[
                     selected_index,
                     column
-                ] = edit_data[column]
+                ] = edit_data[
+                    column
+                ]
 
 
-            # ---------------------------------------------
             # 更新日期
-            # ---------------------------------------------
-
             if "更新日期" in df.columns:
 
                 df.loc[
@@ -724,10 +805,7 @@ elif page == "🛠️ 資料維護":
                 )
 
 
-            # ---------------------------------------------
             # 更新人
-            # ---------------------------------------------
-
             if "更新人" in df.columns:
 
                 df.loc[
@@ -736,11 +814,9 @@ elif page == "🛠️ 資料維護":
                 ] = "客服"
 
 
-            # ---------------------------------------------
-            # 儲存
-            # ---------------------------------------------
-
-            save_data(df)
+            save_data(
+                df
+            )
 
 
             st.success(
