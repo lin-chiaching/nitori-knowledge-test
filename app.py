@@ -74,10 +74,17 @@ def clean_announcement_content(text):
 
     text = str(text)
 
+    # --------------------------------------------------------
     # HTML entity 轉換
+    # 例如 &nbsp; → 空白
+    # --------------------------------------------------------
+
     text = html.unescape(text)
 
-    # 移除 SVG 開始與結束標籤
+    # --------------------------------------------------------
+    # 移除 SVG
+    # --------------------------------------------------------
+
     text = re.sub(
         r"<svg.*?</svg>",
         "",
@@ -93,22 +100,11 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
-    # HTML 的段落標籤改成換行
-    text = re.sub(
-        r"<\s*p[^>]*>",
-        "",
-        text,
-        flags=re.IGNORECASE
-    )
+    # --------------------------------------------------------
+    # HTML 標籤處理
+    # --------------------------------------------------------
 
-    text = re.sub(
-        r"</\s*p\s*>",
-        "\n",
-        text,
-        flags=re.IGNORECASE
-    )
-
-    # h1～h6 標籤
+    # h1～h6 開始標籤
     text = re.sub(
         r"<\s*h[1-6][^>]*>",
         "",
@@ -116,6 +112,7 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
+    # h1～h6 結束標籤
     text = re.sub(
         r"</\s*h[1-6]\s*>",
         "\n",
@@ -123,7 +120,23 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
-    # br 改成換行
+    # p 開始標籤
+    text = re.sub(
+        r"<\s*p[^>]*>",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # p 結束標籤
+    text = re.sub(
+        r"</\s*p\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # br → 換行
     text = re.sub(
         r"<\s*br\s*/?\s*>",
         "\n",
@@ -131,7 +144,15 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
-    # div 結束改成換行
+    # div 開始標籤
+    text = re.sub(
+        r"<\s*div[^>]*>",
+        "",
+        text,
+        flags=re.IGNORECASE
+    )
+
+    # div 結束標籤
     text = re.sub(
         r"</\s*div\s*>",
         "\n",
@@ -139,21 +160,33 @@ def clean_announcement_content(text):
         flags=re.IGNORECASE
     )
 
-    # 移除剩下所有 HTML 標籤
+    # --------------------------------------------------------
+    # 移除剩餘 HTML 標籤
+    # --------------------------------------------------------
+
     text = re.sub(
         r"<[^>]+>",
         "",
         text
     )
 
-    # 清除多餘空白
+    # --------------------------------------------------------
+    # 空白整理
+    # --------------------------------------------------------
+
     text = re.sub(
         r"[ \t]+",
         " ",
         text
     )
 
-    # 清除連續太多空行
+    text = re.sub(
+        r"\n[ \t]+",
+        "\n",
+        text
+    )
+
+    # 連續 3 行以上 → 最多保留 2 行
     text = re.sub(
         r"\n\s*\n\s*\n+",
         "\n\n",
@@ -161,6 +194,20 @@ def clean_announcement_content(text):
     )
 
     return text.strip()
+
+
+# ============================================================
+# HTML 顯示安全處理
+# ============================================================
+
+def safe_html_text(text):
+
+    if pd.isna(text):
+        return ""
+
+    return html.escape(
+        str(text)
+    )
 
 
 # ============================================================
@@ -308,6 +355,10 @@ def load_tools():
         return pd.DataFrame()
 
 
+# ============================================================
+# 載入資料
+# ============================================================
+
 df = load_data()
 synonym_df = load_synonyms()
 announcement_df = load_announcements()
@@ -361,6 +412,7 @@ def save_sheet(sheet_name, data):
 
     wb.save(FILE_PATH)
 
+    # 清除 Streamlit 快取
     st.cache_data.clear()
 
 
@@ -529,19 +581,13 @@ if page == "🏠 首頁":
 
     else:
 
-        # 確認顯示狀態欄位存在
-        if "顯示狀態" in announcement_df.columns:
-
-            show_announcements = announcement_df[
-                announcement_df["顯示狀態"]
-                .astype(str)
-                .str.strip()
-                == "顯示"
-            ]
-
-        else:
-
-            show_announcements = announcement_df.copy()
+        # 只顯示「顯示」的公告
+        show_announcements = announcement_df[
+            announcement_df["顯示狀態"]
+            .astype(str)
+            .str.strip()
+            == "顯示"
+        ]
 
         if show_announcements.empty:
 
@@ -551,6 +597,7 @@ if page == "🏠 首頁":
 
         else:
 
+            # 最新公告放前面
             show_announcements = show_announcements.tail(
                 3
             )
@@ -578,16 +625,31 @@ if page == "🏠 首頁":
                     )
                 )
 
+                safe_title = safe_html_text(
+                    title
+                )
+
+                safe_content = safe_html_text(
+                    content
+                ).replace(
+                    "\n",
+                    "<br>"
+                )
+
+                safe_date = safe_html_text(
+                    date
+                )
+
                 st.markdown(
                     f"""
                     <div class="announcement-card">
 
-                    <h4>📌 {title}</h4>
+                    <h4>📌 {safe_title}</h4>
 
-                    <p>{content.replace(chr(10), "<br>")}</p>
+                    <p>{safe_content}</p>
 
                     <small>
-                    公告日期：{date}
+                    公告日期：{safe_date}
                     </small>
 
                     </div>
@@ -725,7 +787,7 @@ elif page == "🔍 知識搜尋":
                         f"""
                         <div class="result-card">
 
-                        <h4>{title}</h4>
+                        <h4>{safe_html_text(title)}</h4>
 
                         </div>
                         """,
@@ -942,29 +1004,48 @@ elif page == "📢 公告＆常用工具":
                     )
                 )
 
-                content_html = content.replace(
+                # HTML 安全處理
+                safe_title = safe_html_text(
+                    title
+                )
+
+                content_html = safe_html_text(
+                    content
+                ).replace(
                     "\n",
                     "<br>"
+                )
+
+                safe_date = safe_html_text(
+                    date
+                )
+
+                safe_activity = safe_html_text(
+                    activity
+                )
+
+                safe_point = safe_html_text(
+                    point
                 )
 
                 st.markdown(
                     f"""
                     <div class="announcement-card">
 
-                    <h4>📌 {title}</h4>
+                    <h4>📌 {safe_title}</h4>
 
                     <p>{content_html}</p>
 
                     <p>
-                    📅 公告日期：{date}
+                    📅 公告日期：{safe_date}
                     </p>
 
                     <p>
-                    🗓️ 活動期限：{activity}
+                    🗓️ 活動期限：{safe_activity}
                     </p>
 
                     <p>
-                    🪙 點數期限：{point}
+                    🪙 點數期限：{safe_point}
                     </p>
 
                     </div>
@@ -1014,7 +1095,8 @@ elif page == "📢 公告＆常用工具":
             for category in categories:
 
                 st.markdown(
-                    f"### {category}"
+                    f"### {safe_html_text(category)}",
+                    unsafe_allow_html=True
                 )
 
                 category_tools = show_tools[
@@ -1067,11 +1149,11 @@ elif page == "📢 公告＆常用工具":
                                 <div class="tool-card">
 
                                 <h4>
-                                🔗 {tool_name}
+                                🔗 {safe_html_text(tool_name)}
                                 </h4>
 
                                 <p>
-                                {tool_description}
+                                {safe_html_text(tool_description)}
                                 </p>
 
                                 </div>
@@ -1362,6 +1444,7 @@ elif page == "🛠️ 資料維護":
 
         st.divider()
 
+
         # ====================================================
         # 新增公告
         # ====================================================
@@ -1396,7 +1479,7 @@ elif page == "🛠️ 資料維護":
 
         point_period = st.text_input(
             "點數期限",
-            placeholder="例如：2026-11-30",
+            placeholder="例如：限期點數：2026/10/27～2026/12/13",
             key="point_period"
         )
 
@@ -1478,7 +1561,9 @@ elif page == "🛠️ 資料維護":
 
                 st.rerun()
 
+
         st.divider()
+
 
         # ====================================================
         # 修改公告
@@ -1661,6 +1746,7 @@ elif page == "🛠️ 資料維護":
 
         st.divider()
 
+
         # ====================================================
         # 新增工具
         # ====================================================
@@ -1781,7 +1867,9 @@ elif page == "🛠️ 資料維護":
 
                 st.rerun()
 
+
         st.divider()
+
 
         # ====================================================
         # 修改工具
