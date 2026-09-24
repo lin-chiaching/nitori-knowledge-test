@@ -521,6 +521,14 @@ if page == "🏠 首頁":
 elif page == "🔍 知識搜尋":
     st.markdown("# 🔍 知識庫搜尋")
     st.caption("輸入顧客詢問的關鍵字，小貓會幫你找出相關資料。")
+    debug_df = load_data()
+
+st.write("🔧 測試：知識庫資料筆數 =", len(debug_df))
+st.write("🔧 測試：欄位 =", list(debug_df.columns))
+
+if not debug_df.empty:
+    st.write("🔧 測試：第一筆資料")
+    st.dataframe(debug_df.head(1))
     keyword = st.text_input("搜尋關鍵字", placeholder="例如：重量、床包尺寸、退貨、配送……")
     top_n = st.slider("顯示筆數", 5, 30, 10)
     if keyword.strip():
