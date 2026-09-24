@@ -120,6 +120,32 @@ def find_sheet(candidates, fallback_index=None):
 
 @st.cache_data(ttl=60)
 def load_data():
+    if not EXCEL_PATH.exists():
+        return pd.DataFrame()
+
+    try:
+        excel = pd.ExcelFile(EXCEL_PATH)
+
+        # 優先尋找知識庫工作表
+        sheet = find_sheet(["知識庫", "問題集", "Sheet1"], 0)
+
+        if not sheet:
+            return pd.DataFrame()
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet,
+            dtype=str
+        ).fillna("")
+
+        # 清除欄位名稱前後空白
+        df.columns = [str(c).strip() for c in df.columns]
+
+        return df
+
+    except Exception as e:
+        st.error(f"讀取知識庫失敗：{e}")
+        return pd.DataFrame()
     sheet = find_sheet(["知識庫", "問題集", "Sheet1"], 0)
     if not sheet:
         return pd.DataFrame()
