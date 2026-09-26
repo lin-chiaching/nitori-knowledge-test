@@ -45,7 +45,7 @@ try:
     }
 
     .block-container {
-        padding-top: 1.8rem;
+        padding-top: 3.5rem;
         padding-bottom: 3rem;
         max-width: 1400px;
     }
