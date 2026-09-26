@@ -995,7 +995,7 @@ elif page == "🔍 知識搜尋":
         "輸入顧客詢問的關鍵字，小貓會幫你找出相關資料。"
     )
 
-    st.markdown("### 🔎 找找看顧客問題")
+    st.markdown("### 找找看顧客問題")
     keyword = st.text_input(
         "搜尋關鍵字",
         placeholder="輸入顧客問題，例如：床墊有味道、床包尺寸、退貨方式……",
