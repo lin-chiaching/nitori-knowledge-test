@@ -3235,11 +3235,10 @@ with st.popover("🐱"):
                 )
 
                 if st.button(
-                    "📝 提出這個問題給我審核",
-                    type="primary",
-                    use_container_width=True,
-                    key="floating_submit_pending"
+                    "📝 測試提交按鈕",
+                    key="test_pending_button"
                 ):
+                    st.success("🎉 按鈕真的有被按到！")
 
                     st.write("🔍 正在提交問題：", assistant_question)
 
