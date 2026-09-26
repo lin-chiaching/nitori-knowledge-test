@@ -43,7 +43,9 @@ try:
         background: #F7F4EE;
         color: #5F5A53;
     }
-
+    [data-testid="stHeader"] {
+        background: transparent !important;
+    }
     .block-container {
         padding-top: 3.5rem;
         padding-bottom: 3rem;
