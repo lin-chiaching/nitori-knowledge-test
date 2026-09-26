@@ -3106,7 +3106,7 @@ elif page == "🛠️ 資料維護":
 
             editor_name_knowledge = st.text_input(
                 "👤 修改人姓名（必填）",
-                placeholder="請輸入實際修改人的姓名，例如：皮皮",
+                placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
                 key="editor_name_knowledge",
                 help="儲存知識庫時必須填寫，姓名會記錄在修改歷程中。"
             )
@@ -3173,7 +3173,7 @@ elif page == "🛠️ 資料維護":
 
             editor_name_announcement = st.text_input(
                 "👤 修改人姓名（必填）",
-                placeholder="請輸入實際修改人的姓名，例如：皮皮",
+                placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
                 key="editor_name_announcement",
                 help="儲存公告時必須填寫，姓名會記錄在修改歷程中。"
             )
@@ -3243,7 +3243,7 @@ elif page == "🛠️ 資料維護":
 
             editor_name_tools = st.text_input(
                 "👤 修改人姓名（必填）",
-                placeholder="請輸入實際修改人的姓名，例如：皮皮",
+                placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
                 key="editor_name_tools",
                 help="儲存常用工具時必須填寫。"
             )
@@ -3405,7 +3405,7 @@ elif page == "🛠️ 資料維護":
 
                 editor_name_pending = st.text_input(
                     "👤 修改人姓名（必填）",
-                    placeholder="請輸入實際修改人的姓名，例如：皮皮",
+                    placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
                     key="editor_name_pending",
                     help="儲存審核結果時必須填寫。"
                 )
@@ -3606,7 +3606,7 @@ elif page == "🛠️ 資料維護":
 
         editor_name_complaints = st.text_input(
             "👤 修改人姓名（必填）",
-            placeholder="請輸入實際修改人的姓名，例如：皮皮",
+            placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
             key="editor_name_complaints",
             help="儲存客訴資料時必須填寫，姓名會記錄在修改歷程中。"
         )
