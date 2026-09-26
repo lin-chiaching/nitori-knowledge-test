@@ -34,7 +34,6 @@ POWER_BI_URL = (
 # 日系貓咪 UI
 # ============================================================
 
-# 使用 st.html 放 CSS，不再使用 st.markdown 顯示 HTML
 try:
     st.html("""
     <style>
@@ -43,15 +42,19 @@ try:
         background: #F7F4EE;
         color: #5F5A53;
     }
+
     [data-testid="stHeader"] {
         background: transparent !important;
     }
+
     .block-container {
         padding-top: 3.5rem;
         padding-bottom: 3rem;
         max-width: 1400px;
     }
+
     /* 知識庫搜尋框 */
+
     [data-testid="stTextInput"] input {
         height: 52px !important;
         font-size: 17px !important;
@@ -69,6 +72,7 @@ try:
     [data-testid="stTextInput"] input::placeholder {
         color: #A9A096 !important;
     }
+
     h1, h2, h3, h4 {
         color: #514C45 !important;
     }
@@ -110,61 +114,53 @@ try:
         border-radius: 10px !important;
     }
 
-    /* =========================
-       浮動客服小幫手
-       ========================= */
+    /* =========================================================
+       🐱 浮動客服小幫手
+       ========================================================= */
 
-/* =========================================================
-   🐱 浮動客服小幫手
-   ========================================================= */
+    [data-testid="stPopover"] {
+        position: fixed !important;
+        right: 22px !important;
+        bottom: 22px !important;
+        z-index: 999999 !important;
 
-[data-testid="stPopover"] {
-    position: fixed !important;
-    right: 22px !important;
-    bottom: 22px !important;
-    z-index: 999999 !important;
+        width: 58px !important;
+        height: 58px !important;
 
-    width: 58px !important;
-    height: 58px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
 
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
+    [data-testid="stPopover"] > button {
+        width: 58px !important;
+        height: 58px !important;
+        min-width: 58px !important;
+        min-height: 58px !important;
 
-[data-testid="stPopover"] > button {
-    width: 58px !important;
-    height: 58px !important;
-    min-width: 58px !important;
-    min-height: 58px !important;
+        padding: 0 !important;
+        margin: 0 !important;
 
-    padding: 0 !important;
-    margin: 0 !important;
+        border-radius: 50% !important;
 
-    border-radius: 50% !important;
+        background: #FFFDF9 !important;
+        border: 1px solid #D8C9B8 !important;
 
-    background: #FFFDF9 !important;
-    border: 1px solid #D8C9B8 !important;
+        box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
 
-    box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
+        font-size: 27px !important;
+    }
 
-    font-size: 27px !important;
-}
-
-[data-testid="stPopover"] > button:hover {
-    transform: scale(1.08);
-    border-color: #B9785E !important;
-}
-
-[data-testid="stPopover"] > button:focus {
-    outline: none !important;
-    box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
-}
     [data-testid="stPopover"] > button:hover {
-        transform: scale(1.05);
+        transform: scale(1.08);
         border-color: #B9785E !important;
+    }
+
+    [data-testid="stPopover"] > button:focus {
+        outline: none !important;
+        box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
     }
 
     </style>
@@ -191,9 +187,6 @@ def normalize_search_text(value):
 
 
 def clean_announcement_content(text):
-    """
-    將公告中的 HTML / Markdown / SVG / 多餘標籤整理成純文字。
-    """
 
     if text is None or pd.isna(text):
         return ""
@@ -274,6 +267,7 @@ def clean_announcement_content(text):
 
 
 def clean_announcement_title(text):
+
     text = clean_announcement_content(text)
 
     text = text.replace("📌", "").strip()
@@ -425,6 +419,63 @@ def load_pending_questions():
         sheet_name=sheet,
         dtype=str
     ).fillna("")
+
+
+# ============================================================
+# 客訴資料
+# ============================================================
+
+@st.cache_data(ttl=60)
+def load_complaints():
+
+    sheet = find_sheet(
+        ["客訴資料"]
+    )
+
+    if not sheet:
+        return pd.DataFrame()
+
+    df = pd.read_excel(
+        EXCEL_PATH,
+        sheet_name=sheet,
+        dtype=str
+    ).fillna("")
+
+    # 確保必要欄位存在
+    expected_columns = [
+        "序號",
+        "日期",
+        "月份",
+        "購買通路",
+        "商品編號",
+        "商品名稱",
+        "客訴類型",
+        "客訴細項",
+        "客訴內容",
+        "處理方式",
+        "處理結果",
+        "備註"
+    ]
+
+    for col in expected_columns:
+        if col not in df.columns:
+            df[col] = ""
+
+    # 日期轉換
+    df["_日期"] = pd.to_datetime(
+        df["日期"],
+        errors="coerce"
+    )
+
+    # 從日期自動產生月份
+    df["_月份"] = df["_日期"].dt.strftime("%Y/%m")
+
+    # 如果日期無法辨識，再使用 Excel 原本的月份
+    df["_月份"] = df["_月份"].fillna(
+        df["月份"].apply(clean_text)
+    )
+
+    return df
 
 
 # ============================================================
@@ -821,6 +872,7 @@ with st.sidebar:
         [
             "🏠 首頁",
             "🔍 知識搜尋",
+            "📊 客訴資料統計",
             "🗺️ 門市地圖",
             "📢 公告＆常用工具",
             "🛠️ 資料維護"
@@ -841,10 +893,6 @@ with st.sidebar:
 
 if page == "🏠 首頁":
 
-    # --------------------------------------------------------
-    # Hero
-    # --------------------------------------------------------
-
     st.title(
         "🐱 客服作業系統"
     )
@@ -856,10 +904,6 @@ if page == "🏠 首頁":
     st.info(
         "🌿 今天也辛苦了，讓小貓陪你一起找資料"
     )
-
-    # --------------------------------------------------------
-    # Quick Access
-    # --------------------------------------------------------
 
     st.subheader(
         "QUICK ACCESS"
@@ -898,10 +942,6 @@ if page == "🏠 首頁":
         )
 
     st.divider()
-
-    # --------------------------------------------------------
-    # 最新公告
-    # --------------------------------------------------------
 
     st.subheader(
         "📢 LATEST ANNOUNCEMENTS"
@@ -995,7 +1035,10 @@ elif page == "🔍 知識搜尋":
         "輸入顧客詢問的關鍵字，小貓會幫你找出相關資料。"
     )
 
-    st.markdown("### 找找看顧客問題")
+    st.markdown(
+        "### 找找看顧客問題"
+    )
+
     keyword = st.text_input(
         "搜尋關鍵字",
         placeholder="輸入顧客問題，例如：床墊有味道、床包尺寸、退貨方式……",
@@ -1139,6 +1182,394 @@ elif page == "🔍 知識搜尋":
 
         st.info(
             "🐾 輸入關鍵字開始搜尋"
+        )
+
+
+# ============================================================
+# 客訴資料統計
+# ============================================================
+
+elif page == "📊 客訴資料統計":
+
+    st.title(
+        "📊 客訴資料統計"
+    )
+
+    st.caption(
+        "整理客訴資料，查看客訴趨勢、類型與細項分布。"
+    )
+
+    complaints = load_complaints()
+
+    if complaints.empty:
+
+        st.info(
+            "目前尚無客訴資料，請確認 Excel 中是否已建立「客訴資料」工作表。"
+        )
+
+    else:
+
+        # ----------------------------------------------------
+        # 篩選條件
+        # ----------------------------------------------------
+
+        st.subheader(
+            "🔎 資料篩選"
+        )
+
+        filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
+
+        # 月份
+        month_options = sorted(
+            [
+                x for x in complaints["_月份"].dropna().unique()
+                if clean_text(x)
+            ],
+            reverse=True
+        )
+
+        with filter_col1:
+
+            selected_month = st.selectbox(
+                "月份",
+                ["全部"] + month_options
+            )
+
+        # 購買通路
+        channel_options = sorted(
+            [
+                x for x in complaints["購買通路"].dropna().unique()
+                if clean_text(x)
+            ]
+        )
+
+        with filter_col2:
+
+            selected_channel = st.selectbox(
+                "購買通路",
+                ["全部"] + channel_options
+            )
+
+        # 客訴類型
+        type_options = sorted(
+            [
+                x for x in complaints["客訴類型"].dropna().unique()
+                if clean_text(x)
+            ]
+        )
+
+        with filter_col3:
+
+            selected_type = st.selectbox(
+                "客訴類型",
+                ["全部"] + type_options
+            )
+
+        # 客訴細項
+        detail_options = sorted(
+            [
+                x for x in complaints["客訴細項"].dropna().unique()
+                if clean_text(x)
+            ]
+        )
+
+        with filter_col4:
+
+            selected_detail = st.selectbox(
+                "客訴細項",
+                ["全部"] + detail_options
+            )
+
+        # ----------------------------------------------------
+        # 套用篩選
+        # ----------------------------------------------------
+
+        filtered = complaints.copy()
+
+        if selected_month != "全部":
+
+            filtered = filtered[
+                filtered["_月份"] == selected_month
+            ]
+
+        if selected_channel != "全部":
+
+            filtered = filtered[
+                filtered["購買通路"] == selected_channel
+            ]
+
+        if selected_type != "全部":
+
+            filtered = filtered[
+                filtered["客訴類型"] == selected_type
+            ]
+
+        if selected_detail != "全部":
+
+            filtered = filtered[
+                filtered["客訴細項"] == selected_detail
+            ]
+
+        # ----------------------------------------------------
+        # 統計數字
+        # ----------------------------------------------------
+
+        st.divider()
+
+        total_count = len(filtered)
+
+        current_month = datetime.now().strftime("%Y/%m")
+
+        current_month_count = len(
+            complaints[
+                complaints["_月份"] == current_month
+            ]
+        )
+
+        product_count = len(
+            filtered[
+                filtered["客訴類型"].astype(str).str.contains(
+                    "商品",
+                    na=False
+                )
+            ]
+        )
+
+        other_count = total_count - product_count
+
+        card1, card2, card3, card4 = st.columns(4)
+
+        with card1:
+
+            st.metric(
+                "📋 篩選後客訴",
+                f"{total_count} 件"
+            )
+
+        with card2:
+
+            st.metric(
+                "📅 本月客訴",
+                f"{current_month_count} 件"
+            )
+
+        with card3:
+
+            st.metric(
+                "📦 商品相關",
+                f"{product_count} 件"
+            )
+
+        with card4:
+
+            st.metric(
+                "📝 其他類型",
+                f"{other_count} 件"
+            )
+
+        st.divider()
+
+        # ----------------------------------------------------
+        # 每月客訴趨勢
+        # ----------------------------------------------------
+
+        st.subheader(
+            "📈 每月客訴趨勢"
+        )
+
+        monthly_data = (
+            filtered[
+                filtered["_月份"].astype(str).str.strip() != ""
+            ]
+            .groupby("_月份")
+            .size()
+            .reset_index(name="客訴件數")
+        )
+
+        if monthly_data.empty:
+
+            st.info(
+                "目前沒有足夠的月份資料可以統計。"
+            )
+
+        else:
+
+            monthly_data = monthly_data.sort_values(
+                "_月份"
+            )
+
+            monthly_chart = monthly_data.set_index(
+                "_月份"
+            )
+
+            st.line_chart(
+                monthly_chart["客訴件數"],
+                use_container_width=True
+            )
+
+        st.divider()
+
+        # ----------------------------------------------------
+        # 客訴類型＆細項
+        # ----------------------------------------------------
+
+        chart_col1, chart_col2 = st.columns(2)
+
+        with chart_col1:
+
+            st.subheader(
+                "📊 客訴類型"
+            )
+
+            type_data = (
+                filtered[
+                    filtered["客訴類型"].astype(str).str.strip() != ""
+                ]
+                .groupby("客訴類型")
+                .size()
+                .reset_index(name="件數")
+                .sort_values(
+                    "件數",
+                    ascending=False
+                )
+            )
+
+            if type_data.empty:
+
+                st.info(
+                    "目前沒有客訴類型資料。"
+                )
+
+            else:
+
+                type_chart = type_data.set_index(
+                    "客訴類型"
+                )
+
+                st.bar_chart(
+                    type_chart["件數"],
+                    use_container_width=True
+                )
+
+        with chart_col2:
+
+            st.subheader(
+                "📊 客訴細項"
+            )
+
+            detail_data = (
+                filtered[
+                    filtered["客訴細項"].astype(str).str.strip() != ""
+                ]
+                .groupby("客訴細項")
+                .size()
+                .reset_index(name="件數")
+                .sort_values(
+                    "件數",
+                    ascending=False
+                )
+            )
+
+            if detail_data.empty:
+
+                st.info(
+                    "目前沒有客訴細項資料。"
+                )
+
+            else:
+
+                detail_chart = detail_data.set_index(
+                    "客訴細項"
+                )
+
+                st.bar_chart(
+                    detail_chart["件數"],
+                    use_container_width=True
+                )
+
+        st.divider()
+
+        # ----------------------------------------------------
+        # 購買通路
+        # ----------------------------------------------------
+
+        st.subheader(
+            "🛒 購買通路"
+        )
+
+        channel_data = (
+            filtered[
+                filtered["購買通路"].astype(str).str.strip() != ""
+            ]
+            .groupby("購買通路")
+            .size()
+            .reset_index(name="件數")
+            .sort_values(
+                "件數",
+                ascending=False
+            )
+        )
+
+        if channel_data.empty:
+
+            st.info(
+                "目前沒有購買通路資料。"
+            )
+
+        else:
+
+            channel_chart = channel_data.set_index(
+                "購買通路"
+            )
+
+            st.bar_chart(
+                channel_chart["件數"],
+                use_container_width=True
+            )
+
+        st.divider()
+
+        # ----------------------------------------------------
+        # 客訴資料明細
+        # ----------------------------------------------------
+
+        st.subheader(
+            "📋 客訴資料明細"
+        )
+
+        st.caption(
+            f"目前顯示 {len(filtered)} 筆資料"
+        )
+
+        display_columns = [
+            "序號",
+            "日期",
+            "月份",
+            "購買通路",
+            "商品編號",
+            "商品名稱",
+            "客訴類型",
+            "客訴細項",
+            "客訴內容",
+            "處理方式",
+            "處理結果",
+            "備註"
+        ]
+
+        display_columns = [
+            c for c in display_columns
+            if c in filtered.columns
+        ]
+
+        display_df = filtered[
+            display_columns
+        ].copy()
+
+        st.dataframe(
+            display_df,
+            use_container_width=True,
+            hide_index=True,
+            height=500
         )
 
 
@@ -1603,11 +2034,6 @@ elif page == "🛠️ 資料維護":
 
 # ============================================================
 # 🐱 浮動客服小幫手
-# ============================================================
-#
-# 注意：
-# 這一段刻意放在所有 page 判斷的最後面，
-# 因此不管你現在在哪一頁，都可以使用右下角小貓。
 # ============================================================
 
 with st.popover("🐱"):
