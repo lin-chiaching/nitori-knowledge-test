@@ -2074,6 +2074,7 @@ def sidebar_button(label, key):
         label,
         key=key,
         use_container_width=True
+        type="primary" if is_current else "secondary"
     ):
         st.session_state["current_page"] = label
         st.rerun()
