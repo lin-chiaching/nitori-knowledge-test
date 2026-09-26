@@ -94,17 +94,51 @@ try:
         color: #554F48 !important;
     }
 
-    .stButton > button {
-        border-radius: 12px;
-        border: 1px solid #D8C9B8;
-        background: #FFFDF9;
-        color: #5F5A53;
-    }
+    /* =========================================================
+   側邊欄按鈕
+   ========================================================= */
 
-    .stButton > button:hover {
-        border-color: #B9785E;
-        color: #8A5E4C;
-    }
+[data-testid="stSidebar"] .stButton > button {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 14px;
+
+    border-radius: 12px;
+    border: 1px solid transparent;
+
+    background: transparent;
+    color: #625C54;
+
+    text-align: left;
+    font-size: 15px;
+    font-weight: 500;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: #FFF9F2;
+    border-color: #D8C9B8;
+    color: #8A5E4C;
+
+    transform: translateX(2px);
+}
+
+[data-testid="stSidebar"] .stButton > button:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* 目前頁面的視覺效果 */
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+    background: #E5D4C5 !important;
+    border-color: #D2B9A5 !important;
+    color: #704D3D !important;
+    font-weight: 700;
+}
 
     input,
     textarea,
