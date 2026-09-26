@@ -3200,6 +3200,30 @@ elif page == "🛠️ 資料維護":
 # 🐱 浮動客服小幫手
 # ============================================================
 
+# ------------------------------------------------------------
+# 初始化小幫手狀態
+# ------------------------------------------------------------
+
+if "assistant_searched" not in st.session_state:
+    st.session_state["assistant_searched"] = False
+
+if "assistant_found" not in st.session_state:
+    st.session_state["assistant_found"] = False
+
+if "assistant_result" not in st.session_state:
+    st.session_state["assistant_result"] = pd.DataFrame()
+
+if "assistant_question_saved" not in st.session_state:
+    st.session_state["assistant_question_saved"] = ""
+
+if "assistant_submit_message" not in st.session_state:
+    st.session_state["assistant_submit_message"] = ""
+
+
+# ============================================================
+# 浮動小幫手
+# ============================================================
+
 with st.popover("🐱"):
 
     st.subheader(
@@ -3210,11 +3234,19 @@ with st.popover("🐱"):
         "先從知識庫幫你找答案"
     )
 
+    # --------------------------------------------------------
+    # 顧客問題輸入
+    # --------------------------------------------------------
+
     assistant_question = st.text_input(
         "顧客問題",
         placeholder="例如：床墊有味道怎麼辦？",
         key="floating_assistant_question"
     )
+
+    # --------------------------------------------------------
+    # 搜尋按鈕
+    # --------------------------------------------------------
 
     assistant_search = st.button(
         "🔍 幫我找答案",
@@ -3223,9 +3255,21 @@ with st.popover("🐱"):
         key="floating_assistant_search"
     )
 
+    # --------------------------------------------------------
+    # 按下搜尋
+    # --------------------------------------------------------
+
     if assistant_search:
 
-        if not assistant_question.strip():
+        question = clean_text(
+            assistant_question
+        )
+
+        if not question:
+
+            st.session_state["assistant_searched"] = False
+            st.session_state["assistant_found"] = False
+            st.session_state["assistant_result"] = pd.DataFrame()
 
             st.warning(
                 "請先輸入顧客問題。"
@@ -3233,192 +3277,321 @@ with st.popover("🐱"):
 
         else:
 
-            found, result = (
-                ask_customer_assistant(
-                    assistant_question
+            found, result = ask_customer_assistant(
+                question
+            )
+
+            # ------------------------------------------------
+            # 把搜尋結果記住
+            # ------------------------------------------------
+
+            st.session_state["assistant_searched"] = True
+
+            st.session_state["assistant_found"] = (
+                found and not result.empty
+            )
+
+            st.session_state["assistant_result"] = result
+
+            st.session_state["assistant_question"] = question
+
+            # 每次重新搜尋都清除上次提交狀態
+            st.session_state["assistant_question_saved"] = ""
+
+            st.session_state["assistant_submit_message"] = ""
+
+
+    # ========================================================
+    # 顯示搜尋結果
+    # ========================================================
+
+    if st.session_state.get(
+        "assistant_searched",
+        False
+    ):
+
+        result = st.session_state.get(
+            "assistant_result",
+            pd.DataFrame()
+        )
+
+        found = st.session_state.get(
+            "assistant_found",
+            False
+        )
+
+        question_to_submit = st.session_state.get(
+            "assistant_question",
+            ""
+        )
+
+        # ====================================================
+        # 找到答案
+        # ====================================================
+
+        if found and not result.empty:
+
+            best = result.iloc[0]
+
+            title = clean_text(
+                best.get(
+                    "問題摘要",
+                    "相關問題"
                 )
             )
 
-            if (
-                found
-                and not result.empty
-            ):
-
-                best = result.iloc[0]
-
-                title = clean_text(
-                    best.get(
-                        "問題摘要",
-                        "相關問題"
-                    )
+            answer = clean_text(
+                best.get(
+                    "標準回覆",
+                    ""
                 )
+            )
 
-                answer = clean_text(
-                    best.get(
-                        "標準回覆",
-                        ""
-                    )
+            judgment = clean_text(
+                best.get(
+                    "判斷依據",
+                    ""
                 )
+            )
 
-                judgment = clean_text(
-                    best.get(
-                        "判斷依據",
-                        ""
-                    )
+            source = clean_text(
+                best.get(
+                    "資料來源",
+                    ""
                 )
+            )
 
-                source = clean_text(
-                    best.get(
-                        "資料來源",
-                        ""
-                    )
+            score = float(
+                best.get(
+                    "_final_score",
+                    0
                 )
+            )
 
-                score = float(
-                    best.get(
-                        "_final_score",
-                        0
-                    )
-                )
+            st.success(
+                "🐾 找到相關資料"
+            )
 
-                st.success(
-                    "🐾 找到相關資料"
-                )
+            st.markdown(
+                "**問題**"
+            )
+
+            st.write(
+                title
+            )
+
+            st.markdown(
+                "**💬 建議回覆**"
+            )
+
+            st.write(
+                answer
+            )
+
+            if judgment:
 
                 st.markdown(
-                    "**問題**"
+                    "**🔎 判斷依據**"
                 )
 
                 st.write(
-                    title
+                    judgment
                 )
 
+            if source:
+
                 st.markdown(
-                    "**💬 建議回覆**"
+                    "**📚 資料來源**"
                 )
 
                 st.write(
-                    answer
+                    source
                 )
 
-                if judgment:
+            st.caption(
+                f"相關度 {score:.1%}"
+            )
 
-                    st.markdown(
-                        "**🔎 判斷依據**"
-                    )
+            # ------------------------------------------------
+            # 其他相關資料
+            # ------------------------------------------------
 
-                    st.write(
-                        judgment
-                    )
+            if len(result) > 1:
 
-                if source:
+                st.divider()
 
-                    st.markdown(
-                        "**📚 資料來源**"
-                    )
-
-                    st.write(
-                        source
-                    )
-
-                st.caption(
-                    f"相關度 {score:.1%}"
+                st.markdown(
+                    "#### 🔎 其他相關資料"
                 )
 
-                if len(result) > 1:
-
-                    st.divider()
-
-                    st.markdown(
-                        "#### 🔎 其他相關資料"
+                for i in range(
+                    1,
+                    min(
+                        len(result),
+                        4
                     )
+                ):
 
-                    for i in range(
-                        1,
-                        min(
-                            len(result),
-                            4
+                    row = result.iloc[i]
+
+                    other_title = clean_text(
+                        row.get(
+                            "問題摘要",
+                            "相關問題"
                         )
+                    )
+
+                    other_score = float(
+                        row.get(
+                            "_final_score",
+                            0
+                        )
+                    )
+
+                    with st.container(
+                        border=True
                     ):
 
-                        row = result.iloc[i]
-
-                        other_title = clean_text(
-                            row.get(
-                                "問題摘要",
-                                "相關問題"
-                            )
+                        st.write(
+                            other_title
                         )
 
-                        other_score = float(
-                            row.get(
-                                "_final_score",
-                                0
-                            )
+                        st.caption(
+                            f"相關度 {other_score:.1%}"
                         )
 
-                        with st.container(
-                            border=True
-                        ):
 
-                            st.write(
-                                other_title
-                            )
+        # ====================================================
+        # 沒找到答案
+        # ====================================================
 
-                            st.caption(
-                                f"相關度 {other_score:.1%}"
-                            )
+        else:
+
+            st.warning(
+                "🐱 目前沒有找到足夠相關的資料"
+            )
+
+            st.write(
+                "這個問題目前可能還沒有建立在知識庫裡。"
+            )
+
+            st.write(
+                "可以先不要直接使用答案，"
+                "建議送到「待審核問題」，"
+                "確認後再加入正式知識庫。"
+            )
+
+            st.divider()
+
+            st.markdown(
+                "### 📝 要把這個問題送去審核嗎？"
+            )
+
+            st.caption(
+                f"目前問題：{question_to_submit}"
+            )
+
+            # ------------------------------------------------
+            # 已經成功提交過
+            # ------------------------------------------------
+
+            saved_question = st.session_state.get(
+                "assistant_question_saved",
+                ""
+            )
+
+            if (
+                saved_question
+                and saved_question == question_to_submit
+            ):
+
+                st.success(
+                    "🎉 已成功加入待審核問題！"
+                )
+
+                st.info(
+                    "請到「🛠️ 資料維護 → 📝 待審核問題」查看。"
+                )
+
+            # ------------------------------------------------
+            # 尚未提交
+            # ------------------------------------------------
 
             else:
 
-                st.warning(
-                    "🐱 目前沒有找到足夠相關的資料"
-                )
-
-                st.write(
-                    "這個問題目前可能還沒有建立在知識庫裡。"
-                )
-
-                st.write(
-                    "可以先不要直接使用答案，"
-                    "建議送到「待審核問題」，"
-                    "確認後再加入正式知識庫。"
-                )
-
-                # =================================================
-                # ⭐ 提出待審核問題
-                # =================================================
-
-                if st.button(
+                submit_pending = st.button(
                     "📝 提出這個問題給我審核",
                     type="primary",
                     use_container_width=True,
                     key="floating_submit_pending"
-                ):
+                )
 
-                    st.write(
-                        "🔍 正在提交問題……"
+                if submit_pending:
+
+                    # ----------------------------------------
+                    # 先確認問題不是空的
+                    # ----------------------------------------
+
+                    question_to_submit = clean_text(
+                        question_to_submit
                     )
 
-                    success = add_pending_question(
-                        assistant_question
-                    )
+                    if not question_to_submit:
 
-                    if success:
-
-                        st.success(
-                            "🎉 已加入待審核問題！"
+                        st.error(
+                            "❌ 沒有取得要提交的問題，請重新搜尋一次。"
                         )
-
-                        st.info(
-                            "請到「資料維護 → 待審核問題」查看。"
-                        )
-
-                        # 不立即 rerun，
-                        # 讓使用者確實看到成功訊息
 
                     else:
 
-                        st.error(
-                            "❌ 提交失敗，請確認上方錯誤訊息。"
+                        st.info(
+                            "🔄 正在將問題加入待審核清單……"
                         )
+
+                        # ------------------------------------
+                        # 實際寫入 Excel
+                        # ------------------------------------
+
+                        success = add_pending_question(
+                            question_to_submit
+                        )
+
+                        # ------------------------------------
+                        # 寫入成功
+                        # ------------------------------------
+
+                        if success:
+
+                            # 記住這個問題已經提交
+                            st.session_state[
+                                "assistant_question_saved"
+                            ] = question_to_submit
+
+                            # 清除 cache
+                            st.cache_data.clear()
+
+                            st.success(
+                                "🎉 已成功加入待審核問題！"
+                            )
+
+                            st.info(
+                                "請到「🛠️ 資料維護 → 📝 待審核問題」查看。"
+                            )
+
+                            st.caption(
+                                f"已提交問題：{question_to_submit}"
+                            )
+
+                        # ------------------------------------
+                        # 寫入失敗
+                        # ------------------------------------
+
+                        else:
+
+                            st.error(
+                                "❌ 提交失敗。"
+                            )
+
+                            st.warning(
+                                "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
+                            )
