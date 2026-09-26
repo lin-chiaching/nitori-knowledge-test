@@ -36,6 +36,7 @@ POWER_BI_URL = (
 # ============================================================
 
 try:
+
     st.html("""
     <style>
 
@@ -53,8 +54,6 @@ try:
         padding-bottom: 3rem;
         max-width: 1400px;
     }
-
-    /* 知識庫搜尋框 */
 
     [data-testid="stTextInput"] input {
         height: 52px !important;
@@ -166,6 +165,7 @@ try:
 
     </style>
     """)
+
 except Exception:
     pass
 
@@ -295,7 +295,9 @@ def get_excel_sheets():
     if not EXCEL_PATH.exists():
         return []
 
-    return pd.ExcelFile(EXCEL_PATH).sheet_names
+    return pd.ExcelFile(
+        EXCEL_PATH
+    ).sheet_names
 
 
 def find_sheet(candidates, fallback_index=None):
@@ -407,74 +409,434 @@ def load_tools():
     ).fillna("")
 
 
+# ============================================================
+# 待審核問題
+# ============================================================
+
+PENDING_COLUMNS = [
+    "提出時間",
+    "問題",
+    "建議分類",
+    "狀態",
+    "審核備註"
+]
+
+
 @st.cache_data(ttl=60)
 def load_pending_questions():
 
-    sheet = find_sheet(
-        ["待審核問題"]
-    )
-
-    if not sheet:
-
+    if not EXCEL_PATH.exists():
         return pd.DataFrame(
-            columns=[
-                "提出時間",
-                "問題",
-                "建議分類",
-                "狀態",
-                "審核備註"
-            ]
+            columns=PENDING_COLUMNS
         )
 
-    return pd.read_excel(
-        EXCEL_PATH,
-        sheet_name=sheet,
-        dtype=str
-    ).fillna("")
+    try:
+
+        sheets = get_excel_sheets()
+
+        if "待審核問題" not in sheets:
+
+            return pd.DataFrame(
+                columns=PENDING_COLUMNS
+            )
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name="待審核問題",
+            dtype=str
+        ).fillna("")
+
+        # 確保欄位完整
+        for col in PENDING_COLUMNS:
+
+            if col not in df.columns:
+                df[col] = ""
+
+        # 只保留正確順序
+        df = df[
+            PENDING_COLUMNS
+        ].copy()
+
+        return df
+
+    except Exception as e:
+
+        st.error(
+            f"讀取待審核問題失敗：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=PENDING_COLUMNS
+        )
+
+
+# ============================================================
+# 儲存 Excel
+# ============================================================
+
+def save_sheet(sheet_name, data):
+
+    if not EXCEL_PATH.exists():
+
+        st.error(
+            "找不到 Excel：DATA/知識庫實驗品.xlsx"
+        )
+
+        return False
+
+    try:
+
+        wb = openpyxl.load_workbook(
+            EXCEL_PATH
+        )
+
+        # 如果工作表已存在，刪除後重新建立
+        if sheet_name in wb.sheetnames:
+
+            ws_old = wb[sheet_name]
+
+            wb.remove(
+                ws_old
+            )
+
+        ws = wb.create_sheet(
+            sheet_name
+        )
+
+        # 寫入欄位名稱
+        for c, col in enumerate(
+            data.columns,
+            1
+        ):
+
+            ws.cell(
+                1,
+                c,
+                str(col)
+            )
+
+        # 寫入資料
+        for r, row in enumerate(
+            data.itertuples(index=False),
+            2
+        ):
+
+            for c, value in enumerate(
+                row,
+                1
+            ):
+
+                if pd.isna(value):
+                    value = ""
+
+                ws.cell(
+                    r,
+                    c,
+                    value
+                )
+
+        wb.save(
+            EXCEL_PATH
+        )
+
+        # 清除 Streamlit 快取
+        st.cache_data.clear()
+
+        return True
+
+    except PermissionError:
+
+        st.error(
+            "❌ Excel 目前可能正在被開啟，請先關閉「知識庫實驗品.xlsx」後再試一次。"
+        )
+
+        return False
+
+    except Exception as e:
+
+        st.error(
+            f"❌ 儲存失敗：{e}"
+        )
+
+        return False
+
+
+def save_knowledge_data(data):
+
+    sheet = find_sheet(
+        ["知識庫", "問題集", "Sheet1"],
+        0
+    )
+
+    if sheet:
+
+        return save_sheet(
+            sheet,
+            data
+        )
+
+    return False
+
+
+# ============================================================
+# ⭐ 新增待審核問題
+# ============================================================
 
 def add_pending_question(question):
 
-    question = clean_text(question)
+    question = clean_text(
+        question
+    )
 
     if not question:
         return False
 
-    # 讀取目前待審核問題
-    pending = load_pending_questions()
+    if not EXCEL_PATH.exists():
 
-    # 避免同一個問題重複提交
-    if not pending.empty and "問題" in pending.columns:
-        existing_questions = (
-            pending["問題"]
-            .astype(str)
-            .str.strip()
+        st.error(
+            "❌ 找不到 Excel 檔案。"
         )
 
-        if question in existing_questions.values:
+        return False
+
+    try:
+
+        # ----------------------------------------------------
+        # 開啟 Excel
+        # ----------------------------------------------------
+
+        wb = openpyxl.load_workbook(
+            EXCEL_PATH
+        )
+
+        sheet_name = "待審核問題"
+
+        # ----------------------------------------------------
+        # 如果沒有工作表 → 自動建立
+        # ----------------------------------------------------
+
+        if sheet_name not in wb.sheetnames:
+
+            ws = wb.create_sheet(
+                sheet_name
+            )
+
+            headers = PENDING_COLUMNS
+
+            for c, header in enumerate(
+                headers,
+                1
+            ):
+
+                ws.cell(
+                    1,
+                    c,
+                    header
+                )
+
+        else:
+
+            ws = wb[sheet_name]
+
+            # ------------------------------------------------
+            # 確認第一列是否有標題
+            # ------------------------------------------------
+
+            existing_headers = [
+                ws.cell(
+                    1,
+                    c
+                ).value
+                for c in range(
+                    1,
+                    max(
+                        ws.max_column,
+                        len(PENDING_COLUMNS)
+                    ) + 1
+                )
+            ]
+
+            existing_headers = [
+                clean_text(x)
+                for x in existing_headers
+            ]
+
+            # 如果標題不完整，補齊
+            for index, header in enumerate(
+                PENDING_COLUMNS,
+                1
+            ):
+
+                if (
+                    index > ws.max_column
+                    or not clean_text(
+                        ws.cell(
+                            1,
+                            index
+                        ).value
+                    )
+                ):
+
+                    ws.cell(
+                        1,
+                        index,
+                        header
+                    )
+
+        # ----------------------------------------------------
+        # 檢查是否重複
+        # ----------------------------------------------------
+
+        existing_questions = []
+
+        if ws.max_row >= 2:
+
+            # 找「問題」欄位位置
+            problem_column = None
+
+            for c in range(
+                1,
+                ws.max_column + 1
+            ):
+
+                header = clean_text(
+                    ws.cell(
+                        1,
+                        c
+                    ).value
+                )
+
+                if header == "問題":
+
+                    problem_column = c
+                    break
+
+            # 找不到就預設第 2 欄
+            if problem_column is None:
+
+                problem_column = 2
+
+            for r in range(
+                2,
+                ws.max_row + 1
+            ):
+
+                value = clean_text(
+                    ws.cell(
+                        r,
+                        problem_column
+                    ).value
+                )
+
+                if value:
+
+                    existing_questions.append(
+                        value
+                    )
+
+        if question in existing_questions:
+
+            wb.save(
+                EXCEL_PATH
+            )
+
+            st.cache_data.clear()
+
             return True
 
-    # 建立新的待審核資料
-    new_row = pd.DataFrame([
-        {
-            "提出時間": datetime.now().strftime("%Y/%m/%d %H:%M"),
-            "問題": question,
-            "建議分類": "",
-            "狀態": "待審核",
-            "審核備註": ""
-        }
-    ])
+        # ----------------------------------------------------
+        # 新增一筆
+        # ----------------------------------------------------
 
-    # 合併資料
-    pending = pd.concat(
-        [pending, new_row],
-        ignore_index=True
-    )
+        new_row = [
+            datetime.now().strftime(
+                "%Y/%m/%d %H:%M"
+            ),
+            question,
+            "",
+            "待審核",
+            ""
+        ]
 
-    # 儲存回 Excel
-    return save_sheet(
-        "待審核問題",
-        pending
-    )
+        ws.append(
+            new_row
+        )
+
+        # ----------------------------------------------------
+        # 儲存
+        # ----------------------------------------------------
+
+        wb.save(
+            EXCEL_PATH
+        )
+
+        # 確認真的寫進去了
+        wb_check = openpyxl.load_workbook(
+            EXCEL_PATH,
+            read_only=True,
+            data_only=True
+        )
+
+        if sheet_name not in wb_check.sheetnames:
+
+            wb_check.close()
+
+            st.error(
+                "❌ Excel 儲存後找不到「待審核問題」工作表。"
+            )
+
+            return False
+
+        ws_check = wb_check[
+            sheet_name
+        ]
+
+        saved = False
+
+        for row in ws_check.iter_rows(
+            min_row=2,
+            values_only=True
+        ):
+
+            if (
+                len(row) >= 2
+                and clean_text(row[1]) == question
+            ):
+
+                saved = True
+                break
+
+        wb_check.close()
+
+        # 清除所有 cache
+        st.cache_data.clear()
+
+        if saved:
+            return True
+
+        st.error(
+            "❌ 已執行儲存，但重新讀取 Excel 時沒有找到這筆問題。"
+        )
+
+        return False
+
+    except PermissionError:
+
+        st.error(
+            "❌ Excel 目前正在被開啟，請先關閉「知識庫實驗品.xlsx」再提交。"
+        )
+
+        return False
+
+    except Exception as e:
+
+        st.error(
+            f"❌ 待審核問題儲存失敗：{e}"
+        )
+
+        return False
+
+
 # ============================================================
 # 客訴資料
 # ============================================================
@@ -532,106 +894,23 @@ def load_complaints():
 
 
 # ============================================================
-# 儲存
-# ============================================================
-
-def save_sheet(sheet_name, data):
-
-    if not EXCEL_PATH.exists():
-
-        st.error(
-            "找不到 Excel：DATA/知識庫實驗品.xlsx"
-        )
-
-        return False
-
-    try:
-
-        wb = openpyxl.load_workbook(
-            EXCEL_PATH
-        )
-
-        if sheet_name in wb.sheetnames:
-
-            ws = wb[sheet_name]
-
-            wb.remove(ws)
-
-        ws = wb.create_sheet(sheet_name)
-
-        for c, col in enumerate(
-            data.columns,
-            1
-        ):
-
-            ws.cell(
-                1,
-                c,
-                col
-            )
-
-        for r, row in enumerate(
-            data.itertuples(index=False),
-            2
-        ):
-
-            for c, value in enumerate(
-                row,
-                1
-            ):
-
-                ws.cell(
-                    r,
-                    c,
-                    value
-                )
-
-        wb.save(EXCEL_PATH)
-
-        st.cache_data.clear()
-
-        return True
-
-    except Exception as e:
-
-        st.error(
-            f"儲存失敗：{e}"
-        )
-
-        return False
-
-
-def save_knowledge_data(data):
-
-    sheet = find_sheet(
-        ["知識庫", "問題集", "Sheet1"],
-        0
-    )
-
-    if sheet:
-
-        return save_sheet(
-            sheet,
-            data
-        )
-
-    return False
-
-
-# ============================================================
 # 搜尋詞擴充
 # ============================================================
 
 def expand_search_word(keyword):
 
-    keyword = clean_text(keyword)
+    keyword = clean_text(
+        keyword
+    )
 
     if not keyword:
         return ""
 
     synonym_df = load_synonyms()
 
-    words = [keyword]
+    words = [
+        keyword
+    ]
 
     if (
         not synonym_df.empty
@@ -642,8 +921,13 @@ def expand_search_word(keyword):
 
         for _, row in synonym_df.iterrows():
 
-            left = clean_text(row[a])
-            right = clean_text(row[b])
+            left = clean_text(
+                row[a]
+            )
+
+            right = clean_text(
+                row[b]
+            )
 
             if not left and not right:
                 continue
@@ -677,12 +961,15 @@ def expand_search_word(keyword):
                 and keyword_normalized in right_normalized
             ):
 
-                words.append(left)
+                words.append(
+                    left
+                )
 
     return " ".join(
         dict.fromkeys(
             [
-                x for x in words
+                x
+                for x in words
                 if clean_text(x)
             ]
         )
@@ -695,23 +982,13 @@ def expand_search_word(keyword):
 
 def split_search_terms(keyword):
 
-    """
-    把使用者輸入拆成多個搜尋詞。
-
-    支援：
-    床墊 異味
-    床墊+異味
-    床墊、異味
-    床墊/異味
-    床墊 以及 異味
-    """
-
-    keyword = clean_text(keyword)
+    keyword = clean_text(
+        keyword
+    )
 
     if not keyword:
         return []
 
-    # 常見客服問句中的無意義詞
     stop_words = {
         "請問",
         "想問",
@@ -747,7 +1024,6 @@ def split_search_terms(keyword):
         "謝謝妳"
     }
 
-    # 明確分隔符
     parts = re.split(
         r"[\s,，、/／+＋&＆|｜;；]+",
         keyword
@@ -757,17 +1033,20 @@ def split_search_terms(keyword):
 
     for part in parts:
 
-        part = clean_text(part)
+        part = clean_text(
+            part
+        )
 
         if not part:
             continue
 
-        normalized = normalize_search_text(part)
+        normalized = normalize_search_text(
+            part
+        )
 
         if not normalized:
             continue
 
-        # 去除客服常見問句詞
         for stop_word in stop_words:
 
             normalized_stop = normalize_search_text(
@@ -775,15 +1054,17 @@ def split_search_terms(keyword):
             )
 
             if normalized == normalized_stop:
+
                 normalized = ""
+
                 break
 
         if normalized:
-            terms.append(normalized)
 
-    # 如果使用者沒有使用分隔符，
-    # 不強制把整句拆成很多字。
-    # 保留完整句子給 TF-IDF 處理。
+            terms.append(
+                normalized
+            )
+
     if not terms:
 
         normalized = normalize_search_text(
@@ -791,43 +1072,41 @@ def split_search_terms(keyword):
         )
 
         if normalized:
-            terms.append(normalized)
+            terms.append(
+                normalized
+            )
 
     return list(
-        dict.fromkeys(terms)
+        dict.fromkeys(
+            terms
+        )
     )
 
 
 def build_search_terms(keyword):
 
-    """
-    建立真正用來比對的搜尋詞。
-
-    原始搜尋詞
-    ↓
-    多關鍵字拆分
-    ↓
-    同義詞擴充
-    ↓
-    去除重複
-    """
-
-    original = clean_text(keyword)
+    original = clean_text(
+        keyword
+    )
 
     if not original:
         return []
 
-    terms = split_search_terms(original)
+    terms = split_search_terms(
+        original
+    )
 
     expanded_terms = []
 
-    # 先加入原本拆出的關鍵字
-    expanded_terms.extend(terms)
+    expanded_terms.extend(
+        terms
+    )
 
-    # 每個關鍵字再做同義詞擴充
     for term in terms:
 
-        expanded = expand_search_word(term)
+        expanded = expand_search_word(
+            term
+        )
 
         if not expanded:
             continue
@@ -844,17 +1123,17 @@ def build_search_terms(keyword):
             )
 
             if normalized:
+
                 expanded_terms.append(
                     normalized
                 )
 
-    # 如果原句本身是一個完整問題，
-    # 也保留完整句子給 TF-IDF。
     normalized_original = normalize_search_text(
         original
     )
 
     if normalized_original:
+
         expanded_terms.append(
             normalized_original
         )
@@ -862,37 +1141,36 @@ def build_search_terms(keyword):
     return list(
         dict.fromkeys(
             [
-                x for x in expanded_terms
+                x
+                for x in expanded_terms
                 if x
             ]
         )
     )
 
 
-def calculate_fuzzy_similarity(term, value):
+def calculate_fuzzy_similarity(
+    term,
+    value
+):
 
-    """
-    計算模糊文字相似度。
+    term = normalize_search_text(
+        term
+    )
 
-    完全包含 → 1.0
-    部分相似 → 依 SequenceMatcher 計算
-    """
-
-    term = normalize_search_text(term)
-    value = normalize_search_text(value)
+    value = normalize_search_text(
+        value
+    )
 
     if not term or not value:
         return 0.0
 
-    # 完全命中
     if term in value:
         return 1.0
 
-    # 太短的詞不做模糊比對
     if len(term) < 2:
         return 0.0
 
-    # 如果整體很短，直接比較
     if len(value) <= len(term) + 3:
 
         return SequenceMatcher(
@@ -901,15 +1179,16 @@ def calculate_fuzzy_similarity(term, value):
             value
         ).ratio()
 
-    # 針對商品名稱、問題摘要等較長文字，
-    # 使用滑動視窗找最接近的片段。
     window_size = len(term)
 
     best_score = 0.0
 
-    max_start = len(value) - window_size + 1
+    max_start = (
+        len(value)
+        - window_size
+        + 1
+    )
 
-    # 避免極長文字造成過多計算
     if max_start > 120:
 
         positions = list(
@@ -924,6 +1203,7 @@ def calculate_fuzzy_similarity(term, value):
         )
 
         if positions[-1] != max_start - 1:
+
             positions.append(
                 max_start - 1
             )
@@ -957,77 +1237,10 @@ def calculate_fuzzy_similarity(term, value):
     return best_score
 
 
-def calculate_term_match(
-    term,
-    row,
-    fields,
-    weights
+def search_knowledge(
+    keyword,
+    top_n=10
 ):
-
-    """
-    計算單一關鍵字在一筆資料中的命中程度。
-
-    完全命中與模糊命中會有不同權重。
-    """
-
-    best_exact = 0.0
-    best_fuzzy = 0.0
-
-    for field in fields:
-
-        value = normalize_search_text(
-            row.get(field, "")
-        )
-
-        if not value:
-            continue
-
-        field_weight = weights.get(
-            field,
-            20
-        )
-
-        normalized_weight = field_weight / 100
-
-        # 完全包含
-        if term in value:
-
-            exact_score = min(
-                1.0,
-                0.5 + normalized_weight * 0.5
-            )
-
-            if exact_score > best_exact:
-
-                best_exact = exact_score
-
-        # 模糊比對
-        fuzzy_score = calculate_fuzzy_similarity(
-            term,
-            value
-        )
-
-        if fuzzy_score >= 0.62:
-
-            weighted_fuzzy = (
-                fuzzy_score
-                * (
-                    0.55
-                    + normalized_weight * 0.45
-                )
-            )
-
-            if weighted_fuzzy > best_fuzzy:
-
-                best_fuzzy = weighted_fuzzy
-
-    return max(
-        best_exact,
-        best_fuzzy
-    )
-
-
-def search_knowledge(keyword, top_n=10):
 
     df = load_data()
 
@@ -1049,7 +1262,8 @@ def search_knowledge(keyword, top_n=10):
     ]
 
     fields = [
-        c for c in fields
+        c
+        for c in fields
         if c in df.columns
     ]
 
@@ -1066,10 +1280,6 @@ def search_knowledge(keyword, top_n=10):
             top_n
         ).copy()
 
-    # --------------------------------------------------------
-    # 建立搜尋詞
-    # --------------------------------------------------------
-
     search_terms = build_search_terms(
         original_keyword
     )
@@ -1080,21 +1290,15 @@ def search_knowledge(keyword, top_n=10):
             top_n
         ).copy()
 
-    # 原始完整問題
     normalized_query = normalize_search_text(
         original_keyword
     )
 
-    # 同義詞擴充後的完整搜尋文字
     expanded_query = normalize_search_text(
         expand_search_word(
             original_keyword
         )
     )
-
-    # --------------------------------------------------------
-    # 欄位權重
-    # --------------------------------------------------------
 
     weights = {
         "問題摘要": 100,
@@ -1111,7 +1315,7 @@ def search_knowledge(keyword, top_n=10):
     }
 
     # --------------------------------------------------------
-    # 建立 TF-IDF corpus
+    # TF-IDF
     # --------------------------------------------------------
 
     corpus = []
@@ -1123,7 +1327,10 @@ def search_knowledge(keyword, top_n=10):
         for field in fields:
 
             value = normalize_search_text(
-                row.get(field, "")
+                row.get(
+                    field,
+                    ""
+                )
             )
 
             if not value:
@@ -1147,23 +1354,22 @@ def search_knowledge(keyword, top_n=10):
             " ".join(parts)
         )
 
-    # --------------------------------------------------------
-    # TF-IDF
-    # --------------------------------------------------------
-
     vectorizer = TfidfVectorizer(
         analyzer="char",
         ngram_range=(1, 3),
         min_df=1
     )
 
-    query_for_tfidf = expanded_query
-
-    if not query_for_tfidf:
-        query_for_tfidf = normalized_query
+    query_for_tfidf = (
+        expanded_query
+        if expanded_query
+        else normalized_query
+    )
 
     matrix = vectorizer.fit_transform(
-        corpus + [query_for_tfidf]
+        corpus + [
+            query_for_tfidf
+        ]
     )
 
     scores = cosine_similarity(
@@ -1176,23 +1382,14 @@ def search_knowledge(keyword, top_n=10):
     result["_score"] = scores
 
     # --------------------------------------------------------
-    # 多關鍵字命中
+    # 多關鍵字
     # --------------------------------------------------------
 
-    term_coverage_scores = []
-    term_quality_scores = []
-    fuzzy_scores = []
-    direct_scores = []
-
-    # 只使用實際關鍵字，不把完整長句當成獨立詞
     meaningful_terms = []
 
     for term in search_terms:
 
-        # 過長的完整自然語句，
-        # 不拿來做逐詞命中。
         if len(term) > 12:
-
             continue
 
         if term not in meaningful_terms:
@@ -1201,13 +1398,16 @@ def search_knowledge(keyword, top_n=10):
                 term
             )
 
-    # 如果沒有適合拆分的詞，
-    # 至少使用原始搜尋句。
     if not meaningful_terms:
 
         meaningful_terms = [
             normalized_query
         ]
+
+    term_coverage_scores = []
+    term_quality_scores = []
+    fuzzy_scores = []
+    direct_scores = []
 
     for _, row in result.iterrows():
 
@@ -1225,12 +1425,16 @@ def search_knowledge(keyword, top_n=10):
                 continue
 
             best_exact_field_score = 0.0
+
             best_fuzzy_field_score = 0.0
 
             for field in fields:
 
                 value = normalize_search_text(
-                    row.get(field, "")
+                    row.get(
+                        field,
+                        ""
+                    )
                 )
 
                 if not value:
@@ -1241,26 +1445,23 @@ def search_knowledge(keyword, top_n=10):
                     20
                 )
 
-                # ----------------------------
                 # 完全命中
-                # ----------------------------
-
                 if term in value:
 
                     weighted_exact = (
                         field_weight / 100
                     )
 
-                    if weighted_exact > best_exact_field_score:
+                    if (
+                        weighted_exact
+                        > best_exact_field_score
+                    ):
 
                         best_exact_field_score = (
                             weighted_exact
                         )
 
-                # ----------------------------
                 # 模糊命中
-                # ----------------------------
-
                 fuzzy = calculate_fuzzy_similarity(
                     term,
                     value
@@ -1279,7 +1480,10 @@ def search_knowledge(keyword, top_n=10):
                         )
                     )
 
-                    if weighted_fuzzy > best_fuzzy_field_score:
+                    if (
+                        weighted_fuzzy
+                        > best_fuzzy_field_score
+                    ):
 
                         best_fuzzy_field_score = (
                             weighted_fuzzy
@@ -1298,20 +1502,13 @@ def search_knowledge(keyword, top_n=10):
 
                 exact_hit_count += 1
 
-            fuzzy_total += (
-                best_term_score
-            )
-
-            # direct score
-            if best_exact_field_score > 0:
-
                 direct_score += (
                     best_exact_field_score
                 )
 
-        # ----------------------------------------------------
-        # 多關鍵字覆蓋率
-        # ----------------------------------------------------
+            fuzzy_total += (
+                best_term_score
+            )
 
         total_terms = max(
             1,
@@ -1339,7 +1536,6 @@ def search_knowledge(keyword, top_n=10):
             / total_terms
         )
 
-        # 完全命中多個詞時給予額外加分
         multi_exact_bonus = min(
             0.20,
             exact_hit_count * 0.05
@@ -1394,7 +1590,7 @@ def search_knowledge(keyword, top_n=10):
     )
 
     # --------------------------------------------------------
-    # 完整句子直接命中
+    # 完整句子命中
     # --------------------------------------------------------
 
     full_query_scores = []
@@ -1406,7 +1602,10 @@ def search_knowledge(keyword, top_n=10):
         for field in fields:
 
             value = normalize_search_text(
-                row.get(field, "")
+                row.get(
+                    field,
+                    ""
+                )
             )
 
             if not value:
@@ -1449,42 +1648,32 @@ def search_knowledge(keyword, top_n=10):
     )
 
     # --------------------------------------------------------
-    # 最終相關度
-    # --------------------------------------------------------
-    #
-    # TF-IDF             40%
-    # 多關鍵字覆蓋率     25%
-    # 關鍵字品質         15%
-    # 直接命中           10%
-    # 模糊搜尋           10%
-    #
-    # 完整句子命中會額外拉高結果
+    # 最終分數
     # --------------------------------------------------------
 
     result["_final_score"] = (
+
         result["_score"] * 0.40
+
         + result["_term_coverage"] * 0.25
+
         + result["_term_quality"] * 0.15
+
         + result["_direct_score"] * 0.10
+
         + result["_fuzzy_score"] * 0.10
     )
 
-    # 完整問題直接命中時加分
     result["_final_score"] = (
         result["_final_score"]
         + result["_full_query_score"] * 0.10
     )
 
-    # 防止超過 100%
     result["_final_score"] = (
         result["_final_score"].clip(
             upper=1.0
         )
     )
-
-    # --------------------------------------------------------
-    # 排序
-    # --------------------------------------------------------
 
     result = result.sort_values(
         [
@@ -1501,7 +1690,7 @@ def search_knowledge(keyword, top_n=10):
 
 
 # ============================================================
-# 客服小幫手
+# 客服小幫手搜尋
 # ============================================================
 
 def ask_customer_assistant(question):
@@ -1512,6 +1701,7 @@ def ask_customer_assistant(question):
     )
 
     if result.empty:
+
         return False, result
 
     best_score = float(
@@ -1524,121 +1714,15 @@ def ask_customer_assistant(question):
     MIN_SCORE = 0.12
 
     if best_score < MIN_SCORE:
+
         return False, result
 
     return True, result
 
 
-def add_pending_question(question):
-
-    question = clean_text(question)
-
-    if not question:
-        return False
-
-    try:
-
-        wb = openpyxl.load_workbook(
-            EXCEL_PATH
-        )
-
-        sheet_name = "待審核問題"
-
-        # 如果沒有待審核問題工作表，就直接建立
-        if sheet_name in wb.sheetnames:
-
-            ws = wb[sheet_name]
-
-            # 取得目前資料
-            headers = [
-                ws.cell(1, c).value
-                for c in range(1, ws.max_column + 1)
-            ]
-
-            # 如果工作表是空的，重新建立標題
-            if not headers or all(
-                h is None for h in headers
-            ):
-
-                headers = [
-                    "提出時間",
-                    "問題",
-                    "建議分類",
-                    "狀態",
-                    "審核備註"
-                ]
-
-                for c, header in enumerate(
-                    headers,
-                    1
-                ):
-                    ws.cell(1, c, header)
-
-        else:
-
-            ws = wb.create_sheet(sheet_name)
-
-            headers = [
-                "提出時間",
-                "問題",
-                "建議分類",
-                "狀態",
-                "審核備註"
-            ]
-
-            for c, header in enumerate(
-                headers,
-                1
-            ):
-                ws.cell(1, c, header)
-
-        # 檢查是否已經有相同問題
-        existing_questions = []
-
-        for row in ws.iter_rows(
-            min_row=2,
-            values_only=True
-        ):
-
-            if len(row) >= 2 and row[1]:
-
-                existing_questions.append(
-                    str(row[1]).strip()
-                )
-
-        if question in existing_questions:
-
-            wb.save(EXCEL_PATH)
-
-            st.cache_data.clear()
-
-            return True
-
-        # 新增資料
-        ws.append([
-            datetime.now().strftime(
-                "%Y/%m/%d %H:%M"
-            ),
-            question,
-            "",
-            "待審核",
-            ""
-        ])
-
-        wb.save(EXCEL_PATH)
-
-        st.cache_data.clear()
-
-        return True
-
-    except Exception as e:
-
-        st.error(
-            f"待審核問題儲存失敗：{e}"
-        )
-
-        return False
-
+# ============================================================
+# 客訴統計
+# ============================================================
 
 # ============================================================
 # 側邊欄
@@ -1750,11 +1834,14 @@ if page == "🏠 首頁":
 
     else:
 
-        cols = list(ann.columns)
+        cols = list(
+            ann.columns
+        )
 
         title_col = next(
             (
-                c for c in cols
+                c
+                for c in cols
                 if "標題" in str(c)
             ),
             cols[0]
@@ -1762,18 +1849,25 @@ if page == "🏠 首頁":
 
         content_col = next(
             (
-                c for c in cols
+                c
+                for c in cols
                 if any(
                     x in str(c)
-                    for x in ["內容", "說明"]
+                    for x in [
+                        "內容",
+                        "說明"
+                    ]
                 )
             ),
-            cols[1] if len(cols) > 1 else cols[0]
+            cols[1]
+            if len(cols) > 1
+            else cols[0]
         )
 
         date_col = next(
             (
-                c for c in cols
+                c
+                for c in cols
                 if "日期" in str(c)
             ),
             None
@@ -1790,12 +1884,16 @@ if page == "🏠 首頁":
             )
 
             date = (
-                clean_text(row[date_col])
+                clean_text(
+                    row[date_col]
+                )
                 if date_col
                 else ""
             )
 
-            with st.container(border=True):
+            with st.container(
+                border=True
+            ):
 
                 st.subheader(
                     "📌 " + title
@@ -1891,10 +1989,14 @@ elif page == "🔍 知識搜尋":
                 ]:
 
                     value = clean_text(
-                        row.get(c, "")
+                        row.get(
+                            c,
+                            ""
+                        )
                     )
 
                     if value:
+
                         meta_parts.append(
                             value
                         )
@@ -1924,7 +2026,9 @@ elif page == "🔍 知識搜尋":
                     )
                 )
 
-                with st.container(border=True):
+                with st.container(
+                    border=True
+                ):
 
                     st.subheader(
                         title
@@ -2002,10 +2106,6 @@ elif page == "📊 客訴資料統計":
 
     else:
 
-        # ----------------------------------------------------
-        # 篩選條件
-        # ----------------------------------------------------
-
         st.subheader(
             "🔎 資料篩選"
         )
@@ -2014,7 +2114,8 @@ elif page == "📊 客訴資料統計":
 
         month_options = sorted(
             [
-                x for x in complaints["_月份"].dropna().unique()
+                x
+                for x in complaints["_月份"].dropna().unique()
                 if clean_text(x)
             ],
             reverse=True
@@ -2029,7 +2130,8 @@ elif page == "📊 客訴資料統計":
 
         channel_options = sorted(
             [
-                x for x in complaints["購買通路"].dropna().unique()
+                x
+                for x in complaints["購買通路"].dropna().unique()
                 if clean_text(x)
             ]
         )
@@ -2043,7 +2145,8 @@ elif page == "📊 客訴資料統計":
 
         type_options = sorted(
             [
-                x for x in complaints["客訴類型"].dropna().unique()
+                x
+                for x in complaints["客訴類型"].dropna().unique()
                 if clean_text(x)
             ]
         )
@@ -2057,7 +2160,8 @@ elif page == "📊 客訴資料統計":
 
         detail_options = sorted(
             [
-                x for x in complaints["客訴細項"].dropna().unique()
+                x
+                for x in complaints["客訴細項"].dropna().unique()
                 if clean_text(x)
             ]
         )
@@ -2069,43 +2173,41 @@ elif page == "📊 客訴資料統計":
                 ["全部"] + detail_options
             )
 
-        # ----------------------------------------------------
-        # 套用篩選
-        # ----------------------------------------------------
-
         filtered = complaints.copy()
 
         if selected_month != "全部":
 
             filtered = filtered[
-                filtered["_月份"] == selected_month
+                filtered["_月份"]
+                == selected_month
             ]
 
         if selected_channel != "全部":
 
             filtered = filtered[
-                filtered["購買通路"] == selected_channel
+                filtered["購買通路"]
+                == selected_channel
             ]
 
         if selected_type != "全部":
 
             filtered = filtered[
-                filtered["客訴類型"] == selected_type
+                filtered["客訴類型"]
+                == selected_type
             ]
 
         if selected_detail != "全部":
 
             filtered = filtered[
-                filtered["客訴細項"] == selected_detail
+                filtered["客訴細項"]
+                == selected_detail
             ]
-
-        # ----------------------------------------------------
-        # 統計數字
-        # ----------------------------------------------------
 
         st.divider()
 
-        total_count = len(filtered)
+        total_count = len(
+            filtered
+        )
 
         current_month = datetime.now().strftime(
             "%Y/%m"
@@ -2113,20 +2215,26 @@ elif page == "📊 客訴資料統計":
 
         current_month_count = len(
             complaints[
-                complaints["_月份"] == current_month
+                complaints["_月份"]
+                == current_month
             ]
         )
 
         product_count = len(
             filtered[
-                filtered["客訴類型"].astype(str).str.contains(
+                filtered[
+                    "客訴類型"
+                ].astype(str).str.contains(
                     "商品",
                     na=False
                 )
             ]
         )
 
-        other_count = total_count - product_count
+        other_count = (
+            total_count
+            - product_count
+        )
 
         card1, card2, card3, card4 = st.columns(4)
 
@@ -2160,21 +2268,22 @@ elif page == "📊 客訴資料統計":
 
         st.divider()
 
-        # ----------------------------------------------------
-        # 每月客訴趨勢
-        # ----------------------------------------------------
-
         st.subheader(
             "📈 每月客訴趨勢"
         )
 
         monthly_data = (
             filtered[
-                filtered["_月份"].astype(str).str.strip() != ""
+                filtered["_月份"]
+                .astype(str)
+                .str.strip()
+                != ""
             ]
             .groupby("_月份")
             .size()
-            .reset_index(name="客訴件數")
+            .reset_index(
+                name="客訴件數"
+            )
         )
 
         if monthly_data.empty:
@@ -2185,24 +2294,26 @@ elif page == "📊 客訴資料統計":
 
         else:
 
-            monthly_data = monthly_data.sort_values(
-                "_月份"
+            monthly_data = (
+                monthly_data.sort_values(
+                    "_月份"
+                )
             )
 
-            monthly_chart = monthly_data.set_index(
-                "_月份"
+            monthly_chart = (
+                monthly_data.set_index(
+                    "_月份"
+                )
             )
 
             st.line_chart(
-                monthly_chart["客訴件數"],
+                monthly_chart[
+                    "客訴件數"
+                ],
                 use_container_width=True
             )
 
         st.divider()
-
-        # ----------------------------------------------------
-        # 客訴類型＆細項
-        # ----------------------------------------------------
 
         chart_col1, chart_col2 = st.columns(2)
 
@@ -2214,11 +2325,18 @@ elif page == "📊 客訴資料統計":
 
             type_data = (
                 filtered[
-                    filtered["客訴類型"].astype(str).str.strip() != ""
+                    filtered[
+                        "客訴類型"
+                    ].astype(str).str.strip()
+                    != ""
                 ]
-                .groupby("客訴類型")
+                .groupby(
+                    "客訴類型"
+                )
                 .size()
-                .reset_index(name="件數")
+                .reset_index(
+                    name="件數"
+                )
                 .sort_values(
                     "件數",
                     ascending=False
@@ -2233,8 +2351,10 @@ elif page == "📊 客訴資料統計":
 
             else:
 
-                type_chart = type_data.set_index(
-                    "客訴類型"
+                type_chart = (
+                    type_data.set_index(
+                        "客訴類型"
+                    )
                 )
 
                 st.bar_chart(
@@ -2250,11 +2370,18 @@ elif page == "📊 客訴資料統計":
 
             detail_data = (
                 filtered[
-                    filtered["客訴細項"].astype(str).str.strip() != ""
+                    filtered[
+                        "客訴細項"
+                    ].astype(str).str.strip()
+                    != ""
                 ]
-                .groupby("客訴細項")
+                .groupby(
+                    "客訴細項"
+                )
                 .size()
-                .reset_index(name="件數")
+                .reset_index(
+                    name="件數"
+                )
                 .sort_values(
                     "件數",
                     ascending=False
@@ -2269,8 +2396,10 @@ elif page == "📊 客訴資料統計":
 
             else:
 
-                detail_chart = detail_data.set_index(
-                    "客訴細項"
+                detail_chart = (
+                    detail_data.set_index(
+                        "客訴細項"
+                    )
                 )
 
                 st.bar_chart(
@@ -2280,21 +2409,24 @@ elif page == "📊 客訴資料統計":
 
         st.divider()
 
-        # ----------------------------------------------------
-        # 購買通路
-        # ----------------------------------------------------
-
         st.subheader(
             "🛒 購買通路"
         )
 
         channel_data = (
             filtered[
-                filtered["購買通路"].astype(str).str.strip() != ""
+                filtered[
+                    "購買通路"
+                ].astype(str).str.strip()
+                != ""
             ]
-            .groupby("購買通路")
+            .groupby(
+                "購買通路"
+            )
             .size()
-            .reset_index(name="件數")
+            .reset_index(
+                name="件數"
+            )
             .sort_values(
                 "件數",
                 ascending=False
@@ -2309,8 +2441,10 @@ elif page == "📊 客訴資料統計":
 
         else:
 
-            channel_chart = channel_data.set_index(
-                "購買通路"
+            channel_chart = (
+                channel_data.set_index(
+                    "購買通路"
+                )
             )
 
             st.bar_chart(
@@ -2319,10 +2453,6 @@ elif page == "📊 客訴資料統計":
             )
 
         st.divider()
-
-        # ----------------------------------------------------
-        # 客訴資料明細
-        # ----------------------------------------------------
 
         st.subheader(
             "📋 客訴資料明細"
@@ -2348,7 +2478,8 @@ elif page == "📊 客訴資料統計":
         ]
 
         display_columns = [
-            c for c in display_columns
+            c
+            for c in display_columns
             if c in filtered.columns
         ]
 
@@ -2386,7 +2517,7 @@ elif page == "🗺️ 門市地圖":
 
 
 # ============================================================
-# 公告＆工具
+# 公告＆常用工具
 # ============================================================
 
 elif page == "📢 公告＆常用工具":
@@ -2402,10 +2533,6 @@ elif page == "📢 公告＆常用工具":
         ]
     )
 
-    # --------------------------------------------------------
-    # 公告
-    # --------------------------------------------------------
-
     with tab1:
 
         ann = load_announcements()
@@ -2418,11 +2545,14 @@ elif page == "📢 公告＆常用工具":
 
         else:
 
-            cols = list(ann.columns)
+            cols = list(
+                ann.columns
+            )
 
             title_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if "標題" in str(c)
                 ),
                 cols[0]
@@ -2430,18 +2560,25 @@ elif page == "📢 公告＆常用工具":
 
             content_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
-                        for x in ["內容", "說明"]
+                        for x in [
+                            "內容",
+                            "說明"
+                        ]
                     )
                 ),
-                cols[1] if len(cols) > 1 else cols[0]
+                cols[1]
+                if len(cols) > 1
+                else cols[0]
             )
 
             date_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if "日期" in str(c)
                 ),
                 None
@@ -2458,12 +2595,16 @@ elif page == "📢 公告＆常用工具":
                 )
 
                 date = (
-                    clean_text(row[date_col])
+                    clean_text(
+                        row[date_col]
+                    )
                     if date_col
                     else ""
                 )
 
-                with st.container(border=True):
+                with st.container(
+                    border=True
+                ):
 
                     st.subheader(
                         "📌 " + title
@@ -2479,10 +2620,6 @@ elif page == "📢 公告＆常用工具":
                         content
                     )
 
-    # --------------------------------------------------------
-    # 常用工具
-    # --------------------------------------------------------
-
     with tab2:
 
         tools = load_tools()
@@ -2495,11 +2632,14 @@ elif page == "📢 公告＆常用工具":
 
         else:
 
-            cols = list(tools.columns)
+            cols = list(
+                tools.columns
+            )
 
             name_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
                         for x in [
@@ -2514,7 +2654,8 @@ elif page == "📢 公告＆常用工具":
 
             url_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
                         for x in [
@@ -2530,7 +2671,8 @@ elif page == "📢 公告＆常用工具":
 
             desc_col = next(
                 (
-                    c for c in cols
+                    c
+                    for c in cols
                     if any(
                         x in str(c)
                         for x in [
@@ -2554,18 +2696,24 @@ elif page == "📢 公告＆常用工具":
                 )
 
                 url = (
-                    clean_text(row[url_col])
+                    clean_text(
+                        row[url_col]
+                    )
                     if url_col
                     else ""
                 )
 
                 desc = (
-                    clean_text(row[desc_col])
+                    clean_text(
+                        row[desc_col]
+                    )
                     if desc_col
                     else ""
                 )
 
-                with grid[i % 3]:
+                with grid[
+                    i % 3
+                ]:
 
                     with st.container(
                         border=True
@@ -2614,9 +2762,9 @@ elif page == "🛠️ 資料維護":
         ]
     )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 知識庫
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab1:
 
@@ -2653,9 +2801,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-    # --------------------------------------------------------
+    # ========================================================
     # 公告
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab2:
 
@@ -2699,9 +2847,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-    # --------------------------------------------------------
+    # ========================================================
     # 常用工具
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab3:
 
@@ -2745,9 +2893,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-    # --------------------------------------------------------
+    # ========================================================
     # 待審核問題
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab4:
 
@@ -2779,7 +2927,8 @@ elif page == "🛠️ 資料維護":
 
             if st.button(
                 "💾 儲存審核結果",
-                type="primary"
+                type="primary",
+                key="save_pending_questions"
             ):
 
                 if save_sheet(
@@ -2823,9 +2972,9 @@ elif page == "🛠️ 資料維護":
             """
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # 客訴資料
-    # --------------------------------------------------------
+    # ========================================================
 
     with tab5:
 
@@ -2866,10 +3015,6 @@ elif page == "🛠️ 資料維護":
                 complaint_columns
             ].copy()
 
-        # ----------------------------------------------------
-        # 自動補序號
-        # ----------------------------------------------------
-
         if "序號" in edit_df.columns:
 
             for i in range(
@@ -2882,12 +3027,12 @@ elif page == "🛠️ 資料維護":
 
                     edit_df.iloc[
                         i,
-                        edit_df.columns.get_loc("序號")
-                    ] = str(i + 1)
-
-        # ----------------------------------------------------
-        # 編輯表格
-        # ----------------------------------------------------
+                        edit_df.columns.get_loc(
+                            "序號"
+                        )
+                    ] = str(
+                        i + 1
+                    )
 
         edited_complaints = st.data_editor(
             edit_df,
@@ -2896,42 +3041,54 @@ elif page == "🛠️ 資料維護":
             height=600,
             key="complaint_editor",
             column_config={
+
                 "序號": st.column_config.TextColumn(
                     "序號",
                     help="儲存時會自動重新編號"
                 ),
+
                 "日期": st.column_config.TextColumn(
                     "日期",
                     help="例如：2026/09/26"
                 ),
+
                 "月份": st.column_config.TextColumn(
                     "月份",
                     help="例如：2026/09"
                 ),
+
                 "購買通路": st.column_config.TextColumn(
                     "購買通路"
                 ),
+
                 "商品編號": st.column_config.TextColumn(
                     "商品編號"
                 ),
+
                 "商品名稱": st.column_config.TextColumn(
                     "商品名稱"
                 ),
+
                 "客訴類型": st.column_config.TextColumn(
                     "客訴類型"
                 ),
+
                 "客訴細項": st.column_config.TextColumn(
                     "客訴細項"
                 ),
+
                 "客訴內容": st.column_config.TextColumn(
                     "客訴內容"
                 ),
+
                 "處理方式": st.column_config.TextColumn(
                     "處理方式"
                 ),
+
                 "處理結果": st.column_config.TextColumn(
                     "處理結果"
                 ),
+
                 "備註": st.column_config.TextColumn(
                     "備註"
                 )
@@ -2942,32 +3099,28 @@ elif page == "🛠️ 資料維護":
             "可以直接在表格內新增、修改或刪除資料。"
         )
 
-        # ----------------------------------------------------
-        # 儲存客訴資料
-        # ----------------------------------------------------
-
         if st.button(
             "💾 儲存客訴資料",
             type="primary",
             key="save_complaints"
         ):
 
-            save_df = edited_complaints.copy()
+            save_df = (
+                edited_complaints.copy()
+            )
 
             save_df = save_df.reindex(
                 columns=complaint_columns
             )
-
-            # ------------------------------------------------
-            # 移除完全空白的列
-            # ------------------------------------------------
 
             if not save_df.empty:
 
                 save_df = save_df[
                     save_df.apply(
                         lambda row: any(
-                            clean_text(value)
+                            clean_text(
+                                value
+                            )
                             for value in row
                         ),
                         axis=1
@@ -2975,10 +3128,6 @@ elif page == "🛠️ 資料維護":
                 ].reset_index(
                     drop=True
                 )
-
-            # ------------------------------------------------
-            # 自動重新編號
-            # ------------------------------------------------
 
             if "序號" in save_df.columns:
 
@@ -2988,10 +3137,6 @@ elif page == "🛠️ 資料維護":
                         len(save_df)
                     )
                 ]
-
-            # ------------------------------------------------
-            # 自動補月份
-            # ------------------------------------------------
 
             if (
                 "日期" in save_df.columns
@@ -3021,9 +3166,11 @@ elif page == "🛠️ 資料維護":
                         and not month_value
                     ):
 
-                        parsed_date = pd.to_datetime(
-                            date_value,
-                            errors="coerce"
+                        parsed_date = (
+                            pd.to_datetime(
+                                date_value,
+                                errors="coerce"
+                            )
                         )
 
                         if not pd.isna(
@@ -3036,10 +3183,6 @@ elif page == "🛠️ 資料維護":
                             ] = parsed_date.strftime(
                                 "%Y/%m"
                             )
-
-            # ------------------------------------------------
-            # 寫回 Excel
-            # ------------------------------------------------
 
             if save_sheet(
                 "客訴資料",
@@ -3090,11 +3233,16 @@ with st.popover("🐱"):
 
         else:
 
-            found, result = ask_customer_assistant(
-                assistant_question
+            found, result = (
+                ask_customer_assistant(
+                    assistant_question
+                )
             )
 
-            if found and not result.empty:
+            if (
+                found
+                and not result.empty
+            ):
 
                 best = result.iloc[0]
 
@@ -3187,7 +3335,10 @@ with st.popover("🐱"):
 
                     for i in range(
                         1,
-                        min(len(result), 4)
+                        min(
+                            len(result),
+                            4
+                        )
                     ):
 
                         row = result.iloc[i]
@@ -3234,32 +3385,40 @@ with st.popover("🐱"):
                     "確認後再加入正式知識庫。"
                 )
 
+                # =================================================
+                # ⭐ 提出待審核問題
+                # =================================================
+
                 if st.button(
-                    "📝 測試提交按鈕",
-                    key="test_pending_button"
+                    "📝 提出這個問題給我審核",
+                    type="primary",
+                    use_container_width=True,
+                    key="floating_submit_pending"
                 ):
-                    st.success("🎉 按鈕真的有被按到！")
 
-                    st.write("🔍 正在提交問題：", assistant_question)
+                    st.write(
+                        "🔍 正在提交問題……"
+                    )
 
-                    result = add_pending_question(
+                    success = add_pending_question(
                         assistant_question
                     )
 
-                    st.write("🔍 儲存結果：", result)
-
-                    if result:
+                    if success:
 
                         st.success(
-                            "✅ 已加入待審核問題！"
+                            "🎉 已加入待審核問題！"
                         )
 
-                        st.cache_data.clear()
+                        st.info(
+                            "請到「資料維護 → 待審核問題」查看。"
+                        )
 
-                        st.rerun()
+                        # 不立即 rerun，
+                        # 讓使用者確實看到成功訊息
 
                     else:
 
                         st.error(
-                            "❌ 提交失敗，請查看上方的錯誤訊息。"
+                            "❌ 提交失敗，請確認上方錯誤訊息。"
                         )
