@@ -51,7 +51,24 @@ try:
         padding-bottom: 3rem;
         max-width: 1400px;
     }
+    /* 知識庫搜尋框 */
+    [data-testid="stTextInput"] input {
+        height: 52px !important;
+        font-size: 17px !important;
+        padding: 0 18px !important;
+        border: 2px solid #D8C9B8 !important;
+        border-radius: 14px !important;
+        background: #FFFDF9 !important;
+    }
 
+    [data-testid="stTextInput"] input:focus {
+        border-color: #B9785E !important;
+        box-shadow: 0 0 0 3px rgba(185,120,94,.12) !important;
+    }
+
+    [data-testid="stTextInput"] input::placeholder {
+        color: #A9A096 !important;
+    }
     h1, h2, h3, h4 {
         color: #514C45 !important;
     }
@@ -978,9 +995,11 @@ elif page == "🔍 知識搜尋":
         "輸入顧客詢問的關鍵字，小貓會幫你找出相關資料。"
     )
 
+    st.markdown("### 🔎 找找看顧客問題")
     keyword = st.text_input(
         "搜尋關鍵字",
-        placeholder="例如：重量、床包尺寸、退貨、配送……"
+        placeholder="輸入顧客問題，例如：床墊有味道、床包尺寸、退貨方式……",
+        label_visibility="collapsed"
     )
 
     top_n = st.slider(
