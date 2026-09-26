@@ -174,15 +174,21 @@ except Exception:
 # ============================================================
 
 def clean_text(value):
+
     if pd.isna(value):
         return ""
+
     return str(value).strip()
 
 
 def normalize_search_text(value):
+
     value = clean_text(value).lower()
+
     value = value.replace("台", "臺")
+
     value = re.sub(r"\s+", "", value)
+
     return value
 
 
@@ -296,10 +302,15 @@ def find_sheet(candidates, fallback_index=None):
     sheets = get_excel_sheets()
 
     for name in candidates:
+
         if name in sheets:
             return name
 
-    if fallback_index is not None and len(sheets) > fallback_index:
+    if (
+        fallback_index is not None
+        and len(sheets) > fallback_index
+    ):
+
         return sheets[fallback_index]
 
     return None
@@ -441,7 +452,6 @@ def load_complaints():
         dtype=str
     ).fillna("")
 
-    # 確保必要欄位存在
     expected_columns = [
         "序號",
         "日期",
@@ -458,19 +468,19 @@ def load_complaints():
     ]
 
     for col in expected_columns:
+
         if col not in df.columns:
             df[col] = ""
 
-    # 日期轉換
     df["_日期"] = pd.to_datetime(
         df["日期"],
         errors="coerce"
     )
 
-    # 從日期自動產生月份
-    df["_月份"] = df["_日期"].dt.strftime("%Y/%m")
+    df["_月份"] = df["_日期"].dt.strftime(
+        "%Y/%m"
+    )
 
-    # 如果日期無法辨識，再使用 Excel 原本的月份
     df["_月份"] = df["_月份"].fillna(
         df["月份"].apply(clean_text)
     )
@@ -607,8 +617,9 @@ def expand_search_word(keyword):
                 right
             )
 
-            if left_normalized and (
-                keyword_normalized in left_normalized
+            if (
+                left_normalized
+                and keyword_normalized in left_normalized
             ):
 
                 words.extend(
@@ -618,8 +629,9 @@ def expand_search_word(keyword):
                     )
                 )
 
-            elif right_normalized and (
-                keyword_normalized in right_normalized
+            elif (
+                right_normalized
+                and keyword_normalized in right_normalized
             ):
 
                 words.append(left)
@@ -1219,7 +1231,6 @@ elif page == "📊 客訴資料統計":
 
         filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
 
-        # 月份
         month_options = sorted(
             [
                 x for x in complaints["_月份"].dropna().unique()
@@ -1235,7 +1246,6 @@ elif page == "📊 客訴資料統計":
                 ["全部"] + month_options
             )
 
-        # 購買通路
         channel_options = sorted(
             [
                 x for x in complaints["購買通路"].dropna().unique()
@@ -1250,7 +1260,6 @@ elif page == "📊 客訴資料統計":
                 ["全部"] + channel_options
             )
 
-        # 客訴類型
         type_options = sorted(
             [
                 x for x in complaints["客訴類型"].dropna().unique()
@@ -1265,7 +1274,6 @@ elif page == "📊 客訴資料統計":
                 ["全部"] + type_options
             )
 
-        # 客訴細項
         detail_options = sorted(
             [
                 x for x in complaints["客訴細項"].dropna().unique()
@@ -1318,7 +1326,9 @@ elif page == "📊 客訴資料統計":
 
         total_count = len(filtered)
 
-        current_month = datetime.now().strftime("%Y/%m")
+        current_month = datetime.now().strftime(
+            "%Y/%m"
+        )
 
         current_month_count = len(
             complaints[
@@ -1813,12 +1823,13 @@ elif page == "🛠️ 資料維護":
         "這裡可以直接編輯目前 Excel 中的資料，完成後按下儲存。"
     )
 
-    tab1, tab2, tab3, tab4 = st.tabs(
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
             "📚 知識庫",
             "📢 公告",
             "🔗 常用工具",
-            "📝 待審核問題"
+            "📝 待審核問題",
+            "📊 客訴資料"
         ]
     )
 
@@ -2030,6 +2041,234 @@ elif page == "🛠️ 資料維護":
             ⑥ 小幫手下次就可以找到
             """
         )
+
+    # --------------------------------------------------------
+    # 客訴資料
+    # --------------------------------------------------------
+
+    with tab5:
+
+        st.subheader(
+            "📊 客訴資料"
+        )
+
+        st.caption(
+            "可以直接新增、修改或刪除客訴資料，完成後按下儲存。"
+        )
+
+        complaints = load_complaints()
+
+        complaint_columns = [
+            "序號",
+            "日期",
+            "月份",
+            "購買通路",
+            "商品編號",
+            "商品名稱",
+            "客訴類型",
+            "客訴細項",
+            "客訴內容",
+            "處理方式",
+            "處理結果",
+            "備註"
+        ]
+
+        # 如果沒有資料，建立空白表格
+        if complaints.empty:
+
+            edit_df = pd.DataFrame(
+                columns=complaint_columns
+            )
+
+        else:
+
+            edit_df = complaints[
+                complaint_columns
+            ].copy()
+
+        # ----------------------------------------------------
+        # 自動補序號
+        # ----------------------------------------------------
+
+        if "序號" in edit_df.columns:
+
+            for i in range(
+                len(edit_df)
+            ):
+
+                if not clean_text(
+                    edit_df.iloc[i]["序號"]
+                ):
+
+                    edit_df.iloc[
+                        i,
+                        edit_df.columns.get_loc("序號")
+                    ] = str(i + 1)
+
+        # ----------------------------------------------------
+        # 編輯表格
+        # ----------------------------------------------------
+
+        edited_complaints = st.data_editor(
+            edit_df,
+            use_container_width=True,
+            num_rows="dynamic",
+            height=600,
+            key="complaint_editor",
+            column_config={
+                "序號": st.column_config.TextColumn(
+                    "序號",
+                    help="儲存時會自動重新編號"
+                ),
+                "日期": st.column_config.TextColumn(
+                    "日期",
+                    help="例如：2026/09/26"
+                ),
+                "月份": st.column_config.TextColumn(
+                    "月份",
+                    help="例如：2026/09"
+                ),
+                "購買通路": st.column_config.TextColumn(
+                    "購買通路"
+                ),
+                "商品編號": st.column_config.TextColumn(
+                    "商品編號"
+                ),
+                "商品名稱": st.column_config.TextColumn(
+                    "商品名稱"
+                ),
+                "客訴類型": st.column_config.TextColumn(
+                    "客訴類型"
+                ),
+                "客訴細項": st.column_config.TextColumn(
+                    "客訴細項"
+                ),
+                "客訴內容": st.column_config.TextColumn(
+                    "客訴內容"
+                ),
+                "處理方式": st.column_config.TextColumn(
+                    "處理方式"
+                ),
+                "處理結果": st.column_config.TextColumn(
+                    "處理結果"
+                ),
+                "備註": st.column_config.TextColumn(
+                    "備註"
+                )
+            }
+        )
+
+        st.caption(
+            "可以直接在表格內新增、修改或刪除資料。"
+        )
+
+        # ----------------------------------------------------
+        # 儲存客訴資料
+        # ----------------------------------------------------
+
+        if st.button(
+            "💾 儲存客訴資料",
+            type="primary",
+            key="save_complaints"
+        ):
+
+            save_df = edited_complaints.copy()
+
+            # 確保欄位順序固定
+            save_df = save_df.reindex(
+                columns=complaint_columns
+            )
+
+            # 移除完全空白的列
+            if not save_df.empty:
+
+                save_df = save_df[
+                    save_df.apply(
+                        lambda row: any(
+                            clean_text(value)
+                            for value in row
+                        ),
+                        axis=1
+                    )
+                ].reset_index(
+                    drop=True
+                )
+
+            # ------------------------------------------------
+            # 自動重新編號
+            # ------------------------------------------------
+
+            if "序號" in save_df.columns:
+
+                save_df["序號"] = [
+                    str(i + 1)
+                    for i in range(
+                        len(save_df)
+                    )
+                ]
+
+            # ------------------------------------------------
+            # 自動補月份
+            # ------------------------------------------------
+
+            if (
+                "日期" in save_df.columns
+                and "月份" in save_df.columns
+            ):
+
+                for i in range(
+                    len(save_df)
+                ):
+
+                    date_value = clean_text(
+                        save_df.at[
+                            i,
+                            "日期"
+                        ]
+                    )
+
+                    month_value = clean_text(
+                        save_df.at[
+                            i,
+                            "月份"
+                        ]
+                    )
+
+                    if (
+                        date_value
+                        and not month_value
+                    ):
+
+                        parsed_date = pd.to_datetime(
+                            date_value,
+                            errors="coerce"
+                        )
+
+                        if not pd.isna(
+                            parsed_date
+                        ):
+
+                            save_df.at[
+                                i,
+                                "月份"
+                            ] = parsed_date.strftime(
+                                "%Y/%m"
+                            )
+
+            # ------------------------------------------------
+            # 寫回 Excel
+            # ------------------------------------------------
+
+            if save_sheet(
+                "客訴資料",
+                save_df
+            ):
+
+                st.success(
+                    "客訴資料已儲存！"
+                )
+
+                st.rerun()
 
 
 # ============================================================
