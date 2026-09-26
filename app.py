@@ -1,3 +1,4 @@
+````python
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -45,7 +46,7 @@ st.markdown("""
 
 .block-container {
     padding-top:1.8rem;
-    padding-bottom:5rem;
+    padding-bottom:3rem;
     max-width:1400px;
 }
 
@@ -229,7 +230,7 @@ textarea,
     border:1px solid #E2D8CC;
     border-radius:20px;
     padding:22px;
-    margin-top:15px;
+    margin-top:10px;
     box-shadow:0 6px 20px rgba(90,70,50,.06);
 }
 
@@ -281,13 +282,6 @@ hr {
     overflow:hidden;
 }
 
-/* 小幫手聊天區 */
-[data-testid="stChatMessage"] {
-    background:#FFFDF9;
-    border:1px solid #E2D8CC;
-    border-radius:15px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -303,12 +297,6 @@ def clean_text(value):
 
 
 def normalize_search_text(value):
-    """
-    搜尋文字標準化：
-    - 去除空白
-    - 統一大小寫
-    - 台 / 臺視為相近
-    """
     value = clean_text(value).lower()
     value = value.replace("台", "臺")
     value = re.sub(r"\s+", "", value)
@@ -489,7 +477,6 @@ def load_announcements():
     ).fillna("")
 
     for col in df.columns:
-
         if any(
             x in str(col)
             for x in ["內容", "說明", "公告"]
@@ -499,7 +486,6 @@ def load_announcements():
             )
 
     for col in df.columns:
-
         if "標題" in str(col):
             df[col] = df[col].map(
                 clean_announcement_title
@@ -557,27 +543,27 @@ def load_pending_questions():
 def save_sheet(sheet_name, data):
 
     if not EXCEL_PATH.exists():
-
         st.error(
             "找不到 Excel：DATA/知識庫實驗品.xlsx"
         )
-
         return False
 
     try:
 
-        wb = openpyxl.load_workbook(EXCEL_PATH)
+        wb = openpyxl.load_workbook(
+            EXCEL_PATH
+        )
 
         if sheet_name in wb.sheetnames:
-
             ws = wb[sheet_name]
-
             wb.remove(ws)
 
         ws = wb.create_sheet(sheet_name)
 
-        for c, col in enumerate(data.columns, 1):
-
+        for c, col in enumerate(
+            data.columns,
+            1
+        ):
             ws.cell(
                 1,
                 c,
@@ -588,9 +574,10 @@ def save_sheet(sheet_name, data):
             data.itertuples(index=False),
             2
         ):
-
-            for c, value in enumerate(row, 1):
-
+            for c, value in enumerate(
+                row,
+                1
+            ):
                 ws.cell(
                     r,
                     c,
@@ -620,7 +607,6 @@ def save_knowledge_data(data):
     )
 
     if sheet:
-
         return save_sheet(
             sheet,
             data
@@ -659,11 +645,21 @@ def expand_search_word(keyword):
             if not left and not right:
                 continue
 
-            if (
-                normalize_search_text(keyword)
-                in normalize_search_text(left)
-            ):
+            keyword_normalized = normalize_search_text(
+                keyword
+            )
 
+            left_normalized = normalize_search_text(
+                left
+            )
+
+            right_normalized = normalize_search_text(
+                right
+            )
+
+            if left_normalized and (
+                keyword_normalized in left_normalized
+            ):
                 words.extend(
                     re.split(
                         r"[,，、/／\s]+",
@@ -671,11 +667,9 @@ def expand_search_word(keyword):
                     )
                 )
 
-            elif (
-                normalize_search_text(keyword)
-                in normalize_search_text(right)
+            elif right_normalized and (
+                keyword_normalized in right_normalized
             ):
-
                 words.append(left)
 
     return " ".join(
@@ -689,7 +683,7 @@ def expand_search_word(keyword):
 
 
 # ============================================================
-# 核心搜尋
+# 知識庫搜尋
 # ============================================================
 
 def search_knowledge(keyword, top_n=10):
@@ -699,11 +693,8 @@ def search_knowledge(keyword, top_n=10):
     if df.empty:
         return pd.DataFrame()
 
-    # --------------------------------------------------------
-    # 新版 Excel 欄位
-    # --------------------------------------------------------
-
-    search_fields = [
+    # 目前 Excel 真正使用的欄位
+    fields = [
         "問題類型",
         "問題細項",
         "商品分類代碼",
@@ -717,18 +708,22 @@ def search_knowledge(keyword, top_n=10):
         "關鍵字"
     ]
 
-    existing_fields = [
-        c for c in search_fields
+    fields = [
+        c for c in fields
         if c in df.columns
     ]
 
-    if not existing_fields:
+    if not fields:
         return pd.DataFrame()
 
-    # --------------------------------------------------------
-    # 欄位權重
-    # --------------------------------------------------------
+    query = normalize_search_text(
+        expand_search_word(keyword)
+    )
 
+    if not query:
+        return df.head(top_n).copy()
+
+    # 欄位權重
     weights = {
         "問題摘要": 100,
         "關鍵字": 90,
@@ -743,25 +738,13 @@ def search_knowledge(keyword, top_n=10):
         "資料來源": 20
     }
 
-    query = normalize_search_text(
-        expand_search_word(keyword)
-    )
-
-    if not query:
-
-        return df.head(top_n).copy()
-
-    # --------------------------------------------------------
-    # 建立 TF-IDF
-    # --------------------------------------------------------
-
     corpus = []
 
     for _, row in df.iterrows():
 
-        text_parts = []
+        parts = []
 
-        for field in existing_fields:
+        for field in fields:
 
             value = normalize_search_text(
                 row.get(field, "")
@@ -775,18 +758,17 @@ def search_knowledge(keyword, top_n=10):
                 20
             )
 
-            # 權重越高，重複次數越多
             repeat_count = max(
                 1,
                 int(weight / 20)
             )
 
-            text_parts.extend(
+            parts.extend(
                 [value] * repeat_count
             )
 
         corpus.append(
-            " ".join(text_parts)
+            " ".join(parts)
         )
 
     vectorizer = TfidfVectorizer(
@@ -808,25 +790,14 @@ def search_knowledge(keyword, top_n=10):
 
     result["_score"] = scores
 
-    # --------------------------------------------------------
-    # 額外直接命中加分
-    # --------------------------------------------------------
-
-    query_parts = [
-        x for x in re.split(
-            r"\s+",
-            query
-        )
-        if x
-    ]
-
+    # 直接命中加分
     direct_scores = []
 
     for _, row in result.iterrows():
 
         direct_score = 0
 
-        for field in existing_fields:
+        for field in fields:
 
             value = normalize_search_text(
                 row.get(field, "")
@@ -840,13 +811,10 @@ def search_knowledge(keyword, top_n=10):
                 20
             )
 
-            for word in query_parts:
-
-                if word and word in value:
-
-                    direct_score += (
-                        field_weight / 1000
-                    )
+            if query in value:
+                direct_score += (
+                    field_weight / 100
+                )
 
         direct_scores.append(
             direct_score
@@ -854,6 +822,7 @@ def search_knowledge(keyword, top_n=10):
 
     result["_direct_score"] = direct_scores
 
+    # 綜合分數
     result["_final_score"] = (
         result["_score"] * 0.65
         + result["_direct_score"] * 0.35
@@ -868,7 +837,7 @@ def search_knowledge(keyword, top_n=10):
 
 
 # ============================================================
-# 智慧客服小幫手
+# 客服小幫手
 # ============================================================
 
 def ask_customer_assistant(question):
@@ -879,11 +848,7 @@ def ask_customer_assistant(question):
     )
 
     if result.empty:
-
-        return {
-            "found": False,
-            "result": result
-        }
+        return False, result
 
     best_score = float(
         result.iloc[0].get(
@@ -892,23 +857,13 @@ def ask_customer_assistant(question):
         )
     )
 
-    # --------------------------------------------------------
-    # 最低可信度
-    # --------------------------------------------------------
-
+    # 小於這個分數就視為沒有足夠資料
     MIN_SCORE = 0.12
 
     if best_score < MIN_SCORE:
+        return False, result
 
-        return {
-            "found": False,
-            "result": result
-        }
-
-    return {
-        "found": True,
-        "result": result
-    }
+    return True, result
 
 
 def add_pending_question(question):
@@ -994,6 +949,10 @@ with st.sidebar:
 
 if page == "🏠 首頁":
 
+    # --------------------------------------------------------
+    # 原本首頁 Hero
+    # --------------------------------------------------------
+
     st.markdown("""
     <div class="hero">
 
@@ -1014,9 +973,8 @@ if page == "🏠 首頁":
     </div>
     """, unsafe_allow_html=True)
 
-
     # --------------------------------------------------------
-    # 快速入口
+    # Quick Access
     # --------------------------------------------------------
 
     st.markdown(
@@ -1051,6 +1009,7 @@ if page == "🏠 首頁":
                 <div class="tool-desc">
                     查詢門市地址、交通、停車及門市相關資訊。
                 </div>
+            </div>
             """,
             unsafe_allow_html=True
         )
@@ -1070,10 +1029,9 @@ if page == "🏠 首頁":
             unsafe_allow_html=True
         )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 客服小幫手
-    # ========================================================
+    # --------------------------------------------------------
 
     st.markdown(
         '<div class="section-label">🐱 CUSTOMER SERVICE ASSISTANT</div>',
@@ -1089,8 +1047,8 @@ if page == "🏠 首頁":
             </div>
 
             <div class="assistant-subtitle">
-                可以直接輸入顧客問題，我會先從目前的知識庫幫你找答案。
-                如果找不到，也可以把問題送進待審核區。
+                輸入顧客問題，小幫手會先從知識庫尋找相關資料。
+                找不到時，可以送出問題等待審核。
             </div>
 
         </div>
@@ -1098,205 +1056,242 @@ if page == "🏠 首頁":
         unsafe_allow_html=True
     )
 
-
-    # --------------------------------------------------------
-    # Chat history
-    # --------------------------------------------------------
-
-    if "assistant_messages" not in st.session_state:
-
-        st.session_state.assistant_messages = []
-
-
-    for message in st.session_state.assistant_messages:
-
-        with st.chat_message(
-            message["role"],
-            avatar=(
-                "🐱"
-                if message["role"] == "assistant"
-                else "👤"
-            )
-        ):
-
-            st.markdown(
-                message["content"]
-            )
-
-
-    # --------------------------------------------------------
-    # Chat input
-    # --------------------------------------------------------
-
-    question = st.chat_input(
-        "問問客服小幫手，例如：床墊有異味怎麼處理？"
+    question = st.text_input(
+        "詢問客服小幫手",
+        placeholder="例如：床墊有味道怎麼辦？",
+        key="assistant_question"
     )
 
+    ask_button = st.button(
+        "🐾 幫我找答案",
+        type="primary",
+        key="assistant_button"
+    )
 
-    if question:
+    if ask_button and question.strip():
 
-        question = question.strip()
+        found, result = ask_customer_assistant(
+            question
+        )
 
-        if question:
+        st.session_state[
+            "assistant_question_current"
+        ] = question
 
-            st.session_state.assistant_messages.append(
-                {
-                    "role": "user",
-                    "content": question
-                }
-            )
+        st.session_state[
+            "assistant_found"
+        ] = found
 
-            answer = ask_customer_assistant(
-                question
-            )
+        st.session_state[
+            "assistant_result"
+        ] = result
 
-            if answer["found"]:
-
-                result = answer["result"]
-
-                best = result.iloc[0]
-
-                title = clean_text(
-                    best.get(
-                        "問題摘要",
-                        "相關問題"
-                    )
-                )
-
-                standard_reply = clean_text(
-                    best.get(
-                        "標準回覆",
-                        ""
-                    )
-                )
-
-                judgment = clean_text(
-                    best.get(
-                        "判斷依據",
-                        ""
-                    )
-                )
-
-                source = clean_text(
-                    best.get(
-                        "資料來源",
-                        ""
-                    )
-                )
-
-                score = float(
-                    best.get(
-                        "_final_score",
-                        0
-                    )
-                )
-
-                response = (
-                    f"### 🐱 找到相關資料\n\n"
-                    f"**問題：** {title}\n\n"
-                    f"**建議回覆：**\n"
-                    f"{standard_reply or '目前資料沒有設定標準回覆。'}\n"
-                )
-
-                if judgment:
-
-                    response += (
-                        f"\n\n**🔎 判斷依據：**\n"
-                        f"{judgment}"
-                    )
-
-                if source:
-
-                    response += (
-                        f"\n\n**📚 資料來源：** "
-                        f"{source}"
-                    )
-
-                response += (
-                    f"\n\n"
-                    f"<small>相關度：約 {score:.1%}</small>"
-                )
-
-                st.session_state.assistant_messages.append(
-                    {
-                        "role": "assistant",
-                        "content": response
-                    }
-                )
-
-            else:
-
-                response = """
-### 🐱 目前沒有找到足夠相關的資料
-
-這個問題目前可能還沒有建立在知識庫裡。
-
-你可以把這個問題送到「待審核問題」，之後再由你確認正確的處理方式。
-
-👉 建議先不要直接把小幫手的結果當成正式客服回覆。
-"""
-
-                st.session_state.assistant_messages.append(
-                    {
-                        "role": "assistant",
-                        "content": response
-                    }
-                )
-
-                st.session_state.last_unanswered_question = question
-
-            st.rerun()
-
+        st.rerun()
 
     # --------------------------------------------------------
-    # 找不到答案時的送審按鈕
+    # 顯示小幫手結果
     # --------------------------------------------------------
 
     if (
-        "last_unanswered_question"
+        "assistant_result"
         in st.session_state
+        and st.session_state[
+            "assistant_question_current"
+        ]
     ):
 
-        pending_question = (
-            st.session_state.last_unanswered_question
-        )
+        result = st.session_state[
+            "assistant_result"
+        ]
 
-        st.markdown(
-            """
-            <div class="assistant-warning">
-                💡 這個問題目前沒有足夠的知識庫資料。
-                <br>
-                如果你希望之後可以搜尋到這個問題，
-                可以送進「待審核問題」。
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        found = st.session_state[
+            "assistant_found"
+        ]
 
-        if st.button(
-            "📝 提出這個問題給我審核",
-            key="send_pending_question",
-            type="primary"
-        ):
+        if found and not result.empty:
 
-            if add_pending_question(
-                pending_question
-            ):
+            best = result.iloc[0]
 
-                st.success(
-                    "已加入「待審核問題」！"
+            title = clean_text(
+                best.get(
+                    "問題摘要",
+                    "相關問題"
+                )
+            )
+
+            answer = clean_text(
+                best.get(
+                    "標準回覆",
+                    ""
+                )
+            )
+
+            judgment = clean_text(
+                best.get(
+                    "判斷依據",
+                    ""
+                )
+            )
+
+            source = clean_text(
+                best.get(
+                    "資料來源",
+                    ""
+                )
+            )
+
+            score = float(
+                best.get(
+                    "_final_score",
+                    0
+                )
+            )
+
+            st.markdown(
+                f"""
+                <div class="assistant-answer">
+
+                    <strong>🐱 找到相關資料</strong>
+
+                    <br><br>
+
+                    <strong>問題：</strong>
+                    {safe_html_text(title)}
+
+                    <br><br>
+
+                    <strong>建議回覆：</strong><br>
+                    {safe_html_text(answer)}
+
+                    {
+                        "<br><br><strong>🔎 判斷依據：</strong><br>"
+                        + safe_html_text(judgment)
+                        if judgment else ""
+                    }
+
+                    {
+                        "<br><br><strong>📚 資料來源：</strong>"
+                        + safe_html_text(source)
+                        if source else ""
+                    }
+
+                    <br><br>
+
+                    <span class="score">
+                        相關度 {score:.1%}
+                    </span>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # 顯示其他相關資料
+            if len(result) > 1:
+
+                st.markdown(
+                    "#### 🔎 其他相關資料"
                 )
 
-                del st.session_state[
-                    "last_unanswered_question"
-                ]
+                for i in range(
+                    1,
+                    min(len(result), 4)
+                ):
 
-                st.rerun()
+                    row = result.iloc[i]
 
+                    other_title = clean_text(
+                        row.get(
+                            "問題摘要",
+                            "相關問題"
+                        )
+                    )
 
-    # ========================================================
-    # 最新公告
-    # ========================================================
+                    other_score = float(
+                        row.get(
+                            "_final_score",
+                            0
+                        )
+                    )
+
+                    st.markdown(
+                        f"""
+                        <div class="result-card">
+
+                            <div class="result-title">
+                                {safe_html_text(other_title)}
+                            </div>
+
+                            <div class="result-meta">
+                                相關度
+                                {other_score:.1%}
+                            </div>
+
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+        else:
+
+            st.markdown(
+                """
+                <div class="assistant-warning">
+
+                    <strong>
+                        🐱 目前沒有找到足夠相關的資料
+                    </strong>
+
+                    <br><br>
+
+                    這個問題目前可能還沒有建立在知識庫裡。
+
+                    <br>
+
+                    可以先不要直接使用答案，
+                    建議送到「待審核問題」，
+                    確認後再加入正式知識庫。
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            pending_question = st.session_state[
+                "assistant_question_current"
+            ]
+
+            if st.button(
+                "📝 提出這個問題給我審核",
+                type="primary",
+                key="submit_pending"
+            ):
+
+                if add_pending_question(
+                    pending_question
+                ):
+
+                    st.success(
+                        "已加入待審核問題！"
+                    )
+
+                    st.session_state[
+                        "assistant_question_current"
+                    ] = ""
+
+                    st.session_state[
+                        "assistant_result"
+                    ] = pd.DataFrame()
+
+                    st.session_state[
+                        "assistant_found"
+                    ] = False
+
+                    st.rerun()
+
+    # --------------------------------------------------------
+    # 原本公告
+    # --------------------------------------------------------
 
     st.markdown(
         '<div class="section-label">LATEST ANNOUNCEMENTS</div>',
@@ -1363,28 +1358,22 @@ if page == "🏠 首頁":
             if date:
 
                 date_html = (
-                    "<div class='card-meta'>"
+                    "<div class=\"card-meta\">"
                     "📅 公告日期："
                     + safe_html_text(date)
                     + "</div>"
                 )
 
             st.markdown(
-                f"""
-                <div class='card'>
-
-                    <div class='card-title'>
-                        📌 {safe_html_text(title)}
-                    </div>
-
-                    <div class='card-text'>
-                        {safe_html_text(content)}
-                    </div>
-
-                    {date_html}
-
-                </div>
-                """,
+                "<div class=\"card\">"
+                "<div class=\"card-title\">📌 "
+                + safe_html_text(title)
+                + "</div>"
+                "<div class=\"card-text\">"
+                + safe_html_text(content)
+                + "</div>"
+                + date_html
+                + "</div>",
                 unsafe_allow_html=True
             )
 
@@ -1463,7 +1452,9 @@ elif page == "🔍 知識搜尋":
                     )
 
                     if value:
-                        meta_parts.append(value)
+                        meta_parts.append(
+                            value
+                        )
 
                 meta = "　｜　".join(
                     meta_parts
@@ -1507,39 +1498,31 @@ elif page == "🔍 知識搜尋":
                     )
 
                 st.markdown(
-                    f"""
-                    <div class='result-card'>
-
-                        <div class='result-title'>
-                            {safe_html_text(title)}
-                        </div>
-
-                        <div class='result-meta'>
-                            {safe_html_text(meta)}
-                           　
-                            <span class='score'>
-                                相關度 {score:.1%}
-                            </span>
-                        </div>
-
-                        <div class='result-answer'>
-                            {safe_html_text(answer + extra)}
-                        </div>
-
-                    </div>
-                    """,
+                    "<div class='result-card'>"
+                    "<div class='result-title'>"
+                    + safe_html_text(title)
+                    + "</div>"
+                    "<div class='result-meta'>"
+                    + safe_html_text(meta)
+                    + "　"
+                    "<span class='score'>"
+                    + f"相關度 {score:.1%}"
+                    + "</span>"
+                    "</div>"
+                    "<div class='result-answer'>"
+                    + safe_html_text(answer + extra)
+                    + "</div>"
+                    "</div>",
                     unsafe_allow_html=True
                 )
 
     else:
 
         st.markdown(
-            """
-            <div class='card'
-                 style='text-align:center;padding:40px;'>
-                🐾 輸入關鍵字開始搜尋
-            </div>
-            """,
+            "<div class='card' "
+            "style='text-align:center;padding:40px;'>"
+            "🐾 輸入關鍵字開始搜尋"
+            "</div>",
             unsafe_allow_html=True
         )
 
@@ -1644,31 +1627,24 @@ elif page == "📢 公告＆常用工具":
                 if date:
 
                     date_html = (
-                        "<div class='card-meta'>"
+                        "<div class=\"card-meta\">"
                         "📅 "
                         + safe_html_text(date)
                         + "</div>"
                     )
 
                 st.markdown(
-                    f"""
-                    <div class='card'>
-
-                        <div class='card-title'>
-                            📌 {safe_html_text(title)}
-                        </div>
-
-                        <div class='card-text'>
-                            {safe_html_text(content)}
-                        </div>
-
-                        {date_html}
-
-                    </div>
-                    """,
+                    "<div class=\"card\">"
+                    "<div class=\"card-title\">📌 "
+                    + safe_html_text(title)
+                    + "</div>"
+                    "<div class=\"card-text\">"
+                    + safe_html_text(content)
+                    + "</div>"
+                    + date_html
+                    + "</div>",
                     unsafe_allow_html=True
                 )
-
 
     # --------------------------------------------------------
     # 常用工具
@@ -1759,23 +1735,15 @@ elif page == "📢 公告＆常用工具":
                 with grid[i % 3]:
 
                     st.markdown(
-                        f"""
-                        <div class='tool-card'>
-
-                            <div class='tool-icon'>
-                                🔗
-                            </div>
-
-                            <div class='tool-name'>
-                                {safe_html_text(name)}
-                            </div>
-
-                            <div class='tool-desc'>
-                                {safe_html_text(desc)}
-                            </div>
-
-                        </div>
-                        """,
+                        "<div class='tool-card'>"
+                        "<div class='tool-icon'>🔗</div>"
+                        "<div class='tool-name'>"
+                        + safe_html_text(name)
+                        + "</div>"
+                        "<div class='tool-desc'>"
+                        + safe_html_text(desc)
+                        + "</div>"
+                        "</div>",
                         unsafe_allow_html=True
                     )
 
@@ -1809,10 +1777,9 @@ elif page == "🛠️ 資料維護":
         ]
     )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 知識庫
-    # ========================================================
+    # --------------------------------------------------------
 
     with tab1:
 
@@ -1849,10 +1816,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 公告
-    # ========================================================
+    # --------------------------------------------------------
 
     with tab2:
 
@@ -1896,10 +1862,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 常用工具
-    # ========================================================
+    # --------------------------------------------------------
 
     with tab3:
 
@@ -1943,10 +1908,9 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # 待審核問題
-    # ========================================================
+    # --------------------------------------------------------
 
     with tab4:
 
@@ -1956,7 +1920,6 @@ elif page == "🛠️ 資料維護":
 
         st.caption(
             "客服小幫手找不到答案時，問題會先放在這裡。"
-            "你可以確認後，再自行整理到正式知識庫。"
         )
 
         pending = load_pending_questions()
@@ -1999,16 +1962,27 @@ elif page == "🛠️ 資料維護":
             """
             #### 💡 建議工作方式
 
-            ① 小幫手找不到答案  
-            ↓  
-            ② 按「提出這個問題給我審核」  
-            ↓  
-            ③ 到這裡確認問題  
-            ↓  
-            ④ 整理正確的「問題摘要／標準回覆／判斷依據／資料來源」  
-            ↓  
-            ⑤ 加入正式知識庫  
-            ↓  
+            ① 小幫手找不到答案
+
+            ↓
+
+            ② 按「提出這個問題給我審核」
+
+            ↓
+
+            ③ 到「待審核問題」確認
+
+            ↓
+
+            ④ 整理正確的問題與答案
+
+            ↓
+
+            ⑤ 加入正式知識庫
+
+            ↓
+
             ⑥ 小幫手下次就可以找到
             """
         )
+````
