@@ -224,29 +224,36 @@ textarea,
     font-size:12px;
 }
 
-.assistant-box {
-    background:#FFFDF9;
-    border:1px solid #E2D8CC;
-    border-radius:20px;
-    padding:22px;
-    margin-top:10px;
-    box-shadow:0 6px 20px rgba(90,70,50,.06);
+
+/* =========================================================
+   浮動客服小幫手
+   ========================================================= */
+
+[data-testid="stPopover"] {
+    position:fixed !important;
+    right:24px !important;
+    bottom:24px !important;
+    z-index:999999 !important;
 }
 
-.assistant-title {
-    font-size:20px;
-    font-weight:700;
-    color:#62584F;
+[data-testid="stPopover"] > button {
+    width:58px !important;
+    height:58px !important;
+    min-height:58px !important;
+    border-radius:50% !important;
+    background:#FFFDF9 !important;
+    border:1px solid #D8C9B8 !important;
+    box-shadow:0 5px 18px rgba(90,70,50,.18) !important;
+    font-size:27px !important;
+    padding:0 !important;
 }
 
-.assistant-subtitle {
-    font-size:13px;
-    color:#9B8F82;
-    margin-top:5px;
+[data-testid="stPopover"] > button:hover {
+    transform:scale(1.05);
+    border-color:#B9785E !important;
 }
 
 .assistant-answer {
-    margin-top:15px;
     background:#F8F2EA;
     border-radius:14px;
     padding:17px;
@@ -692,7 +699,6 @@ def search_knowledge(keyword, top_n=10):
     if df.empty:
         return pd.DataFrame()
 
-    # 目前 Excel 真正使用的欄位
     fields = [
         "問題類型",
         "問題細項",
@@ -722,7 +728,6 @@ def search_knowledge(keyword, top_n=10):
     if not query:
         return df.head(top_n).copy()
 
-    # 欄位權重
     weights = {
         "問題摘要": 100,
         "關鍵字": 90,
@@ -789,7 +794,6 @@ def search_knowledge(keyword, top_n=10):
 
     result["_score"] = scores
 
-    # 直接命中加分
     direct_scores = []
 
     for _, row in result.iterrows():
@@ -821,7 +825,6 @@ def search_knowledge(keyword, top_n=10):
 
     result["_direct_score"] = direct_scores
 
-    # 綜合分數
     result["_final_score"] = (
         result["_score"] * 0.65
         + result["_direct_score"] * 0.35
@@ -856,7 +859,6 @@ def ask_customer_assistant(question):
         )
     )
 
-    # 小於這個分數就視為沒有足夠資料
     MIN_SCORE = 0.12
 
     if best_score < MIN_SCORE:
@@ -949,7 +951,7 @@ with st.sidebar:
 if page == "🏠 首頁":
 
     # --------------------------------------------------------
-    # 原本首頁 Hero
+    # Hero
     # --------------------------------------------------------
 
     st.markdown("""
@@ -1028,265 +1030,209 @@ if page == "🏠 首頁":
             unsafe_allow_html=True
         )
 
-    # --------------------------------------------------------
-    # 客服小幫手
-    # --------------------------------------------------------
+    # ========================================================
+    # 右下角浮動客服小幫手
+    # ========================================================
 
-    st.markdown(
-        '<div class="section-label">🐱 CUSTOMER SERVICE ASSISTANT</div>',
-        unsafe_allow_html=True
-    )
+    with st.popover("🐱"):
 
-    st.markdown(
-        """
-        <div class="assistant-box">
-
-            <div class="assistant-title">
+        st.markdown(
+            """
+            <div style="
+                font-size:19px;
+                font-weight:700;
+                color:#62584F;
+                margin-bottom:4px;
+            ">
                 🐱 客服小幫手
             </div>
 
-            <div class="assistant-subtitle">
-                輸入顧客問題，小幫手會先從知識庫尋找相關資料。
-                找不到時，可以送出問題等待審核。
+            <div style="
+                font-size:12px;
+                color:#9B8F82;
+                margin-bottom:12px;
+            ">
+                先從知識庫幫你找答案
             </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    question = st.text_input(
-        "詢問客服小幫手",
-        placeholder="例如：床墊有味道怎麼辦？",
-        key="assistant_question"
-    )
-
-    ask_button = st.button(
-        "🐾 幫我找答案",
-        type="primary",
-        key="assistant_button"
-    )
-
-    if ask_button and question.strip():
-
-        found, result = ask_customer_assistant(
-            question
+            """,
+            unsafe_allow_html=True
         )
 
-        st.session_state[
-            "assistant_question_current"
-        ] = question
+        assistant_question = st.text_input(
+            "顧客問題",
+            placeholder="例如：床墊有味道怎麼辦？",
+            key="floating_assistant_question"
+        )
 
-        st.session_state[
-            "assistant_found"
-        ] = found
+        assistant_search = st.button(
+            "🔍 幫我找答案",
+            use_container_width=True,
+            type="primary",
+            key="floating_assistant_search"
+        )
 
-        st.session_state[
-            "assistant_result"
-        ] = result
+        if assistant_search:
 
-        st.rerun()
+            if not assistant_question.strip():
 
-    # --------------------------------------------------------
-    # 顯示小幫手結果
-    # --------------------------------------------------------
-
-    if (
-        "assistant_result"
-        in st.session_state
-        and st.session_state[
-            "assistant_question_current"
-        ]
-    ):
-
-        result = st.session_state[
-            "assistant_result"
-        ]
-
-        found = st.session_state[
-            "assistant_found"
-        ]
-
-        if found and not result.empty:
-
-            best = result.iloc[0]
-
-            title = clean_text(
-                best.get(
-                    "問題摘要",
-                    "相關問題"
-                )
-            )
-
-            answer = clean_text(
-                best.get(
-                    "標準回覆",
-                    ""
-                )
-            )
-
-            judgment = clean_text(
-                best.get(
-                    "判斷依據",
-                    ""
-                )
-            )
-
-            source = clean_text(
-                best.get(
-                    "資料來源",
-                    ""
-                )
-            )
-
-            score = float(
-                best.get(
-                    "_final_score",
-                    0
-                )
-            )
-
-            st.markdown(
-                f"""
-                <div class="assistant-answer">
-
-                    <strong>🐱 找到相關資料</strong>
-
-                    <br><br>
-
-                    <strong>問題：</strong>
-                    {safe_html_text(title)}
-
-                    <br><br>
-
-                    <strong>建議回覆：</strong><br>
-                    {safe_html_text(answer)}
-
-                    {
-                        "<br><br><strong>🔎 判斷依據：</strong><br>"
-                        + safe_html_text(judgment)
-                        if judgment else ""
-                    }
-
-                    {
-                        "<br><br><strong>📚 資料來源：</strong>"
-                        + safe_html_text(source)
-                        if source else ""
-                    }
-
-                    <br><br>
-
-                    <span class="score">
-                        相關度 {score:.1%}
-                    </span>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            # 顯示其他相關資料
-            if len(result) > 1:
-
-                st.markdown(
-                    "#### 🔎 其他相關資料"
+                st.warning(
+                    "請先輸入顧客問題。"
                 )
 
-                for i in range(
-                    1,
-                    min(len(result), 4)
-                ):
+            else:
 
-                    row = result.iloc[i]
+                found, result = ask_customer_assistant(
+                    assistant_question
+                )
 
-                    other_title = clean_text(
-                        row.get(
+                if found and not result.empty:
+
+                    best = result.iloc[0]
+
+                    title = clean_text(
+                        best.get(
                             "問題摘要",
                             "相關問題"
                         )
                     )
 
-                    other_score = float(
-                        row.get(
+                    answer = clean_text(
+                        best.get(
+                            "標準回覆",
+                            ""
+                        )
+                    )
+
+                    judgment = clean_text(
+                        best.get(
+                            "判斷依據",
+                            ""
+                        )
+                    )
+
+                    source = clean_text(
+                        best.get(
+                            "資料來源",
+                            ""
+                        )
+                    )
+
+                    score = float(
+                        best.get(
                             "_final_score",
                             0
                         )
                     )
 
                     st.markdown(
-                        f"""
-                        <div class="result-card">
+                        "<div class='assistant-answer'>"
+                        "<strong>🐾 找到相關資料</strong>"
+                        "<br><br>"
+                        "<strong>問題：</strong><br>"
+                        + safe_html_text(title)
+                        + "<br><br>"
+                        "<strong>建議回覆：</strong><br>"
+                        + safe_html_text(answer)
+                        + (
+                            "<br><br><strong>🔎 判斷依據：</strong><br>"
+                            + safe_html_text(judgment)
+                            if judgment
+                            else ""
+                        )
+                        + (
+                            "<br><br><strong>📚 資料來源：</strong><br>"
+                            + safe_html_text(source)
+                            if source
+                            else ""
+                        )
+                        + "<br><br>"
+                        + "<span class='score'>"
+                        + f"相關度 {score:.1%}"
+                        + "</span>"
+                        + "</div>",
+                        unsafe_allow_html=True
+                    )
 
-                            <div class="result-title">
-                                {safe_html_text(other_title)}
-                            </div>
+                    if len(result) > 1:
 
-                            <div class="result-meta">
-                                相關度
-                                {other_score:.1%}
-                            </div>
+                        st.markdown(
+                            "#### 🔎 其他相關資料"
+                        )
+
+                        for i in range(
+                            1,
+                            min(len(result), 4)
+                        ):
+
+                            row = result.iloc[i]
+
+                            other_title = clean_text(
+                                row.get(
+                                    "問題摘要",
+                                    "相關問題"
+                                )
+                            )
+
+                            other_score = float(
+                                row.get(
+                                    "_final_score",
+                                    0
+                                )
+                            )
+
+                            st.markdown(
+                                "<div class='result-card'>"
+                                "<div class='result-title'>"
+                                + safe_html_text(other_title)
+                                + "</div>"
+                                "<div class='result-meta'>"
+                                + f"相關度 {other_score:.1%}"
+                                + "</div>"
+                                "</div>",
+                                unsafe_allow_html=True
+                            )
+
+                else:
+
+                    st.markdown(
+                        """
+                        <div class="assistant-warning">
+
+                            <strong>
+                                🐱 目前沒有找到足夠相關的資料
+                            </strong>
+
+                            <br><br>
+
+                            這個問題目前可能還沒有建立在知識庫裡。
+
+                            <br>
+
+                            可以先不要直接使用答案，
+                            建議送到「待審核問題」，
+                            確認後再加入正式知識庫。
 
                         </div>
                         """,
                         unsafe_allow_html=True
                     )
 
-        else:
+                    if st.button(
+                        "📝 提出這個問題給我審核",
+                        type="primary",
+                        use_container_width=True,
+                        key="floating_submit_pending"
+                    ):
 
-            st.markdown(
-                """
-                <div class="assistant-warning">
+                        if add_pending_question(
+                            assistant_question
+                        ):
 
-                    <strong>
-                        🐱 目前沒有找到足夠相關的資料
-                    </strong>
+                            st.success(
+                                "已加入待審核問題！"
+                            )
 
-                    <br><br>
-
-                    這個問題目前可能還沒有建立在知識庫裡。
-
-                    <br>
-
-                    可以先不要直接使用答案，
-                    建議送到「待審核問題」，
-                    確認後再加入正式知識庫。
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            pending_question = st.session_state[
-                "assistant_question_current"
-            ]
-
-            if st.button(
-                "📝 提出這個問題給我審核",
-                type="primary",
-                key="submit_pending"
-            ):
-
-                if add_pending_question(
-                    pending_question
-                ):
-
-                    st.success(
-                        "已加入待審核問題！"
-                    )
-
-                    st.session_state[
-                        "assistant_question_current"
-                    ] = ""
-
-                    st.session_state[
-                        "assistant_result"
-                    ] = pd.DataFrame()
-
-                    st.session_state[
-                        "assistant_found"
-                    ] = False
-
-                    st.rerun()
+                            st.cache_data.clear()
 
     # --------------------------------------------------------
     # 原本公告
