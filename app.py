@@ -426,6 +426,7 @@ PENDING_COLUMNS = [
 def load_pending_questions():
 
     if not EXCEL_PATH.exists():
+
         return pd.DataFrame(
             columns=PENDING_COLUMNS
         )
@@ -754,7 +755,7 @@ def add_pending_question(question):
             ),
             question,
             "",
-            "待審核",
+            "確認中",
             ""
         ]
 
@@ -1719,10 +1720,6 @@ def ask_customer_assistant(question):
 
     return True, result
 
-
-# ============================================================
-# 客訴統計
-# ============================================================
 
 # ============================================================
 # 側邊欄
@@ -2917,30 +2914,232 @@ elif page == "🛠️ 資料維護":
 
         else:
 
-            edited_pending = st.data_editor(
-                pending,
-                use_container_width=True,
-                num_rows="dynamic",
-                height=550,
-                key="pending_editor"
+            # ------------------------------------------------
+            # 狀態選項
+            # ------------------------------------------------
+
+            status_options = [
+                "確認中",
+                "已新增完成",
+                "已有類似問題",
+                "不需要建立知識"
+            ]
+
+            # ------------------------------------------------
+            # 舊資料狀態轉換
+            # ------------------------------------------------
+
+            pending = pending.copy()
+
+            pending["狀態"] = (
+                pending["狀態"]
+                .astype(str)
+                .str.strip()
+                .replace(
+                    {
+                        "待審核": "確認中",
+                        "待處理": "確認中",
+                        "": "確認中"
+                    }
+                )
             )
 
-            if st.button(
-                "💾 儲存審核結果",
-                type="primary",
-                key="save_pending_questions"
-            ):
+            # ------------------------------------------------
+            # 顯示全部 / 只顯示確認中
+            # ------------------------------------------------
 
-                if save_sheet(
-                    "待審核問題",
-                    edited_pending
-                ):
+            show_all = st.checkbox(
+                "📂 顯示全部問題",
+                value=False,
+                key="show_all_pending"
+            )
 
-                    st.success(
-                        "待審核問題已更新！"
+            if show_all:
+
+                display_pending = pending.copy()
+
+                st.caption(
+                    f"目前顯示全部 {len(display_pending)} 筆問題"
+                )
+
+            else:
+
+                display_pending = pending[
+                    pending["狀態"] == "確認中"
+                ].copy()
+
+                st.caption(
+                    f"目前有 {len(display_pending)} 筆待處理問題"
+                )
+
+            # ------------------------------------------------
+            # 沒有待處理資料
+            # ------------------------------------------------
+
+            if display_pending.empty:
+
+                if show_all:
+
+                    st.info(
+                        "目前沒有待審核問題。"
                     )
 
-                    st.rerun()
+                else:
+
+                    st.success(
+                        "🎉 目前沒有待處理問題！"
+                    )
+
+                    st.caption(
+                        "如果想查看已處理的歷史資料，可以勾選「📂 顯示全部問題」。"
+                    )
+
+            else:
+
+                # ------------------------------------------------
+                # 編輯資料
+                # ------------------------------------------------
+
+                edited_pending = st.data_editor(
+                    display_pending,
+                    use_container_width=True,
+                    num_rows="dynamic",
+                    height=550,
+                    key="pending_editor",
+                    column_config={
+
+                        "提出時間": st.column_config.TextColumn(
+                            "提出時間",
+                            disabled=True
+                        ),
+
+                        "問題": st.column_config.TextColumn(
+                            "問題"
+                        ),
+
+                        "建議分類": st.column_config.TextColumn(
+                            "建議分類"
+                        ),
+
+                        "狀態": st.column_config.SelectboxColumn(
+                            "狀態",
+                            options=status_options,
+                            help="請選擇這筆問題目前的處理狀態。"
+                        ),
+
+                        "審核備註": st.column_config.TextColumn(
+                            "審核備註",
+                            help="可填寫例如：已加入哪一筆知識、與哪個問題重複等。"
+                        )
+                    }
+                )
+
+                # ------------------------------------------------
+                # 儲存審核結果
+                # ------------------------------------------------
+
+                if st.button(
+                    "💾 儲存審核結果",
+                    type="primary",
+                    key="save_pending_questions"
+                ):
+
+                    try:
+
+                        # ----------------------------------------
+                        # 目前顯示全部
+                        # ----------------------------------------
+
+                        if show_all:
+
+                            save_pending_df = (
+                                edited_pending.copy()
+                            )
+
+                        # ----------------------------------------
+                        # 目前只顯示「確認中」
+                        # ----------------------------------------
+
+                        else:
+
+                            # 保留原本已處理的歷史資料
+                            hidden_pending = pending[
+                                pending["狀態"] != "確認中"
+                            ].copy()
+
+                            save_pending_df = pd.concat(
+                                [
+                                    hidden_pending,
+                                    edited_pending
+                                ],
+                                ignore_index=True
+                            )
+
+                        # ----------------------------------------
+                        # 確保欄位順序
+                        # ----------------------------------------
+
+                        save_pending_df = (
+                            save_pending_df
+                            .reindex(
+                                columns=PENDING_COLUMNS
+                            )
+                            .fillna("")
+                        )
+
+                        # ----------------------------------------
+                        # 清理資料
+                        # ----------------------------------------
+
+                        for col in PENDING_COLUMNS:
+
+                            save_pending_df[col] = (
+                                save_pending_df[col]
+                                .astype(str)
+                                .replace(
+                                    "nan",
+                                    ""
+                                )
+                                .map(
+                                    clean_text
+                                )
+                            )
+
+                        # ----------------------------------------
+                        # 空白狀態自動改成「確認中」
+                        # ----------------------------------------
+
+                        save_pending_df["狀態"] = (
+                            save_pending_df["狀態"]
+                            .replace(
+                                {
+                                    "": "確認中",
+                                    "待審核": "確認中",
+                                    "待處理": "確認中"
+                                }
+                            )
+                        )
+
+                        # ----------------------------------------
+                        # 儲存
+                        # ----------------------------------------
+
+                        if save_sheet(
+                            "待審核問題",
+                            save_pending_df
+                        ):
+
+                            st.success(
+                                "✅ 審核結果已儲存！"
+                            )
+
+                            st.rerun()
+
+                    except Exception as e:
+
+                        st.error(
+                            f"❌ 儲存審核結果失敗：{e}"
+                        )
 
         st.divider()
 
@@ -2968,7 +3167,11 @@ elif page == "🛠️ 資料維護":
 
             ↓
 
-            ⑥ 小幫手下次就可以找到
+            ⑥ 將狀態改成「已新增完成」
+
+            ↓
+
+            ⑦ 小幫手下次就可以找到
             """
         )
 
