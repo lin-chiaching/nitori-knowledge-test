@@ -954,25 +954,9 @@ if page == "🏠 首頁":
     # Hero
     # --------------------------------------------------------
 
-    st.markdown("""
-    <div class="hero">
-
-        <div class="hero-cat">🐱</div>
-
-        <div class="hero-title">
-            客服作業系統
-        </div>
-
-        <div class="hero-subtitle">
-            NITORI CUSTOMER SERVICE WORKSPACE
-        </div>
-
-        <div class="hero-message">
-            🌿 今天也辛苦了，讓小貓陪你一起找資料
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("# 🐱 客服作業系統")
+st.caption("NITORI CUSTOMER SERVICE WORKSPACE")
+st.info("🌿 今天也辛苦了，讓小貓陪你一起找資料")
 
     # --------------------------------------------------------
     # Quick Access
@@ -1194,29 +1178,13 @@ if page == "🏠 首頁":
 
                 else:
 
-                    st.markdown(
-                        """
-                        <div class="assistant-warning">
-
-                            <strong>
-                                🐱 目前沒有找到足夠相關的資料
-                            </strong>
-
-                            <br><br>
-
-                            這個問題目前可能還沒有建立在知識庫裡。
-
-                            <br>
-
-                            可以先不要直接使用答案，
-                            建議送到「待審核問題」，
-                            確認後再加入正式知識庫。
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
+                    st.warning(
+    "🐱 目前沒有找到足夠相關的資料\n\n"
+    "這個問題目前可能還沒有建立在知識庫裡。\n\n"
+    "可以先不要直接使用答案，"
+    "建議送到「待審核問題」，"
+    "確認後再加入正式知識庫。"
+)
                     if st.button(
                         "📝 提出這個問題給我審核",
                         type="primary",
