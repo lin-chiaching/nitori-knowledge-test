@@ -95,25 +95,54 @@ try:
        浮動客服小幫手
        ========================= */
 
-    [data-testid="stPopover"] {
-        position: fixed !important;
-        right: 24px !important;
-        bottom: 24px !important;
-        z-index: 999999 !important;
-    }
+/* =========================================================
+   🐱 浮動客服小幫手
+   ========================================================= */
 
-    [data-testid="stPopover"] > button {
-        width: 58px !important;
-        height: 58px !important;
-        min-height: 58px !important;
-        border-radius: 50% !important;
-        background: #FFFDF9 !important;
-        border: 1px solid #D8C9B8 !important;
-        box-shadow: 0 5px 18px rgba(90,70,50,.18) !important;
-        font-size: 27px !important;
-        padding: 0 !important;
-    }
+[data-testid="stPopover"] {
+    position: fixed !important;
+    right: 22px !important;
+    bottom: 22px !important;
+    z-index: 999999 !important;
 
+    width: 58px !important;
+    height: 58px !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+[data-testid="stPopover"] > button {
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    min-height: 58px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border-radius: 50% !important;
+
+    background: #FFFDF9 !important;
+    border: 1px solid #D8C9B8 !important;
+
+    box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
+
+    font-size: 27px !important;
+}
+
+[data-testid="stPopover"] > button:hover {
+    transform: scale(1.08);
+    border-color: #B9785E !important;
+}
+
+[data-testid="stPopover"] > button:focus {
+    outline: none !important;
+    box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
+}
     [data-testid="stPopover"] > button:hover {
         transform: scale(1.05);
         border-color: #B9785E !important;
