@@ -2020,38 +2020,185 @@ def ask_customer_assistant(question):
 # 側邊欄
 # ============================================================
 
+# 第一次開啟時，預設顯示首頁
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "🏠 首頁"
+
+
+def sidebar_button(label, key):
+    """
+    側邊欄按鈕。
+    點擊後切換目前頁面。
+    """
+
+    is_current = (
+        st.session_state["current_page"]
+        == label
+    )
+
+    if st.button(
+        label,
+        key=key,
+        use_container_width=True
+    ):
+        st.session_state["current_page"] = label
+        st.rerun()
+
+
 with st.sidebar:
 
-    st.markdown("## 🐱")
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            font-size:42px;
+            margin-bottom:4px;
+        ">
+            🐱
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown(
-        "### 客服作業系統"
+        """
+        <div style="
+            text-align:center;
+            font-size:21px;
+            font-weight:700;
+            color:#554F48;
+            margin-bottom:2px;
+        ">
+            客服作業系統
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.caption(
-        "NITORI CUSTOMER SERVICE"
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            font-size:11px;
+            letter-spacing:1.5px;
+            color:#9A9187;
+            margin-bottom:18px;
+        ">
+            NITORI CUSTOMER SERVICE
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     st.divider()
 
-    page = st.radio(
-        "功能選單",
-        [
-            "🏠 首頁",
-            "🔍 知識搜尋",
-            "📊 客訴資料統計",
-            "🗺️ 門市地圖",
-            "📢 公告＆常用工具",
-            "🛠️ 資料維護"
-        ],
-        label_visibility="collapsed"
+    # --------------------------------------------------------
+    # 主要功能
+    # --------------------------------------------------------
+
+    st.markdown(
+        """
+        <div style="
+            font-size:12px;
+            font-weight:700;
+            color:#9A9187;
+            margin:8px 0 6px 4px;
+            letter-spacing:1px;
+        ">
+            主要功能
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    sidebar_button(
+        "🏠 首頁",
+        "sidebar_home"
+    )
+
+    sidebar_button(
+        "🔍 知識搜尋",
+        "sidebar_knowledge"
+    )
+
+    sidebar_button(
+        "📊 客訴資料統計",
+        "sidebar_complaints"
+    )
+
+    sidebar_button(
+        "🗺️ 門市地圖",
+        "sidebar_map"
+    )
+
+    # --------------------------------------------------------
+    # 資訊
+    # --------------------------------------------------------
+
+    st.markdown(
+        """
+        <div style="
+            font-size:12px;
+            font-weight:700;
+            color:#9A9187;
+            margin:20px 0 6px 4px;
+            letter-spacing:1px;
+        ">
+            資訊
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    sidebar_button(
+        "📢 公告＆常用工具",
+        "sidebar_announcements"
+    )
+
+    # --------------------------------------------------------
+    # 管理
+    # --------------------------------------------------------
+
+    st.markdown(
+        """
+        <div style="
+            font-size:12px;
+            font-weight:700;
+            color:#9A9187;
+            margin:20px 0 6px 4px;
+            letter-spacing:1px;
+        ">
+            管理
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    sidebar_button(
+        "🛠️ 資料維護",
+        "sidebar_maintenance"
     )
 
     st.divider()
 
-    st.caption(
-        "🌿 讓小貓陪你一起找資料"
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            color:#9A9187;
+            font-size:12px;
+            line-height:1.6;
+            padding:6px 0;
+        ">
+            🌿 讓小貓陪你一起找資料
+        </div>
+        """,
+        unsafe_allow_html=True
     )
+
+
+# 取得目前頁面
+page = st.session_state["current_page"]
 
 
 # ============================================================
