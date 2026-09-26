@@ -8,6 +8,7 @@ import openpyxl
 import re
 import html
 from datetime import datetime
+from difflib import SequenceMatcher
 
 
 # ============================================================
@@ -647,8 +648,342 @@ def expand_search_word(keyword):
 
 
 # ============================================================
-# 知識庫搜尋
+# 搜尋 V2
 # ============================================================
+
+def split_search_terms(keyword):
+
+    """
+    把使用者輸入拆成多個搜尋詞。
+
+    支援：
+    床墊 異味
+    床墊+異味
+    床墊、異味
+    床墊/異味
+    床墊 以及 異味
+    """
+
+    keyword = clean_text(keyword)
+
+    if not keyword:
+        return []
+
+    # 常見客服問句中的無意義詞
+    stop_words = {
+        "請問",
+        "想問",
+        "想詢問",
+        "請教",
+        "麻煩問一下",
+        "可以請問",
+        "可以",
+        "嗎",
+        "呢",
+        "嗎？",
+        "嗎?",
+        "如何",
+        "怎麼",
+        "怎樣",
+        "什麼",
+        "是否",
+        "有沒有",
+        "有無",
+        "我要",
+        "我想",
+        "需要",
+        "一下",
+        "一下子",
+        "問題",
+        "請",
+        "幫我",
+        "告訴我",
+        "想知道",
+        "請幫忙",
+        "謝謝",
+        "謝謝您",
+        "謝謝妳"
+    }
+
+    # 明確分隔符
+    parts = re.split(
+        r"[\s,，、/／+＋&＆|｜;；]+",
+        keyword
+    )
+
+    terms = []
+
+    for part in parts:
+
+        part = clean_text(part)
+
+        if not part:
+            continue
+
+        normalized = normalize_search_text(part)
+
+        if not normalized:
+            continue
+
+        # 去除客服常見問句詞
+        for stop_word in stop_words:
+
+            normalized_stop = normalize_search_text(
+                stop_word
+            )
+
+            if normalized == normalized_stop:
+                normalized = ""
+                break
+
+        if normalized:
+            terms.append(normalized)
+
+    # 如果使用者沒有使用分隔符，
+    # 不強制把整句拆成很多字。
+    # 保留完整句子給 TF-IDF 處理。
+    if not terms:
+
+        normalized = normalize_search_text(
+            keyword
+        )
+
+        if normalized:
+            terms.append(normalized)
+
+    return list(
+        dict.fromkeys(terms)
+    )
+
+
+def build_search_terms(keyword):
+
+    """
+    建立真正用來比對的搜尋詞。
+
+    原始搜尋詞
+    ↓
+    多關鍵字拆分
+    ↓
+    同義詞擴充
+    ↓
+    去除重複
+    """
+
+    original = clean_text(keyword)
+
+    if not original:
+        return []
+
+    terms = split_search_terms(original)
+
+    expanded_terms = []
+
+    # 先加入原本拆出的關鍵字
+    expanded_terms.extend(terms)
+
+    # 每個關鍵字再做同義詞擴充
+    for term in terms:
+
+        expanded = expand_search_word(term)
+
+        if not expanded:
+            continue
+
+        expanded_parts = re.split(
+            r"[\s,，、/／+＋&＆|｜;；]+",
+            expanded
+        )
+
+        for part in expanded_parts:
+
+            normalized = normalize_search_text(
+                part
+            )
+
+            if normalized:
+                expanded_terms.append(
+                    normalized
+                )
+
+    # 如果原句本身是一個完整問題，
+    # 也保留完整句子給 TF-IDF。
+    normalized_original = normalize_search_text(
+        original
+    )
+
+    if normalized_original:
+        expanded_terms.append(
+            normalized_original
+        )
+
+    return list(
+        dict.fromkeys(
+            [
+                x for x in expanded_terms
+                if x
+            ]
+        )
+    )
+
+
+def calculate_fuzzy_similarity(term, value):
+
+    """
+    計算模糊文字相似度。
+
+    完全包含 → 1.0
+    部分相似 → 依 SequenceMatcher 計算
+    """
+
+    term = normalize_search_text(term)
+    value = normalize_search_text(value)
+
+    if not term or not value:
+        return 0.0
+
+    # 完全命中
+    if term in value:
+        return 1.0
+
+    # 太短的詞不做模糊比對
+    if len(term) < 2:
+        return 0.0
+
+    # 如果整體很短，直接比較
+    if len(value) <= len(term) + 3:
+
+        return SequenceMatcher(
+            None,
+            term,
+            value
+        ).ratio()
+
+    # 針對商品名稱、問題摘要等較長文字，
+    # 使用滑動視窗找最接近的片段。
+    window_size = len(term)
+
+    best_score = 0.0
+
+    max_start = len(value) - window_size + 1
+
+    # 避免極長文字造成過多計算
+    if max_start > 120:
+
+        positions = list(
+            range(
+                0,
+                max_start,
+                max(
+                    1,
+                    max_start // 120
+                )
+            )
+        )
+
+        if positions[-1] != max_start - 1:
+            positions.append(
+                max_start - 1
+            )
+
+    else:
+
+        positions = range(
+            max_start
+        )
+
+    for i in positions:
+
+        piece = value[
+            i:i + window_size
+        ]
+
+        score = SequenceMatcher(
+            None,
+            term,
+            piece
+        ).ratio()
+
+        if score > best_score:
+
+            best_score = score
+
+        if best_score >= 0.92:
+
+            break
+
+    return best_score
+
+
+def calculate_term_match(
+    term,
+    row,
+    fields,
+    weights
+):
+
+    """
+    計算單一關鍵字在一筆資料中的命中程度。
+
+    完全命中與模糊命中會有不同權重。
+    """
+
+    best_exact = 0.0
+    best_fuzzy = 0.0
+
+    for field in fields:
+
+        value = normalize_search_text(
+            row.get(field, "")
+        )
+
+        if not value:
+            continue
+
+        field_weight = weights.get(
+            field,
+            20
+        )
+
+        normalized_weight = field_weight / 100
+
+        # 完全包含
+        if term in value:
+
+            exact_score = min(
+                1.0,
+                0.5 + normalized_weight * 0.5
+            )
+
+            if exact_score > best_exact:
+
+                best_exact = exact_score
+
+        # 模糊比對
+        fuzzy_score = calculate_fuzzy_similarity(
+            term,
+            value
+        )
+
+        if fuzzy_score >= 0.62:
+
+            weighted_fuzzy = (
+                fuzzy_score
+                * (
+                    0.55
+                    + normalized_weight * 0.45
+                )
+            )
+
+            if weighted_fuzzy > best_fuzzy:
+
+                best_fuzzy = weighted_fuzzy
+
+    return max(
+        best_exact,
+        best_fuzzy
+    )
+
 
 def search_knowledge(keyword, top_n=10):
 
@@ -679,12 +1014,45 @@ def search_knowledge(keyword, top_n=10):
     if not fields:
         return pd.DataFrame()
 
-    query = normalize_search_text(
-        expand_search_word(keyword)
+    original_keyword = clean_text(
+        keyword
     )
 
-    if not query:
-        return df.head(top_n).copy()
+    if not original_keyword:
+
+        return df.head(
+            top_n
+        ).copy()
+
+    # --------------------------------------------------------
+    # 建立搜尋詞
+    # --------------------------------------------------------
+
+    search_terms = build_search_terms(
+        original_keyword
+    )
+
+    if not search_terms:
+
+        return df.head(
+            top_n
+        ).copy()
+
+    # 原始完整問題
+    normalized_query = normalize_search_text(
+        original_keyword
+    )
+
+    # 同義詞擴充後的完整搜尋文字
+    expanded_query = normalize_search_text(
+        expand_search_word(
+            original_keyword
+        )
+    )
+
+    # --------------------------------------------------------
+    # 欄位權重
+    # --------------------------------------------------------
 
     weights = {
         "問題摘要": 100,
@@ -699,6 +1067,10 @@ def search_knowledge(keyword, top_n=10):
         "判斷依據": 30,
         "資料來源": 20
     }
+
+    # --------------------------------------------------------
+    # 建立 TF-IDF corpus
+    # --------------------------------------------------------
 
     corpus = []
 
@@ -733,14 +1105,23 @@ def search_knowledge(keyword, top_n=10):
             " ".join(parts)
         )
 
+    # --------------------------------------------------------
+    # TF-IDF
+    # --------------------------------------------------------
+
     vectorizer = TfidfVectorizer(
         analyzer="char",
         ngram_range=(1, 3),
         min_df=1
     )
 
+    query_for_tfidf = expanded_query
+
+    if not query_for_tfidf:
+        query_for_tfidf = normalized_query
+
     matrix = vectorizer.fit_transform(
-        corpus + [query]
+        corpus + [query_for_tfidf]
     )
 
     scores = cosine_similarity(
@@ -752,11 +1133,233 @@ def search_knowledge(keyword, top_n=10):
 
     result["_score"] = scores
 
+    # --------------------------------------------------------
+    # 多關鍵字命中
+    # --------------------------------------------------------
+
+    term_coverage_scores = []
+    term_quality_scores = []
+    fuzzy_scores = []
     direct_scores = []
+
+    # 只使用實際關鍵字，不把完整長句當成獨立詞
+    meaningful_terms = []
+
+    for term in search_terms:
+
+        # 過長的完整自然語句，
+        # 不拿來做逐詞命中。
+        if len(term) > 12:
+
+            continue
+
+        if term not in meaningful_terms:
+
+            meaningful_terms.append(
+                term
+            )
+
+    # 如果沒有適合拆分的詞，
+    # 至少使用原始搜尋句。
+    if not meaningful_terms:
+
+        meaningful_terms = [
+            normalized_query
+        ]
 
     for _, row in result.iterrows():
 
-        direct_score = 0
+        row_term_scores = []
+
+        exact_hit_count = 0
+
+        fuzzy_total = 0.0
+
+        direct_score = 0.0
+
+        for term in meaningful_terms:
+
+            if not term:
+                continue
+
+            best_exact_field_score = 0.0
+            best_fuzzy_field_score = 0.0
+
+            for field in fields:
+
+                value = normalize_search_text(
+                    row.get(field, "")
+                )
+
+                if not value:
+                    continue
+
+                field_weight = weights.get(
+                    field,
+                    20
+                )
+
+                # ----------------------------
+                # 完全命中
+                # ----------------------------
+
+                if term in value:
+
+                    weighted_exact = (
+                        field_weight / 100
+                    )
+
+                    if weighted_exact > best_exact_field_score:
+
+                        best_exact_field_score = (
+                            weighted_exact
+                        )
+
+                # ----------------------------
+                # 模糊命中
+                # ----------------------------
+
+                fuzzy = calculate_fuzzy_similarity(
+                    term,
+                    value
+                )
+
+                if fuzzy >= 0.62:
+
+                    weighted_fuzzy = (
+                        fuzzy
+                        * (
+                            0.5
+                            + (
+                                field_weight
+                                / 100
+                            ) * 0.5
+                        )
+                    )
+
+                    if weighted_fuzzy > best_fuzzy_field_score:
+
+                        best_fuzzy_field_score = (
+                            weighted_fuzzy
+                        )
+
+            best_term_score = max(
+                best_exact_field_score,
+                best_fuzzy_field_score
+            )
+
+            row_term_scores.append(
+                best_term_score
+            )
+
+            if best_exact_field_score > 0:
+
+                exact_hit_count += 1
+
+            fuzzy_total += (
+                best_term_score
+            )
+
+            # direct score
+            if best_exact_field_score > 0:
+
+                direct_score += (
+                    best_exact_field_score
+                )
+
+        # ----------------------------------------------------
+        # 多關鍵字覆蓋率
+        # ----------------------------------------------------
+
+        total_terms = max(
+            1,
+            len(row_term_scores)
+        )
+
+        matched_terms = sum(
+            1
+            for score in row_term_scores
+            if score >= 0.25
+        )
+
+        coverage = (
+            matched_terms
+            / total_terms
+        )
+
+        term_quality = (
+            sum(row_term_scores)
+            / total_terms
+        )
+
+        fuzzy_average = (
+            fuzzy_total
+            / total_terms
+        )
+
+        # 完全命中多個詞時給予額外加分
+        multi_exact_bonus = min(
+            0.20,
+            exact_hit_count * 0.05
+        )
+
+        term_coverage_scores.append(
+            min(
+                1.0,
+                coverage + multi_exact_bonus
+            )
+        )
+
+        term_quality_scores.append(
+            min(
+                1.0,
+                term_quality
+            )
+        )
+
+        fuzzy_scores.append(
+            min(
+                1.0,
+                fuzzy_average
+            )
+        )
+
+        direct_scores.append(
+            min(
+                1.0,
+                direct_score
+                / max(
+                    1,
+                    len(meaningful_terms)
+                )
+            )
+        )
+
+    result["_term_coverage"] = (
+        term_coverage_scores
+    )
+
+    result["_term_quality"] = (
+        term_quality_scores
+    )
+
+    result["_fuzzy_score"] = (
+        fuzzy_scores
+    )
+
+    result["_direct_score"] = (
+        direct_scores
+    )
+
+    # --------------------------------------------------------
+    # 完整句子直接命中
+    # --------------------------------------------------------
+
+    full_query_scores = []
+
+    for _, row in result.iterrows():
+
+        full_match_score = 0.0
 
         for field in fields:
 
@@ -772,29 +1375,87 @@ def search_knowledge(keyword, top_n=10):
                 20
             )
 
-            if query in value:
+            if (
+                normalized_query
+                and normalized_query in value
+            ):
 
-                direct_score += (
+                full_match_score = max(
+                    full_match_score,
                     field_weight / 100
                 )
 
-        direct_scores.append(
-            direct_score
+            if (
+                expanded_query
+                and expanded_query in value
+            ):
+
+                full_match_score = max(
+                    full_match_score,
+                    field_weight / 100
+                )
+
+        full_query_scores.append(
+            min(
+                1.0,
+                full_match_score
+            )
         )
 
-    result["_direct_score"] = direct_scores
-
-    result["_final_score"] = (
-        result["_score"] * 0.65
-        + result["_direct_score"] * 0.35
+    result["_full_query_score"] = (
+        full_query_scores
     )
 
+    # --------------------------------------------------------
+    # 最終相關度
+    # --------------------------------------------------------
+    #
+    # TF-IDF             40%
+    # 多關鍵字覆蓋率     25%
+    # 關鍵字品質         15%
+    # 直接命中           10%
+    # 模糊搜尋           10%
+    #
+    # 完整句子命中會額外拉高結果
+    # --------------------------------------------------------
+
+    result["_final_score"] = (
+        result["_score"] * 0.40
+        + result["_term_coverage"] * 0.25
+        + result["_term_quality"] * 0.15
+        + result["_direct_score"] * 0.10
+        + result["_fuzzy_score"] * 0.10
+    )
+
+    # 完整問題直接命中時加分
+    result["_final_score"] = (
+        result["_final_score"]
+        + result["_full_query_score"] * 0.10
+    )
+
+    # 防止超過 100%
+    result["_final_score"] = (
+        result["_final_score"].clip(
+            upper=1.0
+        )
+    )
+
+    # --------------------------------------------------------
+    # 排序
+    # --------------------------------------------------------
+
     result = result.sort_values(
-        "_final_score",
+        [
+            "_final_score",
+            "_term_coverage",
+            "_score"
+        ],
         ascending=False
     )
 
-    return result.head(top_n)
+    return result.head(
+        top_n
+    )
 
 
 # ============================================================
@@ -2073,7 +2734,6 @@ elif page == "🛠️ 資料維護":
             "備註"
         ]
 
-        # 如果沒有資料，建立空白表格
         if complaints.empty:
 
             edit_df = pd.DataFrame(
@@ -2174,12 +2834,14 @@ elif page == "🛠️ 資料維護":
 
             save_df = edited_complaints.copy()
 
-            # 確保欄位順序固定
             save_df = save_df.reindex(
                 columns=complaint_columns
             )
 
+            # ------------------------------------------------
             # 移除完全空白的列
+            # ------------------------------------------------
+
             if not save_df.empty:
 
                 save_df = save_df[
