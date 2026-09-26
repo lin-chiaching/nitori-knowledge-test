@@ -1,4 +1,3 @@
-````python
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -4228,4 +4227,3 @@ with st.popover("🐱"):
                             st.warning(
                                 "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
                             )
-````
