@@ -3241,12 +3241,26 @@ with st.popover("🐱"):
                     key="floating_submit_pending"
                 ):
 
-                    if add_pending_question(
+                    st.write("🔍 正在提交問題：", assistant_question)
+
+                    result = add_pending_question(
                         assistant_question
-                    ):
+                    )
+
+                    st.write("🔍 儲存結果：", result)
+
+                    if result:
 
                         st.success(
-                            "已加入待審核問題！"
+                            "✅ 已加入待審核問題！"
                         )
 
                         st.cache_data.clear()
+
+                        st.rerun()
+
+                    else:
+
+                        st.error(
+                            "❌ 提交失敗，請查看上方的錯誤訊息。"
+                        )
