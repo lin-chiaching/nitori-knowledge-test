@@ -1536,30 +1536,108 @@ def add_pending_question(question):
     if not question:
         return False
 
-    df = load_pending_questions()
+    try:
 
-    new_row = {
-        "提出時間": datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ),
-        "問題": question,
-        "建議分類": "",
-        "狀態": "待審核",
-        "審核備註": ""
-    }
+        wb = openpyxl.load_workbook(
+            EXCEL_PATH
+        )
 
-    df = pd.concat(
-        [
-            df,
-            pd.DataFrame([new_row])
-        ],
-        ignore_index=True
-    )
+        sheet_name = "待審核問題"
 
-    return save_sheet(
-        "待審核問題",
-        df
-    )
+        # 如果沒有待審核問題工作表，就直接建立
+        if sheet_name in wb.sheetnames:
+
+            ws = wb[sheet_name]
+
+            # 取得目前資料
+            headers = [
+                ws.cell(1, c).value
+                for c in range(1, ws.max_column + 1)
+            ]
+
+            # 如果工作表是空的，重新建立標題
+            if not headers or all(
+                h is None for h in headers
+            ):
+
+                headers = [
+                    "提出時間",
+                    "問題",
+                    "建議分類",
+                    "狀態",
+                    "審核備註"
+                ]
+
+                for c, header in enumerate(
+                    headers,
+                    1
+                ):
+                    ws.cell(1, c, header)
+
+        else:
+
+            ws = wb.create_sheet(sheet_name)
+
+            headers = [
+                "提出時間",
+                "問題",
+                "建議分類",
+                "狀態",
+                "審核備註"
+            ]
+
+            for c, header in enumerate(
+                headers,
+                1
+            ):
+                ws.cell(1, c, header)
+
+        # 檢查是否已經有相同問題
+        existing_questions = []
+
+        for row in ws.iter_rows(
+            min_row=2,
+            values_only=True
+        ):
+
+            if len(row) >= 2 and row[1]:
+
+                existing_questions.append(
+                    str(row[1]).strip()
+                )
+
+        if question in existing_questions:
+
+            wb.save(EXCEL_PATH)
+
+            st.cache_data.clear()
+
+            return True
+
+        # 新增資料
+        ws.append([
+            datetime.now().strftime(
+                "%Y/%m/%d %H:%M"
+            ),
+            question,
+            "",
+            "待審核",
+            ""
+        ])
+
+        wb.save(EXCEL_PATH)
+
+        st.cache_data.clear()
+
+        return True
+
+    except Exception as e:
+
+        st.error(
+            f"待審核問題儲存失敗：{e}"
+        )
+
+        return False
 
 
 # ============================================================
