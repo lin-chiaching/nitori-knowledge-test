@@ -432,7 +432,49 @@ def load_pending_questions():
         dtype=str
     ).fillna("")
 
+def add_pending_question(question):
 
+    question = clean_text(question)
+
+    if not question:
+        return False
+
+    # 讀取目前待審核問題
+    pending = load_pending_questions()
+
+    # 避免同一個問題重複提交
+    if not pending.empty and "問題" in pending.columns:
+        existing_questions = (
+            pending["問題"]
+            .astype(str)
+            .str.strip()
+        )
+
+        if question in existing_questions.values:
+            return True
+
+    # 建立新的待審核資料
+    new_row = pd.DataFrame([
+        {
+            "提出時間": datetime.now().strftime("%Y/%m/%d %H:%M"),
+            "問題": question,
+            "建議分類": "",
+            "狀態": "待審核",
+            "審核備註": ""
+        }
+    ])
+
+    # 合併資料
+    pending = pd.concat(
+        [pending, new_row],
+        ignore_index=True
+    )
+
+    # 儲存回 Excel
+    return save_sheet(
+        "待審核問題",
+        pending
+    )
 # ============================================================
 # 客訴資料
 # ============================================================
