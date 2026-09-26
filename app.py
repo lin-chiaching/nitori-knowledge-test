@@ -472,10 +472,320 @@ def load_pending_questions():
 
 
 # ============================================================
+# 修改歷程
+# ============================================================
+
+HISTORY_COLUMNS = [
+    "修改時間",
+    "修改人",
+    "資料區域",
+    "動作",
+    "資料識別",
+    "欄位名稱",
+    "修改前",
+    "修改後"
+]
+
+
+def get_history_identifier(row, index):
+
+    # 優先使用比較容易辨識資料的欄位
+    identifier_fields = [
+        "序號",
+        "商品編號",
+        "問題摘要",
+        "問題",
+        "標題",
+        "名稱",
+        "工具名稱"
+    ]
+
+    for field in identifier_fields:
+
+        if field in row.index:
+
+            value = clean_text(
+                row.get(field, "")
+            )
+
+            if value:
+                return value
+
+    return f"第 {index + 1} 筆"
+
+
+def build_change_history(
+    old_df,
+    new_df,
+    data_area,
+    editor_name
+):
+
+    history = []
+
+    old_df = old_df.copy()
+    new_df = new_df.copy()
+
+    # 確保欄位一致
+    all_columns = list(
+        dict.fromkeys(
+            list(old_df.columns)
+            + list(new_df.columns)
+        )
+    )
+
+    for col in all_columns:
+
+        if col not in old_df.columns:
+            old_df[col] = ""
+
+        if col not in new_df.columns:
+            new_df[col] = ""
+
+    old_df = old_df[
+        all_columns
+    ].fillna("")
+
+    new_df = new_df[
+        all_columns
+    ].fillna("")
+
+    max_rows = max(
+        len(old_df),
+        len(new_df)
+    )
+
+    # --------------------------------------------------------
+    # 逐筆比較
+    # --------------------------------------------------------
+
+    for i in range(max_rows):
+
+        old_exists = i < len(old_df)
+        new_exists = i < len(new_df)
+
+        # ----------------------------------------------------
+        # 新增資料
+        # ----------------------------------------------------
+
+        if not old_exists and new_exists:
+
+            new_row = new_df.iloc[i]
+
+            identifier = get_history_identifier(
+                new_row,
+                i
+            )
+
+            history.append(
+                {
+                    "修改時間": datetime.now().strftime(
+                        "%Y/%m/%d %H:%M:%S"
+                    ),
+                    "修改人": editor_name,
+                    "資料區域": data_area,
+                    "動作": "新增",
+                    "資料識別": identifier,
+                    "欄位名稱": "整筆資料",
+                    "修改前": "",
+                    "修改後": "新增資料"
+                }
+            )
+
+            continue
+
+        # ----------------------------------------------------
+        # 刪除資料
+        # ----------------------------------------------------
+
+        if old_exists and not new_exists:
+
+            old_row = old_df.iloc[i]
+
+            identifier = get_history_identifier(
+                old_row,
+                i
+            )
+
+            history.append(
+                {
+                    "修改時間": datetime.now().strftime(
+                        "%Y/%m/%d %H:%M:%S"
+                    ),
+                    "修改人": editor_name,
+                    "資料區域": data_area,
+                    "動作": "刪除",
+                    "資料識別": identifier,
+                    "欄位名稱": "整筆資料",
+                    "修改前": "原有資料",
+                    "修改後": ""
+                }
+            )
+
+            continue
+
+        # ----------------------------------------------------
+        # 修改資料
+        # ----------------------------------------------------
+
+        old_row = old_df.iloc[i]
+        new_row = new_df.iloc[i]
+
+        identifier = get_history_identifier(
+            new_row,
+            i
+        )
+
+        # 如果新資料沒有識別資訊
+        if identifier.startswith("第 ") and old_exists:
+
+            identifier = get_history_identifier(
+                old_row,
+                i
+            )
+
+        for col in all_columns:
+
+            old_value = clean_text(
+                old_row.get(
+                    col,
+                    ""
+                )
+            )
+
+            new_value = clean_text(
+                new_row.get(
+                    col,
+                    ""
+                )
+            )
+
+            if old_value != new_value:
+
+                history.append(
+                    {
+                        "修改時間": datetime.now().strftime(
+                            "%Y/%m/%d %H:%M:%S"
+                        ),
+                        "修改人": editor_name,
+                        "資料區域": data_area,
+                        "動作": "修改",
+                        "資料識別": identifier,
+                        "欄位名稱": col,
+                        "修改前": old_value,
+                        "修改後": new_value
+                    }
+                )
+
+    return pd.DataFrame(
+        history,
+        columns=HISTORY_COLUMNS
+    )
+
+
+def save_change_history(history_df):
+
+    if history_df.empty:
+        return True
+
+    if not EXCEL_PATH.exists():
+        return False
+
+    try:
+
+        wb = openpyxl.load_workbook(
+            EXCEL_PATH
+        )
+
+        sheet_name = "修改歷程"
+
+        # ----------------------------------------------------
+        # 建立工作表
+        # ----------------------------------------------------
+
+        if sheet_name not in wb.sheetnames:
+
+            ws = wb.create_sheet(
+                sheet_name
+            )
+
+            for c, col in enumerate(
+                HISTORY_COLUMNS,
+                1
+            ):
+
+                ws.cell(
+                    1,
+                    c,
+                    col
+                )
+
+        else:
+
+            ws = wb[sheet_name]
+
+            # 確保標題存在
+            for c, col in enumerate(
+                HISTORY_COLUMNS,
+                1
+            ):
+
+                ws.cell(
+                    1,
+                    c,
+                    col
+                )
+
+        # ----------------------------------------------------
+        # 寫入歷程
+        # ----------------------------------------------------
+
+        for _, row in history_df.iterrows():
+
+            ws.append(
+                [
+                    clean_text(
+                        row.get(
+                            col,
+                            ""
+                        )
+                    )
+                    for col in HISTORY_COLUMNS
+                ]
+            )
+
+        wb.save(
+            EXCEL_PATH
+        )
+
+        return True
+
+    except PermissionError:
+
+        st.error(
+            "❌ Excel 目前可能正在被開啟，無法寫入修改歷程。"
+        )
+
+        return False
+
+    except Exception as e:
+
+        st.error(
+            f"❌ 修改歷程儲存失敗：{e}"
+        )
+
+        return False
+
+
+# ============================================================
 # 儲存 Excel
 # ============================================================
 
-def save_sheet(sheet_name, data):
+def save_sheet(
+    sheet_name,
+    data,
+    editor_name=""
+):
 
     if not EXCEL_PATH.exists():
 
@@ -486,6 +796,41 @@ def save_sheet(sheet_name, data):
         return False
 
     try:
+
+        # ----------------------------------------------------
+        # 先取得修改前資料
+        # ----------------------------------------------------
+
+        old_df = pd.DataFrame()
+
+        if sheet_name in get_excel_sheets():
+
+            try:
+
+                old_df = pd.read_excel(
+                    EXCEL_PATH,
+                    sheet_name=sheet_name,
+                    dtype=str
+                ).fillna("")
+
+            except Exception:
+
+                old_df = pd.DataFrame()
+
+        # ----------------------------------------------------
+        # 建立修改歷程
+        # ----------------------------------------------------
+
+        history_df = build_change_history(
+            old_df,
+            data,
+            sheet_name,
+            clean_text(editor_name)
+        )
+
+        # ----------------------------------------------------
+        # 開啟 Excel
+        # ----------------------------------------------------
 
         wb = openpyxl.load_workbook(
             EXCEL_PATH
@@ -504,7 +849,10 @@ def save_sheet(sheet_name, data):
             sheet_name
         )
 
+        # ----------------------------------------------------
         # 寫入欄位名稱
+        # ----------------------------------------------------
+
         for c, col in enumerate(
             data.columns,
             1
@@ -516,7 +864,10 @@ def save_sheet(sheet_name, data):
                 str(col)
             )
 
+        # ----------------------------------------------------
         # 寫入資料
+        # ----------------------------------------------------
+
         for r, row in enumerate(
             data.itertuples(index=False),
             2
@@ -540,6 +891,20 @@ def save_sheet(sheet_name, data):
             EXCEL_PATH
         )
 
+        # ----------------------------------------------------
+        # 寫入修改歷程
+        # ----------------------------------------------------
+
+        if not history_df.empty:
+
+            if not save_change_history(
+                history_df
+            ):
+
+                st.warning(
+                    "⚠️ 資料已儲存，但修改歷程寫入失敗。"
+                )
+
         # 清除 Streamlit 快取
         st.cache_data.clear()
 
@@ -562,7 +927,10 @@ def save_sheet(sheet_name, data):
         return False
 
 
-def save_knowledge_data(data):
+def save_knowledge_data(
+    data,
+    editor_name=""
+):
 
     sheet = find_sheet(
         ["知識庫", "問題集", "Sheet1"],
@@ -573,7 +941,8 @@ def save_knowledge_data(data):
 
         return save_sheet(
             sheet,
-            data
+            data,
+            editor_name
         )
 
     return False
@@ -1759,7 +2128,57 @@ with st.sidebar:
     st.caption(
         "🌿 讓小貓陪你一起找資料"
     )
+    st.markdown(
+        "### 👤 修改人"
+    )
 
+    editor_name = st.text_input(
+        "請輸入姓名",
+        placeholder="例如：珈青",
+        key="editor_name_input"
+    )
+
+    st.caption(
+        "儲存資料時會記錄修改人"
+    )
+
+    st.divider()
+
+也就是會變成大概：
+
+with st.sidebar:
+
+    st.markdown(
+        "## 🐱"
+    )
+
+    st.markdown(
+        "### 客服作業系統"
+    )
+
+    st.caption(
+        "NITORI CUSTOMER SERVICE"
+    )
+
+    st.divider()
+
+    st.markdown(
+        "### 👤 修改人"
+    )
+
+    editor_name = st.text_input(
+        "請輸入姓名",
+        placeholder="例如：珈青",
+        key="editor_name_input"
+    )
+
+    st.caption(
+        "儲存資料時會記錄修改人"
+    )
+
+    st.divider()
+
+    page = st.radio(
 
 # ============================================================
 # 首頁
@@ -2756,6 +3175,7 @@ elif page == "🛠️ 資料維護":
             "🔗 常用工具",
             "📝 待審核問題",
             "📊 客訴資料"
+            "📜 修改歷程"
         ]
     )
 
@@ -2790,6 +3210,7 @@ elif page == "🛠️ 資料維護":
 
                 if save_knowledge_data(
                     edited
+                    editor_name
                 ):
 
                     st.success(
@@ -2835,6 +3256,7 @@ elif page == "🛠️ 資料維護":
                     and save_sheet(
                         sheet,
                         edited
+                        editor_name
                     )
                 ):
 
@@ -2881,6 +3303,7 @@ elif page == "🛠️ 資料維護":
                     and save_sheet(
                         sheet,
                         edited
+                        editor_name
                     )
                 ):
 
@@ -3127,6 +3550,7 @@ elif page == "🛠️ 資料維護":
                         if save_sheet(
                             "待審核問題",
                             save_pending_df
+                            editor_name
                         ):
 
                             st.success(
@@ -3390,6 +3814,7 @@ elif page == "🛠️ 資料維護":
             if save_sheet(
                 "客訴資料",
                 save_df
+                editor_name
             ):
 
                 st.success(
@@ -3796,5 +4221,248 @@ with st.popover("🐱"):
                             )
 
                             st.warning(
-                                "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
+                                "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。
                             )
+    # ========================================================
+    # 修改歷程
+    # ========================================================
+
+    with tab6:
+
+        st.subheader(
+            "📜 修改歷程"
+        )
+
+        st.caption(
+            "這裡會記錄資料維護中的新增、修改與刪除紀錄。"
+        )
+
+        if not EXCEL_PATH.exists():
+
+            st.warning(
+                "找不到 Excel 檔案。"
+            )
+
+        else:
+
+            try:
+
+                sheets = get_excel_sheets()
+
+                if "修改歷程" not in sheets:
+
+                    st.info(
+                        "目前還沒有修改歷程。第一次修改資料並儲存後，系統會自動建立。"
+                    )
+
+                else:
+
+                    history = pd.read_excel(
+                        EXCEL_PATH,
+                        sheet_name="修改歷程",
+                        dtype=str
+                    ).fillna("")
+
+                    for col in HISTORY_COLUMNS:
+
+                        if col not in history.columns:
+                            history[col] = ""
+
+                    history = history[
+                        HISTORY_COLUMNS
+                    ].copy()
+
+                    if history.empty:
+
+                        st.info(
+                            "目前沒有修改紀錄。"
+                        )
+
+                    else:
+
+                        # ------------------------------------------------
+                        # 篩選
+                        # ------------------------------------------------
+
+                        filter_col1, filter_col2 = st.columns(2)
+
+                        with filter_col1:
+
+                            area_options = sorted(
+                                [
+                                    x
+                                    for x in history[
+                                        "資料區域"
+                                    ].unique()
+                                    if clean_text(x)
+                                ]
+                            )
+
+                            selected_area = st.selectbox(
+                                "資料區域",
+                                ["全部"] + area_options,
+                                key="history_area_filter"
+                            )
+
+                        with filter_col2:
+
+                            action_options = sorted(
+                                [
+                                    x
+                                    for x in history[
+                                        "動作"
+                                    ].unique()
+                                    if clean_text(x)
+                                ]
+                            )
+
+                            selected_action = st.selectbox(
+                                "動作",
+                                ["全部"] + action_options,
+                                key="history_action_filter"
+                            )
+
+                        search_history = st.text_input(
+                            "🔎 搜尋修改紀錄",
+                            placeholder="可搜尋修改人、商品編號、問題、欄位名稱或修改內容……",
+                            key="history_search"
+                        )
+
+                        display_history = history.copy()
+
+                        # ------------------------------------------------
+                        # 資料區域篩選
+                        # ------------------------------------------------
+
+                        if selected_area != "全部":
+
+                            display_history = display_history[
+                                display_history[
+                                    "資料區域"
+                                ]
+                                == selected_area
+                            ]
+
+                        # ------------------------------------------------
+                        # 動作篩選
+                        # ------------------------------------------------
+
+                        if selected_action != "全部":
+
+                            display_history = display_history[
+                                display_history[
+                                    "動作"
+                                ]
+                                == selected_action
+                            ]
+
+                        # ------------------------------------------------
+                        # 關鍵字搜尋
+                        # ------------------------------------------------
+
+                        if search_history.strip():
+
+                            search_value = (
+                                normalize_search_text(
+                                    search_history
+                                )
+                            )
+
+                            mask = pd.Series(
+                                False,
+                                index=display_history.index
+                            )
+
+                            for col in HISTORY_COLUMNS:
+
+                                mask = (
+                                    mask
+                                    | display_history[
+                                        col
+                                    ]
+                                    .astype(str)
+                                    .map(
+                                        normalize_search_text
+                                    )
+                                    .str.contains(
+                                        search_value,
+                                        na=False
+                                    )
+                                )
+
+                            display_history = (
+                                display_history[
+                                    mask
+                                ]
+                            )
+
+                        # ------------------------------------------------
+                        # 最新的放前面
+                        # ------------------------------------------------
+
+                        display_history = (
+                            display_history
+                            .iloc[::-1]
+                            .reset_index(
+                                drop=True
+                            )
+                        )
+
+                        st.caption(
+                            f"目前顯示 {len(display_history)} 筆修改紀錄"
+                        )
+
+                        if display_history.empty:
+
+                            st.info(
+                                "沒有符合條件的修改紀錄。"
+                            )
+
+                        else:
+
+                            st.dataframe(
+                                display_history,
+                                use_container_width=True,
+                                hide_index=True,
+                                height=600,
+                                column_config={
+
+                                    "修改時間": st.column_config.TextColumn(
+                                        "修改時間"
+                                    ),
+
+                                    "修改人": st.column_config.TextColumn(
+                                        "修改人"
+                                    ),
+
+                                    "資料區域": st.column_config.TextColumn(
+                                        "資料區域"
+                                    ),
+
+                                    "動作": st.column_config.TextColumn(
+                                        "動作"
+                                    ),
+
+                                    "資料識別": st.column_config.TextColumn(
+                                        "資料識別"
+                                    ),
+
+                                    "欄位名稱": st.column_config.TextColumn(
+                                        "欄位名稱"
+                                    ),
+
+                                    "修改前": st.column_config.TextColumn(
+                                        "修改前"
+                                    ),
+
+                                    "修改後": st.column_config.TextColumn(
+                                        "修改後"
+                                    )
+                                }
+                            )
+
+            except Exception as e:
+
+                st.error(
+                    f"讀取修改歷程失敗：{e}"
+                )
