@@ -1,3 +1,4 @@
+````python
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -508,6 +509,7 @@ def build_change_history(
         new_exists = i < len(new_df)
 
         if not old_exists and new_exists:
+
             new_row = new_df.iloc[i]
 
             history.append({
@@ -527,6 +529,7 @@ def build_change_history(
             continue
 
         if old_exists and not new_exists:
+
             old_row = old_df.iloc[i]
 
             history.append({
@@ -560,6 +563,7 @@ def build_change_history(
             )
 
         for col in all_columns:
+
             old_value = clean_text(
                 old_row.get(col, "")
             )
@@ -569,6 +573,7 @@ def build_change_history(
             )
 
             if old_value != new_value:
+
                 history.append({
                     "修改時間": now,
                     "修改人": editor_name,
@@ -587,6 +592,7 @@ def build_change_history(
 
 
 def save_change_history(history_df):
+
     if history_df.empty:
         return True
 
@@ -594,6 +600,7 @@ def save_change_history(history_df):
         return False
 
     try:
+
         wb = openpyxl.load_workbook(
             EXCEL_PATH
         )
@@ -601,6 +608,7 @@ def save_change_history(history_df):
         sheet_name = "修改歷程"
 
         if sheet_name not in wb.sheetnames:
+
             ws = wb.create_sheet(
                 sheet_name
             )
@@ -616,7 +624,10 @@ def save_change_history(history_df):
                 )
 
         else:
-            ws = wb[sheet_name]
+
+            ws = wb[
+                sheet_name
+            ]
 
             for c, col in enumerate(
                 HISTORY_COLUMNS,
@@ -629,9 +640,13 @@ def save_change_history(history_df):
                 )
 
         for _, row in history_df.iterrows():
+
             ws.append([
                 clean_text(
-                    row.get(col, "")
+                    row.get(
+                        col,
+                        ""
+                    )
                 )
                 for col in HISTORY_COLUMNS
             ])
@@ -643,15 +658,19 @@ def save_change_history(history_df):
         return True
 
     except PermissionError:
+
         st.error(
             "❌ Excel 目前可能正在被開啟，無法寫入修改歷程。"
         )
+
         return False
 
     except Exception as e:
+
         st.error(
             f"❌ 修改歷程儲存失敗：{e}"
         )
+
         return False
 
 
@@ -664,30 +683,40 @@ def save_sheet(
     data,
     editor_name=""
 ):
+
     if not EXCEL_PATH.exists():
+
         st.error(
             "找不到 Excel：DATA/知識庫實驗品.xlsx"
         )
+
         return False
 
     try:
+
         old_df = pd.DataFrame()
 
         if sheet_name in get_excel_sheets():
+
             try:
+
                 old_df = pd.read_excel(
                     EXCEL_PATH,
                     sheet_name=sheet_name,
                     dtype=str
                 ).fillna("")
+
             except Exception:
+
                 old_df = pd.DataFrame()
 
         history_df = build_change_history(
             old_df,
             data,
             sheet_name,
-            clean_text(editor_name)
+            clean_text(
+                editor_name
+            )
         )
 
         wb = openpyxl.load_workbook(
@@ -695,6 +724,7 @@ def save_sheet(
         )
 
         if sheet_name in wb.sheetnames:
+
             wb.remove(
                 wb[sheet_name]
             )
@@ -707,6 +737,7 @@ def save_sheet(
             data.columns,
             1
         ):
+
             ws.cell(
                 1,
                 c,
@@ -714,13 +745,17 @@ def save_sheet(
             )
 
         for r, row in enumerate(
-            data.itertuples(index=False),
+            data.itertuples(
+                index=False
+            ),
             2
         ):
+
             for c, value in enumerate(
                 row,
                 1
             ):
+
                 if pd.isna(value):
                     value = ""
 
@@ -735,9 +770,11 @@ def save_sheet(
         )
 
         if not history_df.empty:
+
             if not save_change_history(
                 history_df
             ):
+
                 st.warning(
                     "⚠️ 資料已儲存，但修改歷程寫入失敗。"
                 )
@@ -747,15 +784,19 @@ def save_sheet(
         return True
 
     except PermissionError:
+
         st.error(
             "❌ Excel 目前可能正在被開啟，請先關閉「知識庫實驗品.xlsx」後再試一次。"
         )
+
         return False
 
     except Exception as e:
+
         st.error(
             f"❌ 儲存失敗：{e}"
         )
+
         return False
 
 
@@ -763,12 +804,18 @@ def save_knowledge_data(
     data,
     editor_name=""
 ):
+
     sheet = find_sheet(
-        ["知識庫", "問題集", "Sheet1"],
+        [
+            "知識庫",
+            "問題集",
+            "Sheet1"
+        ],
         0
     )
 
     if sheet:
+
         return save_sheet(
             sheet,
             data,
@@ -782,7 +829,10 @@ def save_knowledge_data(
 # 新增待審核問題
 # ============================================================
 
-def add_pending_question(question):
+def add_pending_question(
+    question
+):
+
     question = clean_text(
         question
     )
@@ -791,12 +841,15 @@ def add_pending_question(question):
         return False
 
     if not EXCEL_PATH.exists():
+
         st.error(
             "❌ 找不到 Excel 檔案。"
         )
+
         return False
 
     try:
+
         wb = openpyxl.load_workbook(
             EXCEL_PATH
         )
@@ -804,6 +857,7 @@ def add_pending_question(question):
         sheet_name = "待審核問題"
 
         if sheet_name not in wb.sheetnames:
+
             ws = wb.create_sheet(
                 sheet_name
             )
@@ -812,18 +866,24 @@ def add_pending_question(question):
                 PENDING_COLUMNS,
                 1
             ):
+
                 ws.cell(
                     1,
                     c,
                     header
                 )
+
         else:
-            ws = wb[sheet_name]
+
+            ws = wb[
+                sheet_name
+            ]
 
             for index, header in enumerate(
                 PENDING_COLUMNS,
                 1
             ):
+
                 if (
                     index > ws.max_column
                     or not clean_text(
@@ -833,6 +893,7 @@ def add_pending_question(question):
                         ).value
                     )
                 ):
+
                     ws.cell(
                         1,
                         index,
@@ -842,12 +903,14 @@ def add_pending_question(question):
         existing_questions = []
 
         if ws.max_row >= 2:
+
             problem_column = None
 
             for c in range(
                 1,
                 ws.max_column + 1
             ):
+
                 header = clean_text(
                     ws.cell(
                         1,
@@ -856,7 +919,9 @@ def add_pending_question(question):
                 )
 
                 if header == "問題":
+
                     problem_column = c
+
                     break
 
             if problem_column is None:
@@ -866,6 +931,7 @@ def add_pending_question(question):
                 2,
                 ws.max_row + 1
             ):
+
                 value = clean_text(
                     ws.cell(
                         r,
@@ -874,16 +940,19 @@ def add_pending_question(question):
                 )
 
                 if value:
+
                     existing_questions.append(
                         value
                     )
 
         if question in existing_questions:
+
             wb.save(
                 EXCEL_PATH
             )
 
             st.cache_data.clear()
+
             return True
 
         ws.append([
@@ -907,6 +976,7 @@ def add_pending_question(question):
         )
 
         if sheet_name not in wb_check.sheetnames:
+
             wb_check.close()
 
             st.error(
@@ -925,11 +995,16 @@ def add_pending_question(question):
             min_row=2,
             values_only=True
         ):
+
             if (
                 len(row) >= 2
-                and clean_text(row[1]) == question
+                and clean_text(
+                    row[1]
+                ) == question
             ):
+
                 saved = True
+
                 break
 
         wb_check.close()
@@ -946,15 +1021,19 @@ def add_pending_question(question):
         return False
 
     except PermissionError:
+
         st.error(
             "❌ Excel 目前正在被開啟，請先關閉「知識庫實驗品.xlsx」再提交。"
         )
+
         return False
 
     except Exception as e:
+
         st.error(
             f"❌ 待審核問題儲存失敗：{e}"
         )
+
         return False
 
 
@@ -964,6 +1043,7 @@ def add_pending_question(question):
 
 @st.cache_data(ttl=60)
 def load_complaints():
+
     sheet = find_sheet(
         ["客訴資料"]
     )
@@ -993,6 +1073,7 @@ def load_complaints():
     ]
 
     for col in expected_columns:
+
         if col not in df.columns:
             df[col] = ""
 
@@ -1001,12 +1082,18 @@ def load_complaints():
         errors="coerce"
     )
 
-    df["_月份"] = df["_日期"].dt.strftime(
+    df["_月份"] = df[
+        "_日期"
+    ].dt.strftime(
         "%Y/%m"
     )
 
-    df["_月份"] = df["_月份"].fillna(
-        df["月份"].apply(clean_text)
+    df["_月份"] = df[
+        "_月份"
+    ].fillna(
+        df["月份"].apply(
+            clean_text
+        )
     )
 
     return df
@@ -1016,7 +1103,10 @@ def load_complaints():
 # 搜尋詞擴充
 # ============================================================
 
-def expand_search_word(keyword):
+def expand_search_word(
+    keyword
+):
+
     keyword = clean_text(
         keyword
     )
@@ -1030,33 +1120,50 @@ def expand_search_word(keyword):
 
     if (
         not synonym_df.empty
-        and len(synonym_df.columns) >= 2
+        and len(
+            synonym_df.columns
+        ) >= 2
     ):
+
         a, b = synonym_df.columns[:2]
 
         for _, row in synonym_df.iterrows():
-            left = clean_text(row[a])
-            right = clean_text(row[b])
+
+            left = clean_text(
+                row[a]
+            )
+
+            right = clean_text(
+                row[b]
+            )
 
             if not left and not right:
                 continue
 
-            keyword_normalized = normalize_search_text(
-                keyword
+            keyword_normalized = (
+                normalize_search_text(
+                    keyword
+                )
             )
 
-            left_normalized = normalize_search_text(
-                left
+            left_normalized = (
+                normalize_search_text(
+                    left
+                )
             )
 
-            right_normalized = normalize_search_text(
-                right
+            right_normalized = (
+                normalize_search_text(
+                    right
+                )
             )
 
             if (
                 left_normalized
-                and keyword_normalized in left_normalized
+                and keyword_normalized
+                in left_normalized
             ):
+
                 words.extend(
                     re.split(
                         r"[,，、/／\s]+",
@@ -1066,9 +1173,13 @@ def expand_search_word(keyword):
 
             elif (
                 right_normalized
-                and keyword_normalized in right_normalized
+                and keyword_normalized
+                in right_normalized
             ):
-                words.append(left)
+
+                words.append(
+                    left
+                )
 
     return " ".join(
         dict.fromkeys([
@@ -1083,7 +1194,10 @@ def expand_search_word(keyword):
 # 搜尋
 # ============================================================
 
-def split_search_terms(keyword):
+def split_search_terms(
+    keyword
+):
+
     keyword = clean_text(
         keyword
     )
@@ -1092,15 +1206,34 @@ def split_search_terms(keyword):
         return []
 
     stop_words = {
-        "請問", "想問", "想詢問", "請教",
-        "麻煩問一下", "可以請問", "可以",
-        "嗎", "呢", "嗎？", "嗎?",
-        "如何", "怎麼", "怎樣", "什麼",
-        "是否", "有沒有", "有無", "我要",
-        "我想", "需要", "一下", "一下子",
-        "問題", "請", "幫我", "告訴我",
-        "想知道", "請幫忙", "謝謝", "謝謝您",
-        "謝謝妳"
+        "請問",
+        "想問",
+        "想詢問",
+        "請教",
+        "麻煩問一下",
+        "可以請問",
+        "可以",
+        "嗎",
+        "呢",
+        "如何",
+        "怎麼",
+        "怎樣",
+        "什麼",
+        "是否",
+        "有沒有",
+        "有無",
+        "我要",
+        "我想",
+        "需要",
+        "一下",
+        "問題",
+        "請",
+        "幫我",
+        "告訴我",
+        "想知道",
+        "請幫忙",
+        "謝謝",
+        "謝謝您"
     }
 
     parts = re.split(
@@ -1111,7 +1244,10 @@ def split_search_terms(keyword):
     terms = []
 
     for part in parts:
-        part = clean_text(part)
+
+        part = clean_text(
+            part
+        )
 
         if not part:
             continue
@@ -1124,31 +1260,48 @@ def split_search_terms(keyword):
             continue
 
         for stop_word in stop_words:
-            normalized_stop = normalize_search_text(
-                stop_word
+
+            normalized_stop = (
+                normalize_search_text(
+                    stop_word
+                )
             )
 
             if normalized == normalized_stop:
+
                 normalized = ""
+
                 break
 
         if normalized:
-            terms.append(normalized)
+
+            terms.append(
+                normalized
+            )
 
     if not terms:
+
         normalized = normalize_search_text(
             keyword
         )
 
         if normalized:
-            terms.append(normalized)
+
+            terms.append(
+                normalized
+            )
 
     return list(
-        dict.fromkeys(terms)
+        dict.fromkeys(
+            terms
+        )
     )
 
 
-def build_search_terms(keyword):
+def build_search_terms(
+    keyword
+):
+
     original = clean_text(
         keyword
     )
@@ -1161,9 +1314,13 @@ def build_search_terms(keyword):
     )
 
     expanded_terms = []
-    expanded_terms.extend(terms)
+
+    expanded_terms.extend(
+        terms
+    )
 
     for term in terms:
+
         expanded = expand_search_word(
             term
         )
@@ -1177,20 +1334,25 @@ def build_search_terms(keyword):
         )
 
         for part in expanded_parts:
+
             normalized = normalize_search_text(
                 part
             )
 
             if normalized:
+
                 expanded_terms.append(
                     normalized
                 )
 
-    normalized_original = normalize_search_text(
-        original
+    normalized_original = (
+        normalize_search_text(
+            original
+        )
     )
 
     if normalized_original:
+
         expanded_terms.append(
             normalized_original
         )
@@ -1208,6 +1370,7 @@ def calculate_fuzzy_similarity(
     term,
     value
 ):
+
     term = normalize_search_text(
         term
     )
@@ -1226,6 +1389,7 @@ def calculate_fuzzy_similarity(
         return 0.0
 
     if len(value) <= len(term) + 3:
+
         return SequenceMatcher(
             None,
             term,
@@ -1233,6 +1397,7 @@ def calculate_fuzzy_similarity(
         ).ratio()
 
     window_size = len(term)
+
     best_score = 0.0
 
     max_start = (
@@ -1242,6 +1407,7 @@ def calculate_fuzzy_similarity(
     )
 
     if max_start > 120:
+
         positions = list(
             range(
                 0,
@@ -1253,14 +1419,24 @@ def calculate_fuzzy_similarity(
             )
         )
 
-        if positions[-1] != max_start - 1:
+        if (
+            positions
+            and positions[-1]
+            != max_start - 1
+        ):
+
             positions.append(
                 max_start - 1
             )
+
     else:
-        positions = range(max_start)
+
+        positions = range(
+            max_start
+        )
 
     for i in positions:
+
         piece = value[
             i:i + window_size
         ]
@@ -1272,9 +1448,11 @@ def calculate_fuzzy_similarity(
         ).ratio()
 
         if score > best_score:
+
             best_score = score
 
         if best_score >= 0.92:
+
             break
 
     return best_score
@@ -1284,6 +1462,7 @@ def search_knowledge(
     keyword,
     top_n=10
 ):
+
     df = load_data()
 
     if df.empty:
@@ -1317,6 +1496,7 @@ def search_knowledge(
     )
 
     if not original_keyword:
+
         return df.head(
             top_n
         ).copy()
@@ -1326,17 +1506,22 @@ def search_knowledge(
     )
 
     if not search_terms:
+
         return df.head(
             top_n
         ).copy()
 
-    normalized_query = normalize_search_text(
-        original_keyword
+    normalized_query = (
+        normalize_search_text(
+            original_keyword
+        )
     )
 
-    expanded_query = normalize_search_text(
-        expand_search_word(
-            original_keyword
+    expanded_query = (
+        normalize_search_text(
+            expand_search_word(
+                original_keyword
+            )
         )
     )
 
@@ -1357,11 +1542,16 @@ def search_knowledge(
     corpus = []
 
     for _, row in df.iterrows():
+
         parts = []
 
         for field in fields:
+
             value = normalize_search_text(
-                row.get(field, "")
+                row.get(
+                    field,
+                    ""
+                )
             )
 
             if not value:
@@ -1374,7 +1564,9 @@ def search_knowledge(
 
             repeat_count = max(
                 1,
-                int(weight / 20)
+                int(
+                    weight / 20
+                )
             )
 
             parts.extend(
@@ -1398,7 +1590,9 @@ def search_knowledge(
     )
 
     matrix = vectorizer.fit_transform(
-        corpus + [query_for_tfidf]
+        corpus + [
+            query_for_tfidf
+        ]
     )
 
     scores = cosine_similarity(
@@ -1407,18 +1601,24 @@ def search_knowledge(
     ).ravel()
 
     result = df.copy()
+
     result["_score"] = scores
 
     meaningful_terms = []
 
     for term in search_terms:
+
         if len(term) > 12:
             continue
 
         if term not in meaningful_terms:
-            meaningful_terms.append(term)
+
+            meaningful_terms.append(
+                term
+            )
 
     if not meaningful_terms:
+
         meaningful_terms = [
             normalized_query
         ]
@@ -1429,12 +1629,17 @@ def search_knowledge(
     direct_scores = []
 
     for _, row in result.iterrows():
+
         row_term_scores = []
+
         exact_hit_count = 0
+
         fuzzy_total = 0.0
+
         direct_score = 0.0
 
         for term in meaningful_terms:
+
             if not term:
                 continue
 
@@ -1442,8 +1647,12 @@ def search_knowledge(
             best_fuzzy_field_score = 0.0
 
             for field in fields:
+
                 value = normalize_search_text(
-                    row.get(field, "")
+                    row.get(
+                        field,
+                        ""
+                    )
                 )
 
                 if not value:
@@ -1455,11 +1664,17 @@ def search_knowledge(
                 )
 
                 if term in value:
+
                     weighted_exact = (
-                        field_weight / 100
+                        field_weight
+                        / 100
                     )
 
-                    if weighted_exact > best_exact_field_score:
+                    if (
+                        weighted_exact
+                        > best_exact_field_score
+                    ):
+
                         best_exact_field_score = (
                             weighted_exact
                         )
@@ -1470,6 +1685,7 @@ def search_knowledge(
                 )
 
                 if fuzzy >= 0.62:
+
                     weighted_fuzzy = (
                         fuzzy
                         * (
@@ -1481,7 +1697,11 @@ def search_knowledge(
                         )
                     )
 
-                    if weighted_fuzzy > best_fuzzy_field_score:
+                    if (
+                        weighted_fuzzy
+                        > best_fuzzy_field_score
+                    ):
+
                         best_fuzzy_field_score = (
                             weighted_fuzzy
                         )
@@ -1496,7 +1716,9 @@ def search_knowledge(
             )
 
             if best_exact_field_score > 0:
+
                 exact_hit_count += 1
+
                 direct_score += (
                     best_exact_field_score
                 )
@@ -1537,7 +1759,8 @@ def search_knowledge(
         term_coverage_scores.append(
             min(
                 1.0,
-                coverage + multi_exact_bonus
+                coverage
+                + multi_exact_bonus
             )
         )
 
@@ -1561,35 +1784,42 @@ def search_knowledge(
                 direct_score
                 / max(
                     1,
-                    len(meaningful_terms)
+                    len(
+                        meaningful_terms
+                    )
                 )
             )
         )
 
-    result["_term_coverage"] = (
-        term_coverage_scores
-    )
+    result[
+        "_term_coverage"
+    ] = term_coverage_scores
 
-    result["_term_quality"] = (
-        term_quality_scores
-    )
+    result[
+        "_term_quality"
+    ] = term_quality_scores
 
-    result["_fuzzy_score"] = (
-        fuzzy_scores
-    )
+    result[
+        "_fuzzy_score"
+    ] = fuzzy_scores
 
-    result["_direct_score"] = (
-        direct_scores
-    )
+    result[
+        "_direct_score"
+    ] = direct_scores
 
     full_query_scores = []
 
     for _, row in result.iterrows():
+
         full_match_score = 0.0
 
         for field in fields:
+
             value = normalize_search_text(
-                row.get(field, "")
+                row.get(
+                    field,
+                    ""
+                )
             )
 
             if not value:
@@ -1602,8 +1832,10 @@ def search_knowledge(
 
             if (
                 normalized_query
-                and normalized_query in value
+                and normalized_query
+                in value
             ):
+
                 full_match_score = max(
                     full_match_score,
                     field_weight / 100
@@ -1611,8 +1843,10 @@ def search_knowledge(
 
             if (
                 expanded_query
-                and expanded_query in value
+                and expanded_query
+                in value
             ):
+
                 full_match_score = max(
                     full_match_score,
                     field_weight / 100
@@ -1625,11 +1859,13 @@ def search_knowledge(
             )
         )
 
-    result["_full_query_score"] = (
-        full_query_scores
-    )
+    result[
+        "_full_query_score"
+    ] = full_query_scores
 
-    result["_final_score"] = (
+    result[
+        "_final_score"
+    ] = (
         result["_score"] * 0.40
         + result["_term_coverage"] * 0.25
         + result["_term_quality"] * 0.15
@@ -1637,15 +1873,19 @@ def search_knowledge(
         + result["_fuzzy_score"] * 0.10
     )
 
-    result["_final_score"] = (
+    result[
+        "_final_score"
+    ] = (
         result["_final_score"]
         + result["_full_query_score"] * 0.10
     )
 
-    result["_final_score"] = (
-        result["_final_score"].clip(
-            upper=1.0
-        )
+    result[
+        "_final_score"
+    ] = result[
+        "_final_score"
+    ].clip(
+        upper=1.0
     )
 
     result = result.sort_values(
@@ -1666,13 +1906,17 @@ def search_knowledge(
 # 客服小幫手搜尋
 # ============================================================
 
-def ask_customer_assistant(question):
+def ask_customer_assistant(
+    question
+):
+
     result = search_knowledge(
         question,
         top_n=5
     )
 
     if result.empty:
+
         return False, result
 
     best_score = float(
@@ -1685,6 +1929,7 @@ def ask_customer_assistant(question):
     MIN_SCORE = 0.12
 
     if best_score < MIN_SCORE:
+
         return False, result
 
     return True, result
@@ -1696,7 +1941,9 @@ def ask_customer_assistant(question):
 
 with st.sidebar:
 
-    st.markdown("## 🐱")
+    st.markdown(
+        "## 🐱"
+    )
 
     st.markdown(
         "### 客服作業系統"
@@ -1719,22 +1966,6 @@ with st.sidebar:
             "🛠️ 資料維護"
         ],
         label_visibility="collapsed"
-    )
-
-    st.divider()
-
-    st.markdown(
-        "### 👤 修改人"
-    )
-
-    editor_name = st.text_input(
-        "請輸入姓名",
-        placeholder="例如：珈青",
-        key="editor_name_input"
-    )
-
-    st.caption(
-        "儲存資料時會記錄修改人"
     )
 
     st.divider()
@@ -1769,6 +2000,7 @@ if page == "🏠 首頁":
     c1, c2, c3 = st.columns(3)
 
     with c1:
+
         st.subheader(
             "🔍 知識庫搜尋"
         )
@@ -1778,6 +2010,7 @@ if page == "🏠 首頁":
         )
 
     with c2:
+
         st.subheader(
             "🗺️ 宜得利小地圖"
         )
@@ -1787,6 +2020,7 @@ if page == "🏠 首頁":
         )
 
     with c3:
+
         st.subheader(
             "📢 公告＆常用工具"
         )
@@ -1804,12 +2038,16 @@ if page == "🏠 首頁":
     ann = load_announcements()
 
     if ann.empty:
+
         st.info(
             "目前沒有公告資料。"
         )
 
     else:
-        cols = list(ann.columns)
+
+        cols = list(
+            ann.columns
+        )
 
         title_col = next(
             (
@@ -1826,7 +2064,10 @@ if page == "🏠 首頁":
                 for c in cols
                 if any(
                     x in str(c)
-                    for x in ["內容", "說明"]
+                    for x in [
+                        "內容",
+                        "說明"
+                    ]
                 )
             ),
             cols[1]
@@ -1843,7 +2084,9 @@ if page == "🏠 首頁":
             None
         )
 
-        for _, row in ann.head(5).iterrows():
+        for _, row in ann.head(
+            5
+        ).iterrows():
 
             title = clean_announcement_title(
                 row[title_col]
@@ -1870,11 +2113,13 @@ if page == "🏠 首頁":
                 )
 
                 if date:
+
                     st.caption(
                         "📅 公告日期：" + date
                     )
 
                 if content:
+
                     st.write(
                         content
                     )
@@ -1919,6 +2164,7 @@ elif page == "🔍 知識搜尋":
         )
 
         if result.empty:
+
             st.warning(
                 "目前沒有找到相關資料。"
             )
@@ -1963,6 +2209,7 @@ elif page == "🔍 知識搜尋":
                     )
 
                     if value:
+
                         meta_parts.append(
                             value
                         )
@@ -2001,11 +2248,14 @@ elif page == "🔍 知識搜尋":
                     )
 
                     if meta:
+
                         st.caption(
                             meta
                             + f"　｜　相關度 {score:.1%}"
                         )
+
                     else:
+
                         st.caption(
                             f"相關度 {score:.1%}"
                         )
@@ -2019,6 +2269,7 @@ elif page == "🔍 知識搜尋":
                     )
 
                     if judgment:
+
                         st.markdown(
                             "**🔎 判斷依據**"
                         )
@@ -2028,6 +2279,7 @@ elif page == "🔍 知識搜尋":
                         )
 
                     if source:
+
                         st.markdown(
                             "**📚 資料來源**"
                         )
@@ -2037,6 +2289,7 @@ elif page == "🔍 知識搜尋":
                         )
 
     else:
+
         st.info(
             "🐾 輸入關鍵字開始搜尋"
         )
@@ -2070,12 +2323,16 @@ elif page == "📊 客訴資料統計":
             "🔎 資料篩選"
         )
 
-        filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
+        filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(
+            4
+        )
 
         month_options = sorted(
             [
                 x
-                for x in complaints["_月份"].dropna().unique()
+                for x in complaints[
+                    "_月份"
+                ].dropna().unique()
                 if clean_text(x)
             ],
             reverse=True
@@ -2085,13 +2342,16 @@ elif page == "📊 客訴資料統計":
 
             selected_month = st.selectbox(
                 "月份",
-                ["全部"] + month_options
+                ["全部"]
+                + month_options
             )
 
         channel_options = sorted(
             [
                 x
-                for x in complaints["購買通路"].dropna().unique()
+                for x in complaints[
+                    "購買通路"
+                ].dropna().unique()
                 if clean_text(x)
             ]
         )
@@ -2100,13 +2360,16 @@ elif page == "📊 客訴資料統計":
 
             selected_channel = st.selectbox(
                 "購買通路",
-                ["全部"] + channel_options
+                ["全部"]
+                + channel_options
             )
 
         type_options = sorted(
             [
                 x
-                for x in complaints["客訴類型"].dropna().unique()
+                for x in complaints[
+                    "客訴類型"
+                ].dropna().unique()
                 if clean_text(x)
             ]
         )
@@ -2115,13 +2378,16 @@ elif page == "📊 客訴資料統計":
 
             selected_type = st.selectbox(
                 "客訴類型",
-                ["全部"] + type_options
+                ["全部"]
+                + type_options
             )
 
         detail_options = sorted(
             [
                 x
-                for x in complaints["客訴細項"].dropna().unique()
+                for x in complaints[
+                    "客訴細項"
+                ].dropna().unique()
                 if clean_text(x)
             ]
         )
@@ -2130,30 +2396,35 @@ elif page == "📊 客訴資料統計":
 
             selected_detail = st.selectbox(
                 "客訴細項",
-                ["全部"] + detail_options
+                ["全部"]
+                + detail_options
             )
 
         filtered = complaints.copy()
 
         if selected_month != "全部":
+
             filtered = filtered[
                 filtered["_月份"]
                 == selected_month
             ]
 
         if selected_channel != "全部":
+
             filtered = filtered[
                 filtered["購買通路"]
                 == selected_channel
             ]
 
         if selected_type != "全部":
+
             filtered = filtered[
                 filtered["客訴類型"]
                 == selected_type
             ]
 
         if selected_detail != "全部":
+
             filtered = filtered[
                 filtered["客訴細項"]
                 == selected_detail
@@ -2161,7 +2432,9 @@ elif page == "📊 客訴資料統計":
 
         st.divider()
 
-        total_count = len(filtered)
+        total_count = len(
+            filtered
+        )
 
         current_month = datetime.now().strftime(
             "%Y/%m"
@@ -2190,27 +2463,33 @@ elif page == "📊 客訴資料統計":
             - product_count
         )
 
-        card1, card2, card3, card4 = st.columns(4)
+        card1, card2, card3, card4 = st.columns(
+            4
+        )
 
         with card1:
+
             st.metric(
                 "📋 篩選後客訴",
                 f"{total_count} 件"
             )
 
         with card2:
+
             st.metric(
                 "📅 本月客訴",
                 f"{current_month_count} 件"
             )
 
         with card3:
+
             st.metric(
                 "📦 商品相關",
                 f"{product_count} 件"
             )
 
         with card4:
+
             st.metric(
                 "📝 其他類型",
                 f"{other_count} 件"
@@ -2229,7 +2508,9 @@ elif page == "📊 客訴資料統計":
                 .str.strip()
                 != ""
             ]
-            .groupby("_月份")
+            .groupby(
+                "_月份"
+            )
             .size()
             .reset_index(
                 name="客訴件數"
@@ -2257,13 +2538,17 @@ elif page == "📊 客訴資料統計":
             )
 
             st.line_chart(
-                monthly_chart["客訴件數"],
+                monthly_chart[
+                    "客訴件數"
+                ],
                 use_container_width=True
             )
 
         st.divider()
 
-        chart_col1, chart_col2 = st.columns(2)
+        chart_col1, chart_col2 = st.columns(
+            2
+        )
 
         with chart_col1:
 
@@ -2273,7 +2558,9 @@ elif page == "📊 客訴資料統計":
 
             type_data = (
                 filtered[
-                    filtered["客訴類型"]
+                    filtered[
+                        "客訴類型"
+                    ]
                     .astype(str)
                     .str.strip()
                     != ""
@@ -2292,6 +2579,7 @@ elif page == "📊 客訴資料統計":
             )
 
             if type_data.empty:
+
                 st.info(
                     "目前沒有客訴類型資料。"
                 )
@@ -2305,7 +2593,9 @@ elif page == "📊 客訴資料統計":
                 )
 
                 st.bar_chart(
-                    type_chart["件數"],
+                    type_chart[
+                        "件數"
+                    ],
                     use_container_width=True
                 )
 
@@ -2317,7 +2607,9 @@ elif page == "📊 客訴資料統計":
 
             detail_data = (
                 filtered[
-                    filtered["客訴細項"]
+                    filtered[
+                        "客訴細項"
+                    ]
                     .astype(str)
                     .str.strip()
                     != ""
@@ -2336,6 +2628,7 @@ elif page == "📊 客訴資料統計":
             )
 
             if detail_data.empty:
+
                 st.info(
                     "目前沒有客訴細項資料。"
                 )
@@ -2349,7 +2642,9 @@ elif page == "📊 客訴資料統計":
                 )
 
                 st.bar_chart(
-                    detail_chart["件數"],
+                    detail_chart[
+                        "件數"
+                    ],
                     use_container_width=True
                 )
 
@@ -2361,7 +2656,9 @@ elif page == "📊 客訴資料統計":
 
         channel_data = (
             filtered[
-                filtered["購買通路"]
+                filtered[
+                    "購買通路"
+                ]
                 .astype(str)
                 .str.strip()
                 != ""
@@ -2380,6 +2677,7 @@ elif page == "📊 客訴資料統計":
         )
 
         if channel_data.empty:
+
             st.info(
                 "目前沒有購買通路資料。"
             )
@@ -2393,7 +2691,9 @@ elif page == "📊 客訴資料統計":
             )
 
             st.bar_chart(
-                channel_chart["件數"],
+                channel_chart[
+                    "件數"
+                ],
                 use_container_width=True
             )
 
@@ -2483,6 +2783,7 @@ elif page == "📢 公告＆常用工具":
         ann = load_announcements()
 
         if ann.empty:
+
             st.info(
                 "目前沒有公告資料。"
             )
@@ -2508,7 +2809,10 @@ elif page == "📢 公告＆常用工具":
                     for c in cols
                     if any(
                         x in str(c)
-                        for x in ["內容", "說明"]
+                        for x in [
+                            "內容",
+                            "說明"
+                        ]
                     )
                 ),
                 cols[1]
@@ -2552,6 +2856,7 @@ elif page == "📢 公告＆常用工具":
                     )
 
                     if date:
+
                         st.caption(
                             "📅 " + date
                         )
@@ -2625,7 +2930,9 @@ elif page == "📢 公告＆常用工具":
                 None
             )
 
-            grid = st.columns(3)
+            grid = st.columns(
+                3
+            )
 
             for i, (_, row) in enumerate(
                 tools.iterrows()
@@ -2651,7 +2958,9 @@ elif page == "📢 公告＆常用工具":
                     else ""
                 )
 
-                with grid[i % 3]:
+                with grid[
+                    i % 3
+                ]:
 
                     with st.container(
                         border=True
@@ -2662,11 +2971,13 @@ elif page == "📢 公告＆常用工具":
                         )
 
                         if desc:
+
                             st.write(
                                 desc
                             )
 
                         if url:
+
                             st.link_button(
                                 "開啟工具",
                                 url,
@@ -2687,6 +2998,24 @@ elif page == "🛠️ 資料維護":
     st.caption(
         "這裡可以直接編輯目前 Excel 中的資料，完成後按下儲存。"
     )
+
+    # --------------------------------------------------------
+    # 修改人
+    # --------------------------------------------------------
+
+    editor_name = st.text_input(
+        "👤 修改人姓名",
+        placeholder="例如：珈青",
+        key="editor_name_input"
+    )
+
+    if not editor_name.strip():
+
+        st.info(
+            "💡 請先輸入修改人姓名，再進行資料儲存，系統會將姓名記錄在修改歷程中。"
+        )
+
+    st.divider()
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
         [
@@ -2728,7 +3057,13 @@ elif page == "🛠️ 資料維護":
                 type="primary"
             ):
 
-                if save_knowledge_data(
+                if not editor_name.strip():
+
+                    st.warning(
+                        "⚠️ 請先輸入修改人姓名。"
+                    )
+
+                elif save_knowledge_data(
                     edited,
                     editor_name
                 ):
@@ -2767,24 +3102,35 @@ elif page == "🛠️ 資料維護":
                 "💾 儲存公告"
             ):
 
-                sheet = find_sheet(
-                    ["內部公告", "公告"]
-                )
+                if not editor_name.strip():
 
-                if (
-                    sheet
-                    and save_sheet(
-                        sheet,
-                        edited,
-                        editor_name
-                    )
-                ):
-
-                    st.success(
-                        "公告已儲存！"
+                    st.warning(
+                        "⚠️ 請先輸入修改人姓名。"
                     )
 
-                    st.rerun()
+                else:
+
+                    sheet = find_sheet(
+                        [
+                            "內部公告",
+                            "公告"
+                        ]
+                    )
+
+                    if (
+                        sheet
+                        and save_sheet(
+                            sheet,
+                            edited,
+                            editor_name
+                        )
+                    ):
+
+                        st.success(
+                            "公告已儲存！"
+                        )
+
+                        st.rerun()
 
     # ========================================================
     # 常用工具
@@ -2814,17 +3160,21 @@ elif page == "🛠️ 資料維護":
                 "💾 儲存常用工具"
             ):
 
-                sheet = find_sheet(
-                    ["常用工具", "工具"]
-                )
+                if not editor_name.strip():
 
-                if (
-                    sheet
-                    and save_sheet(
-                        sheet,
-                        edited,
-                        editor_name
+                    st.warning(
+                        "⚠️ 請先輸入修改人姓名。"
                     )
+
+                elif save_sheet(
+                    find_sheet(
+                        [
+                            "常用工具",
+                            "工具"
+                        ]
+                    ),
+                    edited,
+                    editor_name
                 ):
 
                     st.success(
@@ -2887,7 +3237,9 @@ elif page == "🛠️ 資料維護":
 
             if show_all:
 
-                display_pending = pending.copy()
+                display_pending = (
+                    pending.copy()
+                )
 
                 st.caption(
                     f"目前顯示全部 {len(display_pending)} 筆問題"
@@ -2896,7 +3248,8 @@ elif page == "🛠️ 資料維護":
             else:
 
                 display_pending = pending[
-                    pending["狀態"] == "確認中"
+                    pending["狀態"]
+                    == "確認中"
                 ].copy()
 
                 st.caption(
@@ -2963,78 +3316,87 @@ elif page == "🛠️ 資料維護":
                     key="save_pending_questions"
                 ):
 
-                    try:
+                    if not editor_name.strip():
 
-                        if show_all:
+                        st.warning(
+                            "⚠️ 請先輸入修改人姓名。"
+                        )
+
+                    else:
+
+                        try:
+
+                            if show_all:
+
+                                save_pending_df = (
+                                    edited_pending.copy()
+                                )
+
+                            else:
+
+                                hidden_pending = pending[
+                                    pending["狀態"]
+                                    != "確認中"
+                                ].copy()
+
+                                save_pending_df = pd.concat(
+                                    [
+                                        hidden_pending,
+                                        edited_pending
+                                    ],
+                                    ignore_index=True
+                                )
 
                             save_pending_df = (
-                                edited_pending.copy()
+                                save_pending_df
+                                .reindex(
+                                    columns=PENDING_COLUMNS
+                                )
+                                .fillna("")
                             )
 
-                        else:
+                            for col in PENDING_COLUMNS:
 
-                            hidden_pending = pending[
-                                pending["狀態"] != "確認中"
-                            ].copy()
+                                save_pending_df[col] = (
+                                    save_pending_df[col]
+                                    .astype(str)
+                                    .replace(
+                                        "nan",
+                                        ""
+                                    )
+                                    .map(
+                                        clean_text
+                                    )
+                                )
 
-                            save_pending_df = pd.concat(
-                                [
-                                    hidden_pending,
-                                    edited_pending
-                                ],
-                                ignore_index=True
-                            )
-
-                        save_pending_df = (
-                            save_pending_df
-                            .reindex(
-                                columns=PENDING_COLUMNS
-                            )
-                            .fillna("")
-                        )
-
-                        for col in PENDING_COLUMNS:
-
-                            save_pending_df[col] = (
-                                save_pending_df[col]
-                                .astype(str)
+                            save_pending_df["狀態"] = (
+                                save_pending_df["狀態"]
                                 .replace(
-                                    "nan",
-                                    ""
+                                    {
+                                        "": "確認中",
+                                        "待審核": "確認中",
+                                        "待處理": "確認中"
+                                    }
                                 )
-                                .map(
-                                    clean_text
+                            )
+
+                            if save_sheet(
+                                "待審核問題",
+                                save_pending_df,
+                                editor_name
+                            ):
+
+                                st.success(
+                                    "✅ 審核結果已儲存！"
                                 )
+
+                                st.rerun()
+
+                        except Exception as e:
+
+                            st.error(
+                                f"❌ 儲存審核結果失敗：{e}"
                             )
-
-                        save_pending_df["狀態"] = (
-                            save_pending_df["狀態"]
-                            .replace(
-                                {
-                                    "": "確認中",
-                                    "待審核": "確認中",
-                                    "待處理": "確認中"
-                                }
-                            )
-                        )
-
-                        if save_sheet(
-                            "待審核問題",
-                            save_pending_df,
-                            editor_name
-                        ):
-
-                            st.success(
-                                "✅ 審核結果已儲存！"
-                            )
-
-                            st.rerun()
-
-                    except Exception as e:
-
-                        st.error(
-                            f"❌ 儲存審核結果失敗：{e}"
-                        )
 
         st.divider()
 
@@ -3120,7 +3482,9 @@ elif page == "🛠️ 資料維護":
             ):
 
                 if not clean_text(
-                    edit_df.iloc[i]["序號"]
+                    edit_df.iloc[i][
+                        "序號"
+                    ]
                 ):
 
                     edit_df.iloc[
@@ -3203,92 +3567,100 @@ elif page == "🛠️ 資料維護":
             key="save_complaints"
         ):
 
-            save_df = (
-                edited_complaints.copy()
-            )
+            if not editor_name.strip():
 
-            save_df = save_df.reindex(
-                columns=complaint_columns
-            )
-
-            if not save_df.empty:
-
-                save_df = save_df[
-                    save_df.apply(
-                        lambda row: any(
-                            clean_text(value)
-                            for value in row
-                        ),
-                        axis=1
-                    )
-                ].reset_index(
-                    drop=True
+                st.warning(
+                    "⚠️ 請先輸入修改人姓名。"
                 )
 
-            if "序號" in save_df.columns:
+            else:
 
-                save_df["序號"] = [
-                    str(i + 1)
-                    for i in range(
-                        len(save_df)
+                save_df = (
+                    edited_complaints.copy()
+                )
+
+                save_df = save_df.reindex(
+                    columns=complaint_columns
+                )
+
+                if not save_df.empty:
+
+                    save_df = save_df[
+                        save_df.apply(
+                            lambda row: any(
+                                clean_text(value)
+                                for value in row
+                            ),
+                            axis=1
+                        )
+                    ].reset_index(
+                        drop=True
                     )
-                ]
 
-            if (
-                "日期" in save_df.columns
-                and "月份" in save_df.columns
-            ):
+                if "序號" in save_df.columns:
 
-                for i in range(
-                    len(save_df)
+                    save_df["序號"] = [
+                        str(i + 1)
+                        for i in range(
+                            len(save_df)
+                        )
+                    ]
+
+                if (
+                    "日期" in save_df.columns
+                    and "月份" in save_df.columns
                 ):
 
-                    date_value = clean_text(
-                        save_df.at[
-                            i,
-                            "日期"
-                        ]
-                    )
-
-                    month_value = clean_text(
-                        save_df.at[
-                            i,
-                            "月份"
-                        ]
-                    )
-
-                    if (
-                        date_value
-                        and not month_value
+                    for i in range(
+                        len(save_df)
                     ):
 
-                        parsed_date = pd.to_datetime(
-                            date_value,
-                            errors="coerce"
+                        date_value = clean_text(
+                            save_df.at[
+                                i,
+                                "日期"
+                            ]
                         )
 
-                        if not pd.isna(
-                            parsed_date
-                        ):
-
+                        month_value = clean_text(
                             save_df.at[
                                 i,
                                 "月份"
-                            ] = parsed_date.strftime(
-                                "%Y/%m"
+                            ]
+                        )
+
+                        if (
+                            date_value
+                            and not month_value
+                        ):
+
+                            parsed_date = pd.to_datetime(
+                                date_value,
+                                errors="coerce"
                             )
 
-            if save_sheet(
-                "客訴資料",
-                save_df,
-                editor_name
-            ):
+                            if not pd.isna(
+                                parsed_date
+                            ):
 
-                st.success(
-                    "客訴資料已儲存！"
-                )
+                                save_df.at[
+                                    i,
+                                    "月份"
+                                ] = parsed_date.strftime(
+                                    "%Y/%m"
+                                )
 
-                st.rerun()
+                if save_sheet(
+                    "客訴資料",
+                    save_df,
+                    editor_name
+                ):
+
+                    st.success(
+                        "客訴資料已儲存！"
+                    )
+
+                    st.rerun()
 
     # ========================================================
     # 修改歷程
@@ -3347,7 +3719,9 @@ elif page == "🛠️ 資料維護":
 
                     else:
 
-                        filter_col1, filter_col2 = st.columns(2)
+                        filter_col1, filter_col2 = st.columns(
+                            2
+                        )
 
                         with filter_col1:
 
@@ -3363,7 +3737,8 @@ elif page == "🛠️ 資料維護":
 
                             selected_area = st.selectbox(
                                 "資料區域",
-                                ["全部"] + area_options,
+                                ["全部"]
+                                + area_options,
                                 key="history_area_filter"
                             )
 
@@ -3381,7 +3756,8 @@ elif page == "🛠️ 資料維護":
 
                             selected_action = st.selectbox(
                                 "動作",
-                                ["全部"] + action_options,
+                                ["全部"]
+                                + action_options,
                                 key="history_action_filter"
                             )
 
@@ -3391,7 +3767,9 @@ elif page == "🛠️ 資料維護":
                             key="history_search"
                         )
 
-                        display_history = history.copy()
+                        display_history = (
+                            history.copy()
+                        )
 
                         if selected_area != "全部":
 
@@ -3426,7 +3804,9 @@ elif page == "🛠️ 資料維護":
 
                                 mask = (
                                     mask
-                                    | display_history[col]
+                                    | display_history[
+                                        col
+                                    ]
                                     .astype(str)
                                     .map(
                                         normalize_search_text
@@ -3482,19 +3862,34 @@ elif page == "🛠️ 資料維護":
 # ============================================================
 
 if "assistant_searched" not in st.session_state:
-    st.session_state["assistant_searched"] = False
+
+    st.session_state[
+        "assistant_searched"
+    ] = False
 
 if "assistant_found" not in st.session_state:
-    st.session_state["assistant_found"] = False
+
+    st.session_state[
+        "assistant_found"
+    ] = False
 
 if "assistant_result" not in st.session_state:
-    st.session_state["assistant_result"] = pd.DataFrame()
+
+    st.session_state[
+        "assistant_result"
+    ] = pd.DataFrame()
 
 if "assistant_question_saved" not in st.session_state:
-    st.session_state["assistant_question_saved"] = ""
+
+    st.session_state[
+        "assistant_question_saved"
+    ] = ""
 
 if "assistant_submit_message" not in st.session_state:
-    st.session_state["assistant_submit_message"] = ""
+
+    st.session_state[
+        "assistant_submit_message"
+    ] = ""
 
 
 with st.popover("🐱"):
@@ -3528,9 +3923,17 @@ with st.popover("🐱"):
 
         if not question:
 
-            st.session_state["assistant_searched"] = False
-            st.session_state["assistant_found"] = False
-            st.session_state["assistant_result"] = pd.DataFrame()
+            st.session_state[
+                "assistant_searched"
+            ] = False
+
+            st.session_state[
+                "assistant_found"
+            ] = False
+
+            st.session_state[
+                "assistant_result"
+            ] = pd.DataFrame()
 
             st.warning(
                 "請先輸入顧客問題。"
@@ -3542,19 +3945,32 @@ with st.popover("🐱"):
                 question
             )
 
-            st.session_state["assistant_searched"] = True
+            st.session_state[
+                "assistant_searched"
+            ] = True
 
-            st.session_state["assistant_found"] = (
-                found and not result.empty
+            st.session_state[
+                "assistant_found"
+            ] = (
+                found
+                and not result.empty
             )
 
-            st.session_state["assistant_result"] = result
+            st.session_state[
+                "assistant_result"
+            ] = result
 
-            st.session_state["assistant_question"] = question
+            st.session_state[
+                "assistant_question"
+            ] = question
 
-            st.session_state["assistant_question_saved"] = ""
+            st.session_state[
+                "assistant_question_saved"
+            ] = ""
 
-            st.session_state["assistant_submit_message"] = ""
+            st.session_state[
+                "assistant_submit_message"
+            ] = ""
 
     if st.session_state.get(
         "assistant_searched",
@@ -3571,9 +3987,11 @@ with st.popover("🐱"):
             False
         )
 
-        question_to_submit = st.session_state.get(
-            "assistant_question",
-            ""
+        question_to_submit = (
+            st.session_state.get(
+                "assistant_question",
+                ""
+            )
         )
 
         if found and not result.empty:
@@ -3729,14 +4147,17 @@ with st.popover("🐱"):
                 f"目前問題：{question_to_submit}"
             )
 
-            saved_question = st.session_state.get(
-                "assistant_question_saved",
-                ""
+            saved_question = (
+                st.session_state.get(
+                    "assistant_question_saved",
+                    ""
+                )
             )
 
             if (
                 saved_question
-                and saved_question == question_to_submit
+                and saved_question
+                == question_to_submit
             ):
 
                 st.success(
@@ -3807,3 +4228,4 @@ with st.popover("🐱"):
                             st.warning(
                                 "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
                             )
+````
