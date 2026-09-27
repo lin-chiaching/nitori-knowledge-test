@@ -541,7 +541,67 @@ def load_tools():
         dtype=str
     ).fillna("")
 
+# =========================================================
+# 新人訓練中心
+# =========================================================
 
+TRAINING_OVERVIEW_COLUMNS = [
+    "課程ID",
+    "DAY",
+    "課程大項",
+    "Level",
+]
+
+TRAINING_CONTENT_COLUMNS = [
+    "課程ID",
+    "內容ID",
+    "課程大項",
+    "課程細項",
+    "教材",
+    "教學內容",
+    "注意事項",
+    "Level",
+]
+
+
+@st.cache_data(ttl=60)
+def load_training_overview():
+    df = load_sheet(["課程總覽"])
+
+    if df.empty:
+        return pd.DataFrame(columns=TRAINING_OVERVIEW_COLUMNS)
+
+    for col in TRAINING_OVERVIEW_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+
+    df = df[TRAINING_OVERVIEW_COLUMNS].copy()
+
+    # 新人只看 Level 1
+    df["Level"] = df["Level"].astype(str).str.strip()
+    df = df[df["Level"].isin(["", "1"])].copy()
+
+    return df
+
+
+@st.cache_data(ttl=60)
+def load_training_content():
+    df = load_sheet(["課程內容"])
+
+    if df.empty:
+        return pd.DataFrame(columns=TRAINING_CONTENT_COLUMNS)
+
+    for col in TRAINING_CONTENT_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+
+    df = df[TRAINING_CONTENT_COLUMNS].copy()
+
+    # 新人只看 Level 1
+    df["Level"] = df["Level"].astype(str).str.strip()
+    df = df[df["Level"].isin(["", "1"])].copy()
+
+    return df
 # ============================================================
 # 待審核問題
 # ============================================================
