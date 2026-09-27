@@ -616,7 +616,7 @@ df = pd.read_excel(
     sheet_name=sheet
 )
 
-    if df.empty:
+if df.empty:
         return pd.DataFrame(columns=TRAINING_CONTENT_COLUMNS)
 
     for col in TRAINING_CONTENT_COLUMNS:
