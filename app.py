@@ -4233,93 +4233,228 @@ with st.popover("🐱"):
                                 "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
                             )
 # ============================================================
-# 新人訓練中心資料與介面
+# 新人訓練中心（完整 Excel 整合版）
 # ============================================================
+
+def load_training_sheets():
+    """載入新人訓練相關的 Excel 分頁"""
+    if not EXCEL_PATH.exists():
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    
+    try:
+        xls = pd.ExcelFile(EXCEL_PATH)
+        
+        df_courses = pd.read_excel(xls, sheet_name="課程總表", dtype=str).fillna("") if "課程總表" in xls.sheet_names else pd.DataFrame()
+        df_contents = pd.read_excel(xls, sheet_name="課程內容", dtype=str).fillna("") if "課程內容" in xls.sheet_names else pd.DataFrame()
+        df_quiz = pd.read_excel(xls, sheet_name="測驗題庫", dtype=str).fillna("") if "測驗題庫" in xls.sheet_names else pd.DataFrame()
+        df_records = pd.read_excel(xls, sheet_name="新人學習紀錄", dtype=str).fillna("") if "新人學習紀錄" in xls.sheet_names else pd.DataFrame()
+        
+        return df_courses, df_contents, df_records, df_quiz
+    except Exception as e:
+        st.error(f"讀取新人訓練 Excel 失敗: {e}")
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+
+def save_training_record(employee_id, employee_name, course_id, course_name, day, status, score, practical, completion_date, remark):
+    """將新人的學習紀錄儲存或更新至 Excel 的「新人學習紀錄」分頁"""
+    try:
+        wb = openpyxl.load_workbook(EXCEL_PATH)
+        sheet_name = "新人學習紀錄"
+        
+        if sheet_name not in wb.sheetnames:
+            ws = wb.create_sheet(sheet_name)
+            headers = ["員工ID", "姓名", "課程ID", "課程名稱", "DAY", "學習狀態", "測驗成績", "實作", "完成日期", "教育者備註"]
+            ws.append(headers)
+        else:
+            ws = wb[sheet_name]
+            
+        # 檢查是否已有該員工此課程的紀錄，若有則更新，無則新增
+        updated = False
+        for row in range(2, ws.max_row + 1):
+            e_id = clean_text(ws.cell(row, 1).value)
+            c_id = clean_text(ws.cell(row, 3).value)
+            if e_id == employee_id and c_id == course_id:
+                ws.cell(row, 2, employee_name)
+                ws.cell(row, 4, course_name)
+                ws.cell(row, 5, day)
+                ws.cell(row, 6, status)
+                ws.cell(row, 7, str(score))
+                ws.cell(row, 8, practical)
+                ws.cell(row, 9, completion_date)
+                ws.cell(row, 10, remark)
+                updated = True
+                break
+                
+        if not updated:
+            ws.append([employee_id, employee_name, course_id, course_name, day, status, str(score), practical, completion_date, remark])
+            
+        wb.save(EXCEL_PATH)
+        st.cache_data.clear()
+        return True
+    except Exception as e:
+        st.error(f"儲存學習紀錄失敗: {e}")
+        return False
 
 def render_training_center():
     st.subheader("🐱 新人訓練中心（新手村）")
-    st.write("歡迎加入客服團隊！請依照以下指南熟悉系統與日常客服作業。")
+    st.write("歡迎加入客服團隊！請依照下方課程與測驗進度完成培訓。")
 
-    # 使用分頁區隔不同的訓練單元
-    tab1, tab2, tab3 = st.tabs(["📚 1. 核心守則與 SOP", "🎯 2. 常見情境模擬", "📝 3. 新人自我檢測"])
+    # 身分識別輸入（方便將成績寫回記錄）
+    with st.expander("👤 填寫您的基本資料（以記錄學習與測驗成績）", expanded=True):
+        col_id, col_name = st.columns(2)
+        with col_id:
+            emp_id = st.text_input("員工ID", value=st.session_state.get("emp_id", ""))
+            st.session_state["emp_id"] = emp_id
+        with col_name:
+            emp_name = st.text_input("姓名", value=st.session_state.get("emp_name", ""))
+            st.session_state["emp_name"] = emp_name
+
+    if not emp_id or not emp_name:
+        st.warning("⚠️ 請先填寫上方的「員工ID」與「姓名」，才能開始上課與測驗紀錄喔！")
+        return
+
+    # 讀取 Excel 資料
+    df_courses, df_contents, df_records, df_quiz = load_training_sheets()
+
+    if df_courses.empty:
+        st.warning("⚠️ 尚未在 Excel 中找到「課程總表」資料，請確認 Excel 分頁名稱正確。")
+        return
+
+    # 建立分頁介面
+    tab1, tab2, tab3 = st.tabs(["📚 課程總表與學習", "📝 隨堂測驗考核", "📊 我的學習進度"])
 
     # --------------------------------------------------------
-    # Tab 1: 核心守則與 SOP
+    # Tab 1: 課程總表與內容
     # --------------------------------------------------------
     with tab1:
-        st.markdown("### 🌟 客服核心三大原則")
+        st.markdown("### 📋 培訓課程清單")
         
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            with st.container(border=True):
-                st.markdown("#### 1. 溫柔且同理")
-                st.write("以日系、溫暖的語氣回應顧客，先同理情緒，再解決問題。")
-        with col2:
-            with st.container(border=True):
-                st.markdown("#### 2. 依循知識庫")
-                st.write("回答前回覆請務必先透過左側「知識庫搜尋」確認最新標準回覆。")
-        with col3:
-            with st.container(border=True):
-                st.markdown("#### 3. 確實記錄")
-                st.write("遇到特殊客訴或未收錄的問題，記得透過「問題提報」回報給主管。")
+        # 篩選 Level 或 DAY
+        days = sorted(df_courses["DAY"].unique()) if "DAY" in df_courses.columns else []
+        selected_day = st.selectbox("依 DAY 篩選課程：", ["全部顯示"] + [str(d) for d in days if clean_text(d)])
+
+        display_df = df_courses if selected_day == "ทั้งหมด" or selected_day == "全部顯示" else df_courses[df_courses["DAY"] == selected_day]
+        
+        # 顯示課程總表
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
 
         st.markdown("---")
-        st.markdown("### 📋 系統操作快速指引")
-        st.markdown("""
-        * **左側導覽列**：可切換不同功能頁面（首頁、知識庫、客訴分析、常用工具等）。
-        * **即時搜尋**：支援關鍵字與同義詞擴充，輸入商品名稱或問題關鍵字即可快速找答案。
-        * **待審核問題**：若找不到解答，可直接提交問題，後續會由專人補充進知識庫。
-        """)
+        st.markdown("### 📖 課程詳細內容檢視")
+        
+        course_options = df_courses.apply(lambda r: f"[{clean_text(r.get('DAY', ''))}] {clean_text(r.get('課程ID', ''))} - {clean_text(r.get('課程大項', ''))}", axis=1).tolist()
+        selected_course_str = st.selectbox("選擇要上課的項目：", course_options)
+        
+        if selected_course_str:
+            selected_course_id = selected_course_str.split("] ")[1].split(" - ")[0]
+            
+            # 找出對應的課程內容
+            contents = df_contents[df_contents["課程ID"] == selected_course_id] if "課程ID" in df_contents.columns else pd.DataFrame()
+            course_meta = df_courses[df_courses["課程ID"] == selected_course_id].iloc[0] if not df_courses[df_courses["課程ID"] == selected_course_id].empty else None
+            
+            with st.container(border=True):
+                if course_meta is not None:
+                    st.markdown(f"#### 🎯 {course_meta.get('課程大項', '')} （{course_meta.get('Level', '')}）")
+                
+                if not contents.empty:
+                    for _, row in contents.iterrows():
+                        st.markdown(f"##### 📌 課程細項：{row.get('課程細項', '')}")
+                        st.markdown(f"**【教學內容】**\n{row.get('教學內容', '')}")
+                        if clean_text(row.get('注意事項', '')):
+                            st.info(f"💡 **注意事項：**\n{row.get('注意事項', '')}")
+                        st.markdown("---")
+                else:
+                    st.info("此課程尚無詳細內容細項。")
+                
+                # 快速點選「標記為已完成」
+                col_btn1, col_btn2 = st.columns([1, 4])
+                with col_btn1:
+                    if st.button("✅ 回報本課程已學習", key=f"finish_{selected_course_id}"):
+                        c_name = course_meta.get('課程大項', '') if course_meta is not None else ""
+                        c_day = course_meta.get('DAY', '') if course_meta is not None else ""
+                        success = save_training_record(
+                            emp_id, emp_name, selected_course_id, c_name, c_day, 
+                            "已完成", "0", "完成", datetime.now().strftime("%Y/%m/%d"), "自主學習完成"
+                        )
+                        if success:
+                            st.success("🎉 已成功將學習狀態更新為「已完成」！")
 
     # --------------------------------------------------------
-    # Tab 2: 常見情境模擬
+    # Tab 2: 隨堂測驗考核
     # --------------------------------------------------------
     with tab2:
-        st.markdown("### 💡 實戰演練：模擬對話與標準對應")
+        st.markdown("### 📝 課程隨堂測驗")
         
-        scenario = st.selectbox(
-            "請選擇練習情境：",
-            [
-                "情境 A：顧客詢問商品退換貨期限",
-                "情境 B：顧客反應收到瑕疵商品",
-                "情境 C：早鳥預購點數未入帳"
-            ]
-        )
-
-        if "情境 A" in scenario:
-            with st.container(border=True):
-                st.markdown("**【情境描述】** 顧客：「請問你們的商品如果尺寸不合，幾天內可以退換貨？」")
-                st.markdown("**【標準處理方式】**")
-                st.write("依據消保法及公司規範，商品享有 7 天鑑賞期（含例假日）。請引導顧客保持商品完整性並提供訂單編號。")
-                st.info("💡 建議回覆範例：「親愛的顧客您好～ 我們的商品享有 7 天鑑賞期服務喔！若有尺寸不合需要更換，再麻煩您提供訂單編號，這邊會協助您安排後續流程 😊」")
-
-        elif "情境 B" in scenario:
-            with st.container(border=True):
-                st.markdown("**【情境描述】** 顧客：「怎麼這樣！我收到的衣服有一塊明顯的污漬！」")
-                st.markdown("**【標準處理方式】**")
-                st.write("先表達誠摯歉意（不推卸責任），請顧客提供瑕疵部位清晰照片，並承諾會優先為其處理換貨或退款。")
-                st.info("💡 建議回覆範例：「非常抱歉讓您有不好的體驗！收到有瑕疵的商品我們深感抱歉QQ，再麻煩您幫忙拍一下瑕疵的部位照片傳給我們，這邊會立刻為您安排換貨或相關處理！ 🙏」")
-
+        if df_quiz.empty:
+            st.info("目前尚無測驗題庫。")
         else:
-            with st.container(border=True):
-                st.markdown("**【情境描述】** 顧客：「我上次參加活動的點數怎麼到現在還沒看到？」")
-                st.markdown("**【標準處理方式】**")
-                st.write("先請顧客提供會員帳號或手機號碼，並查詢公告欄位確認點數發放時間（通常於活動結束後 7-14 工作天發放）。")
-                st.info("💡 建議回覆範例：「您好～ 關於點數發放的部分，通常會在活動結束後的 14 個工作天內統一匯入喔！方便提供您的會員帳號，我幫您確認目前的狀態嗎？✨」")
+            quiz_course_ids = df_quiz["課程ID"].unique()
+            quiz_target_id = st.selectbox("選擇要測驗的課程 ID：", quiz_course_ids)
+            
+            current_quiz = df_quiz[df_quiz["課程ID"] == quiz_target_id]
+            
+            if current_quiz.empty:
+                st.warning("此課程目前沒有對應的測驗題目。")
+            else:
+                user_answers = {}
+                score_total = 0
+                max_score = len(current_quiz) * (100 / len(current_quiz))
+                
+                with st.form(key="quiz_form"):
+                    for idx, row in current_quiz.iterrows():
+                        q_id = row.get("題目ID", str(idx))
+                        st.markdown(f"**Q{idx+1}: {row.get('題目', '')}**")
+                        
+                        options = []
+                        for opt in ["選項A", "選項B", "選項C", "選項D"]:
+                            val = clean_text(row.get(opt, ""))
+                            if val:
+                                options.append(f"{opt[-1]}. {val}")
+                                
+                        ans = st.radio(f"請選擇答案 ({q_id})", options, key=f"q_{q_id}")
+                        user_answers[q_id] = ans[0] if ans else "" # 取選項的第一個字 (A, B, C, D)
+                        st.markdown("---")
+                        
+                    submitted = st.form_submit_button("📤 提交測驗答案")
+                    
+                    if submitted:
+                        correct_count = 0
+                        total_count = len(current_quiz)
+                        
+                        for idx, row in current_quiz.iterrows():
+                            q_id = row.get("題目ID", str(idx))
+                            correct_ans = clean_text(row.get("正確答案", "")).upper()
+                            user_ans = user_answers.get(q_id, "")
+                            
+                            if user_ans == correct_ans:
+                                correct_count += 1
+                                
+                        final_score = int((correct_count / total_count) * 100)
+                        st.success(f"🎯 測驗結束！您的得分為：**{final_score} 分**（答對 {correct_count} / {total_count} 題）")
+                        
+                        # 找出課程名稱
+                        c_row = df_courses[df_courses["課程ID"] == quiz_target_id]
+                        c_name = c_row.iloc[0].get("課程大項", "") if not c_row.empty else ""
+                        c_day = c_row.iloc[0].get("DAY", "") if not c_row.empty else ""
+                        
+                        # 自動回寫紀錄
+                        save_training_record(
+                            emp_id, emp_name, quiz_target_id, c_name, c_day, 
+                            "測驗及格" if final_score >= 60 else "需補考", str(final_score), "合格", 
+                            datetime.now().strftime("%Y/%m/%d"), f"系統自動評分: {final_score}分"
+                        )
 
     # --------------------------------------------------------
-    # Tab 3: 新人自我檢測
+    # Tab 3: 我的學習進度
     # --------------------------------------------------------
     with tab3:
-        st.markdown("### ✍️ 小考驗：看看你吸收了多少？")
+        st.markdown(f"### 📊 {emp_name} 的培訓進度追蹤")
         
-        q1 = st.radio(
-            "Q1：當顧客詢問退換貨期限時，公司的標準鑑賞期是幾天？",
-            ["3天", "7天", "10天", "14天"]
-        )
-        
-        if st.button("提交答案檢查", key="check_training_quiz"):
-            if q1 == "7天":
-                st.success("🎉 答對了！標準鑑賞期為 7 天。")
+        if df_records.empty:
+            st.info("目前尚無任何學習紀錄。")
+        else:
+            # 過濾當前員工的紀錄
+            my_records = df_records[df_records["員工ID"] == emp_id] if "員工ID" in df_records.columns else pd.DataFrame()
+            
+            if my_records.empty:
+                st.info("您目前還沒有上課或測驗紀錄，快去「課程總表與學習」開始上課吧！")
             else:
-                st.warning("⚠️ 答錯囉，再回「核心守則與 SOP」複習一下吧！")
+                st.dataframe(my_records, use_container_width=True, hide_index=True)
