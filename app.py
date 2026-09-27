@@ -2485,7 +2485,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-    ann = load_announcements()
+ann = load_announcements()
 
     if ann.empty:
 
