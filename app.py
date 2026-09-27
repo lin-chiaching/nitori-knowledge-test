@@ -566,7 +566,10 @@ TRAINING_CONTENT_COLUMNS = [
 
 @st.cache_data(ttl=60)
 def load_training_overview():
-    df = load_sheet(["課程總表"])
+    df = pd.read_excel(
+    EXCEL_PATH,
+    sheet_name="課程總表"
+)
 
     if df.empty:
         return pd.DataFrame(columns=TRAINING_OVERVIEW_COLUMNS)
@@ -586,7 +589,10 @@ def load_training_overview():
 
 @st.cache_data(ttl=60)
 def load_training_content():
-    df = load_sheet(["課程內容"])
+    df = pd.read_excel(
+    EXCEL_PATH,
+    sheet_name="課程內容"
+)
 
     if df.empty:
         return pd.DataFrame(columns=TRAINING_CONTENT_COLUMNS)
