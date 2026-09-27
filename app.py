@@ -2137,37 +2137,101 @@ def ask_customer_assistant(question):
 
 with st.sidebar:
 
-    st.markdown("## 🐱")
+    st.markdown(
+        """
+        <div style="
+            text-align:center;
+            padding:8px 0 18px 0;
+        ">
+            <div style="font-size:42px;">🐱</div>
+            <div style="
+                font-size:20px;
+                font-weight:700;
+                color:#5F554C;
+                letter-spacing:1px;
+            ">
+                客服作業系統
+            </div>
+            <div style="
+                font-size:11px;
+                color:#9A8F84;
+                margin-top:4px;
+                letter-spacing:1px;
+            ">
+                NITORI CUSTOMER SERVICE
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.divider()
+
+    menu_items = [
+        "🏠  首頁",
+        "🔍  知識搜尋",
+        "📊  客訴資料統計",
+        "🗺️  門市地圖",
+        "🎓  新人訓練中心",
+        "📢  公告＆常用工具",
+        "🛠️  資料維護"
+    ]
+
+    if "current_page" not in st.session_state:
+        st.session_state["current_page"] = "🏠  首頁"
+
+    for item in menu_items:
+
+        is_current = (
+            st.session_state["current_page"] == item
+        )
+
+        if is_current:
+
+            st.markdown(
+                f"""
+                <div style="
+                    background:#F3EBDD;
+                    border-radius:12px;
+                    padding:10px 14px;
+                    margin:4px 0;
+                    color:#5F554C;
+                    font-weight:600;
+                    font-size:15px;
+                ">
+                    🐾 {item}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        else:
+
+            if st.button(
+                item,
+                key=f"menu_{item}",
+                use_container_width=True
+            ):
+                st.session_state["current_page"] = item
+                st.rerun()
+
+    st.divider()
 
     st.markdown(
-        "### 客服作業系統"
+        """
+        <div style="
+            text-align:center;
+            color:#9A8F84;
+            font-size:13px;
+            padding:8px;
+        ">
+            🐾 讓小貓陪你一起找資料
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.caption(
-        "NITORI CUSTOMER SERVICE"
-    )
-
-    st.divider()
-
-    page = st.radio(
-        "功能選單",
-        [
-            "🏠 首頁",
-            "🔍 知識搜尋",
-            "📊 客訴資料統計",
-            "🎓 新人訓練中心",
-            "🗺️ 門市地圖",
-            "📢 公告＆常用工具",
-            "🛠️ 資料維護"
-        ],
-        label_visibility="collapsed"
-    )
-
-    st.divider()
-
-    st.caption(
-        "🌿 讓小貓陪你一起找資料"
-    )
+page = st.session_state["current_page"]
 
 
 # ============================================================
