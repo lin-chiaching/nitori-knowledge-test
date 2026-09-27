@@ -623,7 +623,7 @@ for col in TRAINING_CONTENT_COLUMNS:
         if col not in df.columns:
             df[col] = ""
 
-    df = df[TRAINING_CONTENT_COLUMNS].copy()
+df = df[TRAINING_CONTENT_COLUMNS].copy()
 
     # 新人只看 Level 1
     df["Level"] = df["Level"].astype(str).str.strip()
