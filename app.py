@@ -2131,7 +2131,7 @@ with st.sidebar:
 
     # 在主版面路由控制中加入：
     if st.session_state.get("page") == "training_center":
-    render_training_center()
+     render_training_center()
 
     # --------------------------------------------------------
     # 主要功能
