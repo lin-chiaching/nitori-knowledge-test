@@ -2422,6 +2422,23 @@ def render_change_history(
 
 if page == "🏠 首頁":
 
+    current_hour = datetime.now().hour
+
+    if current_hour < 12:
+        greeting = "🌅 早安，今天也辛苦了！"
+    elif current_hour < 18:
+        greeting = "☀️ 午安，辛苦了一半，繼續加油！"
+    else:
+        greeting = "🌙 辛苦了，今天的工作也接近尾聲囉！"
+
+    st.title(
+        greeting
+    )
+
+    st.caption(
+        "歡迎回到客服作業系統，讓小貓陪你一起處理今天的工作 🐾"
+    )
+
     daily_tips = [
         "遇到不確定的問題，先確認資料，再回覆顧客。",
         "先理解顧客的需求，再確認需要查詢的資訊。",
