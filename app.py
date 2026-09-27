@@ -2487,7 +2487,7 @@ st.markdown(
 )
 ann = load_announcements()
 
-    if ann.empty:
+if ann.empty:
 
         st.info(
             "目前沒有公告資料。"
