@@ -2435,44 +2435,6 @@ if page == "🏠 首頁":
     )
 
     st.subheader(
-        "QUICK ACCESS"
-    )
-
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-
-        st.subheader(
-            "🔍 知識庫搜尋"
-        )
-
-        st.write(
-            "輸入顧客問題，快速找出相關作業資訊與罐頭回覆。"
-        )
-
-    with c2:
-
-        st.subheader(
-            "🗺️ 宜得利小地圖"
-        )
-
-        st.write(
-            "查詢門市地址、交通、停車及門市相關資訊。"
-        )
-
-    with c3:
-
-        st.subheader(
-            "📢 公告＆常用工具"
-        )
-
-        st.write(
-            "查看最新內部公告與工作中常用的連結工具。"
-        )
-
-    st.divider()
-
-    st.subheader(
         "📢 LATEST ANNOUNCEMENTS"
     )
 
