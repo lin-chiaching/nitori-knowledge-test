@@ -2437,35 +2437,13 @@ if page == "🏠 首頁":
 
     today_index = datetime.now().timetuple().tm_yday % len(daily_tips)
 
-    st.markdown(
-        f"""
-        <div style="
-            background:#F7F2E8;
-            border-radius:16px;
-            padding:20px 24px;
-            margin:10px 0 25px 0;
-            border:1px solid #E9DFD0;
-        ">
-            <div style="
-                font-size:17px;
-                font-weight:700;
-                color:#6B625A;
-                margin-bottom:10px;
-            ">
-                🌱 每日客服小提醒
-            </div>
+    st.subheader(
+    "🌱 每日客服小提醒"
+)
 
-            <div style="
-                font-size:15px;
-                color:#5F554C;
-                line-height:1.8;
-            ">
-                🐾 {daily_tips[today_index]}
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+st.info(
+    f"🐾 {daily_tips[today_index]}"
+)
 
     st.subheader("📢 最新公告")
 
