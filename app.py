@@ -603,33 +603,60 @@ def load_training_overview():
         )
 
 @st.cache_data(ttl=60)
+@st.cache_data(ttl=60)
 def load_training_content():
-    sheet = find_sheet(["課程內容"])
 
-if not sheet:
-    return pd.DataFrame(
-        columns=TRAINING_CONTENT_COLUMNS
-    )
+    try:
 
-df = pd.read_excel(
-    EXCEL_PATH,
-    sheet_name=sheet
-)
+        sheet = find_sheet(["課程內容"])
 
-if df.empty:
-        return pd.DataFrame(columns=TRAINING_CONTENT_COLUMNS)
+        if not sheet:
+            return pd.DataFrame(
+                columns=TRAINING_CONTENT_COLUMNS
+            )
 
-for col in TRAINING_CONTENT_COLUMNS:
-        if col not in df.columns:
-            df[col] = ""
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet
+        )
 
-df = df[TRAINING_CONTENT_COLUMNS].copy()
+        if df.empty:
+            return pd.DataFrame(
+                columns=TRAINING_CONTENT_COLUMNS
+            )
 
-    # 新人只看 Level 1
-    df["Level"] = df["Level"].astype(str).str.strip()
-    df = df[df["Level"].isin(["", "1"])].copy()
+        for col in TRAINING_CONTENT_COLUMNS:
 
-    return df
+            if col not in df.columns:
+                df[col] = ""
+
+        df = df[
+            TRAINING_CONTENT_COLUMNS
+        ].copy()
+
+        df["Level"] = (
+            df["Level"]
+            .astype(str)
+            .str.strip()
+        )
+
+        df = df[
+            df["Level"].isin(["", "1"])
+        ].copy()
+
+        return df
+
+    except Exception as e:
+
+        st.warning(
+            f"無法讀取課程內容：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=TRAINING_CONTENT_COLUMNS
+        )
+
+
 # ============================================================
 # 待審核問題
 # ============================================================
