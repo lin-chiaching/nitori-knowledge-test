@@ -619,7 +619,7 @@ df = pd.read_excel(
 if df.empty:
         return pd.DataFrame(columns=TRAINING_CONTENT_COLUMNS)
 
-    for col in TRAINING_CONTENT_COLUMNS:
+for col in TRAINING_CONTENT_COLUMNS:
         if col not in df.columns:
             df[col] = ""
 
