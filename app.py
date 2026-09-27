@@ -2954,7 +2954,295 @@ elif page == "🗺️ 門市地圖":
         height=760,
         scrolling=True
     )
+# ============================================================
+# 新人訓練中心
+# ============================================================
 
+elif page == "🎓 新人訓練中心":
+
+    st.title(
+        "🎓 新人訓練中心"
+    )
+
+    st.caption(
+        "新人訓練 Level 1｜共 3 天"
+    )
+
+    training_overview = load_training_overview()
+    training_content = load_training_content()
+
+    if training_overview.empty:
+
+        st.warning(
+            "目前找不到「課程總覽」資料，請確認 Excel 是否已建立該工作表。"
+        )
+
+    else:
+
+        st.markdown(
+            "### 🐾 選擇訓練日"
+        )
+
+        day_columns = st.columns(3)
+
+        days = [
+            ("DAY1", "🌱", "基礎與接待"),
+            ("DAY2", "💻", "系統與網購"),
+            ("DAY3", "🛋️", "家具與商品")
+        ]
+
+        for i, (day, icon, description) in enumerate(days):
+
+            day_data = training_overview[
+                training_overview["DAY"]
+                .astype(str)
+                .str.strip()
+                == day
+            ]
+
+            with day_columns[i]:
+
+                with st.container(
+                    border=True
+                ):
+
+                    st.markdown(
+                        f"## {icon} {day}"
+                    )
+
+                    st.write(
+                        description
+                    )
+
+                    st.caption(
+                        f"{len(day_data)} 個課程大項"
+                    )
+
+                    if st.button(
+                        f"進入 {day}",
+                        use_container_width=True,
+                        key=f"training_day_{day}"
+                    ):
+
+                        st.session_state[
+                            "training_day"
+                        ] = day
+
+                        st.session_state[
+                            "training_course"
+                        ] = ""
+
+                        st.session_state[
+                            "training_content"
+                        ] = ""
+
+                        st.rerun()
+
+        selected_day = st.session_state.get(
+            "training_day",
+            ""
+        )
+
+        if selected_day:
+
+            st.divider()
+
+            st.markdown(
+                f"### 📚 {selected_day} 課程"
+            )
+
+            day_courses = training_overview[
+                training_overview["DAY"]
+                .astype(str)
+                .str.strip()
+                == selected_day
+            ].copy()
+
+            for _, course in day_courses.iterrows():
+
+                course_id = clean_text(
+                    course.get(
+                        "課程ID",
+                        ""
+                    )
+                )
+
+                course_name = clean_text(
+                    course.get(
+                        "課程大項",
+                        ""
+                    )
+                )
+
+                course_items = training_content[
+                    training_content["課程ID"]
+                    .astype(str)
+                    .str.strip()
+                    == course_id
+                ]
+
+                with st.container(
+                    border=True
+                ):
+
+                    col1, col2 = st.columns(
+                        [5, 1]
+                    )
+
+                    with col1:
+
+                        st.subheader(
+                            f"📘 {course_name}"
+                        )
+
+                        st.caption(
+                            f"{len(course_items)} 個課程內容"
+                        )
+
+                    with col2:
+
+                        if st.button(
+                            "查看課程",
+                            key=f"course_{course_id}",
+                            use_container_width=True
+                        ):
+
+                            st.session_state[
+                                "training_course"
+                            ] = course_id
+
+                            st.session_state[
+                                "training_content"
+                            ] = ""
+
+                            st.rerun()
+
+            selected_course = st.session_state.get(
+                "training_course",
+                ""
+            )
+
+            if selected_course:
+
+                course_row = training_overview[
+                    training_overview["課程ID"]
+                    .astype(str)
+                    .str.strip()
+                    == selected_course
+                ]
+
+                if not course_row.empty:
+
+                    course_name = clean_text(
+                        course_row.iloc[0].get(
+                            "課程大項",
+                            ""
+                        )
+                    )
+
+                    st.divider()
+
+                    st.markdown(
+                        f"### 📖 {course_name}"
+                    )
+
+                    course_content = training_content[
+                        training_content["課程ID"]
+                        .astype(str)
+                        .str.strip()
+                        == selected_course
+                    ].copy()
+
+                    if course_content.empty:
+
+                        st.info(
+                            "目前尚未建立這個課程的內容。"
+                        )
+
+                    else:
+
+                        for _, item in course_content.iterrows():
+
+                            content_id = clean_text(
+                                item.get(
+                                    "內容ID",
+                                    ""
+                                )
+                            )
+
+                            content_name = clean_text(
+                                item.get(
+                                    "課程細項",
+                                    ""
+                                )
+                            )
+
+                            with st.expander(
+                                f"📌 {content_name}"
+                            ):
+
+                                teaching = clean_text(
+                                    item.get(
+                                        "教學內容",
+                                        ""
+                                    )
+                                )
+
+                                material = clean_text(
+                                    item.get(
+                                        "教材",
+                                        ""
+                                    )
+                                )
+
+                                note = clean_text(
+                                    item.get(
+                                        "注意事項",
+                                        ""
+                                    )
+                                )
+
+                                st.markdown(
+                                    "#### 🎯 學習內容"
+                                )
+
+                                if teaching:
+
+                                    st.write(
+                                        teaching
+                                    )
+
+                                else:
+
+                                    st.info(
+                                        "尚未建立教學內容"
+                                    )
+
+                                st.markdown(
+                                    "#### 📚 教材"
+                                )
+
+                                if material:
+
+                                    st.write(
+                                        material
+                                    )
+
+                                else:
+
+                                    st.info(
+                                        "尚未建立教材"
+                                    )
+
+                                if note:
+
+                                    st.markdown(
+                                        "#### ⚠️ 注意事項"
+                                    )
+
+                                    st.write(
+                                        note
+                                    )
 
 # ============================================================
 # 公告＆常用工具
