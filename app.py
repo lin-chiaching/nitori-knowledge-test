@@ -2974,7 +2974,7 @@ elif page == "🎓 新人訓練中心":
     if training_overview.empty:
 
         st.warning(
-            "目前找不到「課程總覽」資料，請確認 Excel 是否已建立該工作表。"
+            "目前找不到「課程總表」資料，請確認 Excel 是否已建立該工作表。"
         )
 
     else:
