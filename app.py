@@ -2168,14 +2168,14 @@ with st.sidebar:
     st.divider()
 
     menu_items = [
-        "🏠  首頁",
-        "🔍  知識搜尋",
-        "📊  客訴資料統計",
-        "🗺️  門市地圖",
-        "🎓  新人訓練中心",
-        "📢  公告＆常用工具",
-        "🛠️  資料維護"
-    ]
+    "🏠 首頁",
+    "🔍 知識搜尋",
+    "📊 客訴資料統計",
+    "🗺️ 門市地圖",
+    "🎓 新人訓練中心",
+    "📢 公告＆常用工具",
+    "🛠️ 資料維護"
+]
 
     if "current_page" not in st.session_state:
         st.session_state["current_page"] = "🏠  首頁"
