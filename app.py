@@ -94,51 +94,17 @@ try:
         color: #554F48 !important;
     }
 
-    /* =========================================================
-   側邊欄按鈕
-   ========================================================= */
+    .stButton > button {
+        border-radius: 12px;
+        border: 1px solid #D8C9B8;
+        background: #FFFDF9;
+        color: #5F5A53;
+    }
 
-[data-testid="stSidebar"] .stButton > button {
-    width: 100%;
-    min-height: 44px;
-    padding: 8px 14px;
-
-    border-radius: 12px;
-    border: 1px solid transparent;
-
-    background: transparent;
-    color: #625C54;
-
-    text-align: left;
-    font-size: 15px;
-    font-weight: 500;
-
-    transition:
-        background 0.15s ease,
-        border-color 0.15s ease,
-        transform 0.15s ease;
-}
-
-[data-testid="stSidebar"] .stButton > button:hover {
-    background: #FFF9F2;
-    border-color: #D8C9B8;
-    color: #8A5E4C;
-
-    transform: translateX(2px);
-}
-
-[data-testid="stSidebar"] .stButton > button:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-/* 目前頁面的視覺效果 */
-[data-testid="stSidebar"] .stButton > button[kind="primary"] {
-    background: #E5D4C5 !important;
-    border-color: #D2B9A5 !important;
-    color: #704D3D !important;
-    font-weight: 700;
-}
+    .stButton > button:hover {
+        border-color: #B9785E;
+        color: #8A5E4C;
+    }
 
     input,
     textarea,
@@ -2054,192 +2020,38 @@ def ask_customer_assistant(question):
 # 側邊欄
 # ============================================================
 
-# 第一次開啟時，預設顯示首頁
-if "current_page" not in st.session_state:
-    st.session_state["current_page"] = "🏠 首頁"
-
-
-def sidebar_button(label, key):
-    """
-    側邊欄按鈕。
-    點擊後切換目前頁面。
-    """
-
-    is_current = (
-        st.session_state["current_page"]
-        == label
-    )
-
-    if st.button(
-        label,
-        key=key,
-        use_container_width=True,
-        type="primary" if is_current else "secondary"
-    ):
-        st.session_state["current_page"] = label
-        st.rerun()
-
-
 with st.sidebar:
 
-    st.markdown(
-        """
-        <div style="
-            text-align:center;
-            font-size:42px;
-            margin-bottom:4px;
-        ">
-            🐱
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("## 🐱")
 
     st.markdown(
-        """
-        <div style="
-            text-align:center;
-            font-size:21px;
-            font-weight:700;
-            color:#554F48;
-            margin-bottom:2px;
-        ">
-            客服作業系統
-        </div>
-        """,
-        unsafe_allow_html=True
+        "### 客服作業系統"
     )
 
-    st.markdown(
-        """
-        <div style="
-            text-align:center;
-            font-size:11px;
-            letter-spacing:1.5px;
-            color:#9A9187;
-            margin-bottom:18px;
-        ">
-            NITORI CUSTOMER SERVICE
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.divider()
-    if st.sidebar.button("🐱 新人訓練中心", use_container_width=True):
-    st.session_state["page"] = "training_center"
-
-    # 在主版面路由控制中加入：
-    if st.session_state.get("page") == "training_center":
-     render_training_center()
-
-    # --------------------------------------------------------
-    # 主要功能
-    # --------------------------------------------------------
-
-    st.markdown(
-        """
-        <div style="
-            font-size:12px;
-            font-weight:700;
-            color:#9A9187;
-            margin:8px 0 6px 4px;
-            letter-spacing:1px;
-        ">
-            主要功能
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    sidebar_button(
-        "🏠 首頁",
-        "sidebar_home"
-    )
-
-    sidebar_button(
-        "🔍 知識搜尋",
-        "sidebar_knowledge"
-    )
-
-    sidebar_button(
-        "📊 客訴資料統計",
-        "sidebar_complaints"
-    )
-
-    sidebar_button(
-        "🗺️ 門市地圖",
-        "sidebar_map"
-    )
-
-    # --------------------------------------------------------
-    # 資訊
-    # --------------------------------------------------------
-
-    st.markdown(
-        """
-        <div style="
-            font-size:12px;
-            font-weight:700;
-            color:#9A9187;
-            margin:20px 0 6px 4px;
-            letter-spacing:1px;
-        ">
-            資訊
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    sidebar_button(
-        "📢 公告＆常用工具",
-        "sidebar_announcements"
-    )
-
-    # --------------------------------------------------------
-    # 管理
-    # --------------------------------------------------------
-
-    st.markdown(
-        """
-        <div style="
-            font-size:12px;
-            font-weight:700;
-            color:#9A9187;
-            margin:20px 0 6px 4px;
-            letter-spacing:1px;
-        ">
-            管理
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    sidebar_button(
-        "🛠️ 資料維護",
-        "sidebar_maintenance"
+    st.caption(
+        "NITORI CUSTOMER SERVICE"
     )
 
     st.divider()
 
-    st.markdown(
-        """
-        <div style="
-            text-align:center;
-            color:#9A9187;
-            font-size:12px;
-            line-height:1.6;
-            padding:6px 0;
-        ">
-            🌿 讓小貓陪你一起找資料
-        </div>
-        """,
-        unsafe_allow_html=True
+    page = st.radio(
+        "功能選單",
+        [
+            "🏠 首頁",
+            "🔍 知識搜尋",
+            "📊 客訴資料統計",
+            "🗺️ 門市地圖",
+            "📢 公告＆常用工具",
+            "🛠️ 資料維護"
+        ],
+        label_visibility="collapsed"
     )
 
+    st.divider()
 
-# 取得目前頁面
-page = st.session_state["current_page"]
+    st.caption(
+        "🌿 讓小貓陪你一起找資料"
+    )
 
 
 # ============================================================
@@ -4238,207 +4050,3 @@ with st.popover("🐱"):
                             st.warning(
                                 "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
                             )
-# ============================================================
-# 新人訓練中心（完整 Excel 整合版）
-# ============================================================
-
-def load_training_sheets():
-    """載入新人訓練相關的 Excel 分頁"""
-    if not EXCEL_PATH.exists():
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    
-    try:
-        xls = pd.ExcelFile(EXCEL_PATH)
-        
-        df_courses = pd.read_excel(xls, sheet_name="課程總表", dtype=str).fillna("") if "課程總表" in xls.sheet_names else pd.DataFrame()
-        df_contents = pd.read_excel(xls, sheet_name="課程內容", dtype=str).fillna("") if "課程內容" in xls.sheet_names else pd.DataFrame()
-        df_quiz = pd.read_excel(xls, sheet_name="測驗題庫", dtype=str).fillna("") if "測驗題庫" in xls.sheet_names else pd.DataFrame()
-        df_records = pd.read_excel(xls, sheet_name="新人學習紀錄", dtype=str).fillna("") if "新人學習紀錄" in xls.sheet_names else pd.DataFrame()
-        
-        return df_courses, df_contents, df_records, df_quiz
-    except Exception as e:
-        st.error(f"讀取新人訓練 Excel 失敗: {e}")
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-
-def save_training_record(employee_id, employee_name, course_id, course_name, day, status, score, practical, completion_date, remark):
-    """將新人的學習紀錄儲存或更新至 Excel 的「新人學習紀錄」分頁"""
-    try:
-        wb = openpyxl.load_workbook(EXCEL_PATH)
-        sheet_name = "新人學習紀錄"
-        
-        if sheet_name not in wb.sheetnames:
-            ws = wb.create_sheet(sheet_name)
-            headers = ["員工ID", "姓名", "課程ID", "課程名稱", "DAY", "學習狀態", "測驗成績", "實作", "完成日期", "教育者備註"]
-            ws.append(headers)
-        else:
-            ws = wb[sheet_name]
-            
-        updated = False
-        for row in range(2, ws.max_row + 1):
-            e_id = clean_text(ws.cell(row, 1).value)
-            c_id = clean_text(ws.cell(row, 3).value)
-            if e_id == employee_id and c_id == course_id:
-                ws.cell(row, 2, employee_name)
-                ws.cell(row, 4, course_name)
-                ws.cell(row, 5, day)
-                ws.cell(row, 6, status)
-                ws.cell(row, 7, str(score))
-                ws.cell(row, 8, practical)
-                ws.cell(row, 9, completion_date)
-                ws.cell(row, 10, remark)
-                updated = True
-                break
-                
-        if not updated:
-            ws.append([employee_id, employee_name, course_id, course_name, day, status, str(score), practical, completion_date, remark])
-            
-        wb.save(EXCEL_PATH)
-        st.cache_data.clear()
-        return True
-    except Exception as e:
-        st.error(f"儲存學習紀錄失敗: {e}")
-        return False
-
-def render_training_center():
-    st.subheader("🐱 新人訓練中心（新手村）")
-    st.write("歡迎加入客服團隊！請依照下方課程與測驗進度完成培訓。")
-
-    with st.expander("👤 填寫您的基本資料（以記錄學習與測驗成績）", expanded=True):
-        col_id, col_name = st.columns(2)
-        with col_id:
-            emp_id = st.text_input("員工ID", value=st.session_state.get("emp_id", ""))
-            st.session_state["emp_id"] = emp_id
-        with col_name:
-            emp_name = st.text_input("姓名", value=st.session_state.get("emp_name", ""))
-            st.session_state["emp_name"] = emp_name
-
-    if not emp_id or not emp_name:
-        st.warning("⚠️ 請先填寫上方的「員工ID」與「姓名」，才能開始上課與測驗紀錄喔！")
-        return
-
-    df_courses, df_contents, df_records, df_quiz = load_training_sheets()
-
-    if df_courses.empty:
-        st.warning("⚠️ 尚未在 Excel 中找到「課程總表」資料，請確認 Excel 分頁名稱正確。")
-        return
-
-    tab1, tab2, tab3 = st.tabs(["📚 課程總表與學習", "📝 隨堂測驗考核", "📊 我的學習進度"])
-
-    with tab1:
-        st.markdown("### 📋 培訓課程清單")
-        
-        days = sorted(df_courses["DAY"].unique()) if "DAY" in df_courses.columns else []
-        selected_day = st.selectbox("依 DAY 篩選課程：", ["全部顯示"] + [str(d) for d in days if clean_text(d)])
-
-        display_df = df_courses if selected_day == "全部顯示" else df_courses[df_courses["DAY"] == selected_day]
-        
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
-
-        st.markdown("---")
-        st.markdown("### 📖 課程詳細內容檢視")
-        
-        course_options = df_courses.apply(lambda r: f"[{clean_text(r.get('DAY', ''))}] {clean_text(r.get('課程ID', ''))} - {clean_text(r.get('課程大項', ''))}", axis=1).tolist()
-        selected_course_str = st.selectbox("選擇要上課的項目：", course_options)
-        
-        if selected_course_str:
-            selected_course_id = selected_course_str.split("] ")[1].split(" - ")[0]
-            
-            contents = df_contents[df_contents["課程ID"] == selected_course_id] if "課程ID" in df_contents.columns else pd.DataFrame()
-            course_meta = df_courses[df_courses["課程ID"] == selected_course_id].iloc[0] if not df_courses[df_courses["課程ID"] == selected_course_id].empty else None
-            
-            with st.container(border=True):
-                if course_meta is not None:
-                    st.markdown(f"#### 🎯 {course_meta.get('課程大項', '')} （{course_meta.get('Level', '')}）")
-                
-                if not contents.empty:
-                    for _, row in contents.iterrows():
-                        st.markdown(f"##### 📌 課程細項：{row.get('課程細項', '')}")
-                        st.markdown(f"**【教學內容】**\n{row.get('教學內容', '')}")
-                        if clean_text(row.get('注意事項', '')):
-                            st.info(f"💡 **注意事項：**\n{row.get('注意事項', '')}")
-                        st.markdown("---")
-                else:
-                    st.info("此課程尚無詳細內容細項。")
-                
-                col_btn1, col_btn2 = st.columns([1, 4])
-                with col_btn1:
-                    if st.button("✅ 回報本課程已學習", key=f"finish_{selected_course_id}"):
-                        c_name = course_meta.get('課程大項', '') if course_meta is not None else ""
-                        c_day = course_meta.get('DAY', '') if course_meta is not None else ""
-                        success = save_training_record(
-                            emp_id, emp_name, selected_course_id, c_name, c_day, 
-                            "已完成", "0", "完成", datetime.now().strftime("%Y/%m/%d"), "自主學習完成"
-                        )
-                        if success:
-                            st.success("🎉 已成功將學習狀態更新為「已完成」！")
-
-    with tab2:
-        st.markdown("### 📝 課程隨堂測驗")
-        
-        if df_quiz.empty:
-            st.info("目前尚無測驗題庫。")
-        else:
-            quiz_course_ids = df_quiz["課程ID"].unique()
-            quiz_target_id = st.selectbox("選擇要測驗的課程 ID：", quiz_course_ids)
-            
-            current_quiz = df_quiz[df_quiz["課程ID"] == quiz_target_id]
-            
-            if current_quiz.empty:
-                st.warning("此課程目前沒有對應的測驗題目。")
-            else:
-                user_answers = {}
-                
-                with st.form(key="quiz_form"):
-                    for idx, row in current_quiz.iterrows():
-                        q_id = row.get("題目ID", str(idx))
-                        st.markdown(f"**Q{idx+1}: {row.get('題目', '')}**")
-                        
-                        options = []
-                        for opt in ["選項A", "選項B", "選項C", "選項D"]:
-                            val = clean_text(row.get(opt, ""))
-                            if val:
-                                options.append(f"{opt[-1]}. {val}")
-                                
-                        ans = st.radio(f"請選擇答案 ({q_id})", options, key=f"q_{q_id}")
-                        user_answers[q_id] = ans[0] if ans else ""
-                        st.markdown("---")
-                        
-                    submitted = st.form_submit_button("📤 提交測驗答案")
-                    
-                    if submitted:
-                        correct_count = 0
-                        total_count = len(current_quiz)
-                        
-                        for idx, row in current_quiz.iterrows():
-                            q_id = row.get("題目ID", str(idx))
-                            correct_ans = clean_text(row.get("正確答案", "")).upper()
-                            user_ans = user_answers.get(q_id, "")
-                            
-                            if user_ans == correct_ans:
-                                correct_count += 1
-                                
-                        final_score = int((correct_count / total_count) * 100) if total_count > 0 else 0
-                        st.success(f"🎯 測驗結束！您的得分為：**{final_score} 分**（答對 {correct_count} / {total_count} 題）")
-                        
-                        c_row = df_courses[df_courses["課程ID"] == quiz_target_id]
-                        c_name = c_row.iloc[0].get("課程大項", "") if not c_row.empty else ""
-                        c_day = c_row.iloc[0].get("DAY", "") if not c_row.empty else ""
-                        
-                        save_training_record(
-                            emp_id, emp_name, quiz_target_id, c_name, c_day, 
-                            "測驗及格" if final_score >= 60 else "需補考", str(final_score), "合格", 
-                            datetime.now().strftime("%Y/%m/%d"), f"系統自動評分: {final_score}分"
-                        )
-
-    with tab3:
-        st.markdown(f"### 📊 {emp_name} 的培訓進度追蹤")
-        
-        if df_records.empty:
-            st.info("目前尚無任何學習紀錄。")
-        else:
-            my_records = df_records[df_records["員工ID"] == emp_id] if "員工ID" in df_records.columns else pd.DataFrame()
-            
-            if my_records.empty:
-                st.info("您目前還沒有上課或測驗紀錄，快去「課程總表與學習」開始上課吧！")
-            else:
-                st.dataframe(my_records, use_container_width=True, hide_index=True)
