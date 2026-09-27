@@ -4273,7 +4273,6 @@ def save_training_record(employee_id, employee_name, course_id, course_name, day
         else:
             ws = wb[sheet_name]
             
-        # 檢查是否已有該員工此課程的紀錄，若有則更新，無則新增
         updated = False
         for row in range(2, ws.max_row + 1):
             e_id = clean_text(ws.cell(row, 1).value)
@@ -4304,7 +4303,6 @@ def render_training_center():
     st.subheader("🐱 新人訓練中心（新手村）")
     st.write("歡迎加入客服團隊！請依照下方課程與測驗進度完成培訓。")
 
-    # 身分識別輸入（方便將成績寫回記錄）
     with st.expander("👤 填寫您的基本資料（以記錄學習與測驗成績）", expanded=True):
         col_id, col_name = st.columns(2)
         with col_id:
@@ -4318,29 +4316,22 @@ def render_training_center():
         st.warning("⚠️ 請先填寫上方的「員工ID」與「姓名」，才能開始上課與測驗紀錄喔！")
         return
 
-    # 讀取 Excel 資料
     df_courses, df_contents, df_records, df_quiz = load_training_sheets()
 
     if df_courses.empty:
         st.warning("⚠️ 尚未在 Excel 中找到「課程總表」資料，請確認 Excel 分頁名稱正確。")
         return
 
-    # 建立分頁介面
     tab1, tab2, tab3 = st.tabs(["📚 課程總表與學習", "📝 隨堂測驗考核", "📊 我的學習進度"])
 
-    # --------------------------------------------------------
-    # Tab 1: 課程總表與內容
-    # --------------------------------------------------------
     with tab1:
         st.markdown("### 📋 培訓課程清單")
         
-        # 篩選 Level 或 DAY
         days = sorted(df_courses["DAY"].unique()) if "DAY" in df_courses.columns else []
         selected_day = st.selectbox("依 DAY 篩選課程：", ["全部顯示"] + [str(d) for d in days if clean_text(d)])
 
-        display_df = df_courses if selected_day == "ทั้งหมด" or selected_day == "全部顯示" else df_courses[df_courses["DAY"] == selected_day]
+        display_df = df_courses if selected_day == "全部顯示" else df_courses[df_courses["DAY"] == selected_day]
         
-        # 顯示課程總表
         st.dataframe(display_df, use_container_width=True, hide_index=True)
 
         st.markdown("---")
@@ -4352,7 +4343,6 @@ def render_training_center():
         if selected_course_str:
             selected_course_id = selected_course_str.split("] ")[1].split(" - ")[0]
             
-            # 找出對應的課程內容
             contents = df_contents[df_contents["課程ID"] == selected_course_id] if "課程ID" in df_contents.columns else pd.DataFrame()
             course_meta = df_courses[df_courses["課程ID"] == selected_course_id].iloc[0] if not df_courses[df_courses["課程ID"] == selected_course_id].empty else None
             
@@ -4370,7 +4360,6 @@ def render_training_center():
                 else:
                     st.info("此課程尚無詳細內容細項。")
                 
-                # 快速點選「標記為已完成」
                 col_btn1, col_btn2 = st.columns([1, 4])
                 with col_btn1:
                     if st.button("✅ 回報本課程已學習", key=f"finish_{selected_course_id}"):
@@ -4383,9 +4372,6 @@ def render_training_center():
                         if success:
                             st.success("🎉 已成功將學習狀態更新為「已完成」！")
 
-    # --------------------------------------------------------
-    # Tab 2: 隨堂測驗考核
-    # --------------------------------------------------------
     with tab2:
         st.markdown("### 📝 課程隨堂測驗")
         
@@ -4401,8 +4387,6 @@ def render_training_center():
                 st.warning("此課程目前沒有對應的測驗題目。")
             else:
                 user_answers = {}
-                score_total = 0
-                max_score = len(current_quiz) * (100 / len(current_quiz))
                 
                 with st.form(key="quiz_form"):
                     for idx, row in current_quiz.iterrows():
@@ -4416,7 +4400,7 @@ def render_training_center():
                                 options.append(f"{opt[-1]}. {val}")
                                 
                         ans = st.radio(f"請選擇答案 ({q_id})", options, key=f"q_{q_id}")
-                        user_answers[q_id] = ans[0] if ans else "" # 取選項的第一個字 (A, B, C, D)
+                        user_answers[q_id] = ans[0] if ans else ""
                         st.markdown("---")
                         
                     submitted = st.form_submit_button("📤 提交測驗答案")
@@ -4433,31 +4417,25 @@ def render_training_center():
                             if user_ans == correct_ans:
                                 correct_count += 1
                                 
-                        final_score = int((correct_count / total_count) * 100)
+                        final_score = int((correct_count / total_count) * 100) if total_count > 0 else 0
                         st.success(f"🎯 測驗結束！您的得分為：**{final_score} 分**（答對 {correct_count} / {total_count} 題）")
                         
-                        # 找出課程名稱
                         c_row = df_courses[df_courses["課程ID"] == quiz_target_id]
                         c_name = c_row.iloc[0].get("課程大項", "") if not c_row.empty else ""
                         c_day = c_row.iloc[0].get("DAY", "") if not c_row.empty else ""
                         
-                        # 自動回寫紀錄
                         save_training_record(
                             emp_id, emp_name, quiz_target_id, c_name, c_day, 
                             "測驗及格" if final_score >= 60 else "需補考", str(final_score), "合格", 
                             datetime.now().strftime("%Y/%m/%d"), f"系統自動評分: {final_score}分"
                         )
 
-    # --------------------------------------------------------
-    # Tab 3: 我的學習進度
-    # --------------------------------------------------------
     with tab3:
         st.markdown(f"### 📊 {emp_name} 的培訓進度追蹤")
         
         if df_records.empty:
             st.info("目前尚無任何學習紀錄。")
         else:
-            # 過濾當前員工的紀錄
             my_records = df_records[df_records["員工ID"] == emp_id] if "員工ID" in df_records.columns else pd.DataFrame()
             
             if my_records.empty:
