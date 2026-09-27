@@ -2438,26 +2438,33 @@ if page == "🏠 首頁":
     today_index = datetime.now().timetuple().tm_yday % len(daily_tips)
 
     st.subheader(
-    "🌱 每日客服小提醒"
-)
+        "🌱 每日客服小提醒"
+    )
 
-st.info(
-    f"🐾 {daily_tips[today_index]}"
-)
+    st.info(
+        f"🐾 {daily_tips[today_index]}"
+    )
 
-    st.subheader("📢 最新公告")
+    st.subheader(
+        "📢 最新公告"
+    )
 
     ann = load_announcements()
 
     if ann.empty:
-        st.info("目前沒有公告資料。")
+        st.info(
+            "目前沒有公告資料。"
+        )
     else:
-        announcement_columns = get_announcement_columns(ann)
+        announcement_columns = get_announcement_columns(
+            ann
+        )
 
         for _, row in ann.head(5).iterrows():
             render_announcement(
                 row,
                 announcement_columns
+            )
             )
 
 # ============================================================
