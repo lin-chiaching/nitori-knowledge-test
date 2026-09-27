@@ -566,7 +566,7 @@ TRAINING_CONTENT_COLUMNS = [
 
 @st.cache_data(ttl=60)
 def load_training_overview():
-    df = load_sheet(["課程總覽"])
+    df = load_sheet(["課程總表"])
 
     if df.empty:
         return pd.DataFrame(columns=TRAINING_OVERVIEW_COLUMNS)
