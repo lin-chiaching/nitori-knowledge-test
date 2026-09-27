@@ -2492,7 +2492,6 @@ if ann.empty:
         st.info(
             "目前沒有公告資料。"
         )
-
     else:
 
         announcement_columns = get_announcement_columns(
