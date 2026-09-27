@@ -2126,6 +2126,12 @@ with st.sidebar:
     )
 
     st.divider()
+    if st.sidebar.button("🐱 新人訓練中心", use_container_width=True):
+    st.session_state["page"] = "training_center"
+
+    # 在主版面路由控制中加入：
+    if st.session_state.get("page") == "training_center":
+    render_training_center()
 
     # --------------------------------------------------------
     # 主要功能
