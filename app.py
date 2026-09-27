@@ -2422,88 +2422,70 @@ def render_change_history(
 
 if page == "🏠 首頁":
 
-    st.title(
-        "🐱 客服作業系統"
-    )
+elif page == "🏠 首頁":
 
-    st.caption(
-        "NITORI CUSTOMER SERVICE WORKSPACE"
-    )
+    daily_tips = [
+        "遇到不確定的問題，先確認資料，再回覆顧客。",
+        "先理解顧客的需求，再確認需要查詢的資訊。",
+        "回覆顧客前，記得確認商品編號與商品名稱。",
+        "遇到無法立即確認的問題，可以先整理資訊，再進行內部確認。",
+        "客服交接時，資訊越完整，下一位同仁就越容易接手。",
+        "顧客情緒較強烈時，先傾聽並確認問題，再說明處理方式。",
+        "遇到規則不確定的案件，請先確認最新公告或內部資訊。",
+        "回覆顧客時，除了說明目前狀況，也可以告知顧客下一步該怎麼做。",
+        "商品問題除了確認商品本身，也別忘了確認購買通路與購買時間。",
+        "電話結束前，確認顧客是否還有其他需要協助的事項。"
+    ]
 
-    st.info(
-        "🌿 今天也辛苦了，讓小貓陪你一起找資料"
-    )
+    today_index = datetime.now().timetuple().tm_yday % len(daily_tips)
 
-    st.subheader(
-        "📢 LATEST ANNOUNCEMENTS"
-    )
-# ============================================================
-# 每日客服小提醒
-# ============================================================
-
-daily_tips = [
-    "遇到不確定的問題，先確認資料，再回覆顧客。",
-    "先理解顧客的需求，再確認需要查詢的資訊。",
-    "回覆顧客前，記得確認商品編號與商品名稱。",
-    "遇到無法立即確認的問題，可以先整理資訊，再進行內部確認。",
-    "客服交接時，資訊越完整，下一位同仁就越容易接手。",
-    "顧客情緒較強烈時，先傾聽並確認問題，再說明處理方式。",
-    "遇到規則不確定的案件，請先確認最新公告或內部資訊。",
-    "回覆顧客時，除了說明目前狀況，也可以告知顧客下一步該怎麼做。",
-    "商品問題除了確認商品本身，也別忘了確認購買通路與購買時間。",
-    "電話結束前，確認顧客是否還有其他需要協助的事項。"
-]
-
-today_index = datetime.now().timetuple().tm_yday % len(daily_tips)
-
-st.markdown(
-    f"""
-    <div style="
-        background:#F7F2E8;
-        border-radius:16px;
-        padding:20px 24px;
-        margin:10px 0 25px 0;
-        border:1px solid #E9DFD0;
-    ">
+    st.markdown(
+        f"""
         <div style="
-            font-size:17px;
-            font-weight:700;
-            color:#6B625A;
-            margin-bottom:10px;
+            background:#F7F2E8;
+            border-radius:16px;
+            padding:20px 24px;
+            margin:10px 0 25px 0;
+            border:1px solid #E9DFD0;
         ">
-            🌱 每日客服小提醒
+            <div style="
+                font-size:17px;
+                font-weight:700;
+                color:#6B625A;
+                margin-bottom:10px;
+            ">
+                🌱 每日客服小提醒
+            </div>
+
+            <div style="
+                font-size:15px;
+                color:#5F554C;
+                line-height:1.8;
+            ">
+                🐾 {daily_tips[today_index]}
+            </div>
         </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-        <div style="
-            font-size:15px;
-            color:#5F554C;
-            line-height:1.8;
-        ">
-            🐾 {daily_tips[today_index]}
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-ann = load_announcements()
+    st.subheader("📢 最新公告")
 
-if ann.empty:
+    ann = load_announcements()
 
-        st.info(
-            "目前沒有公告資料。"
-        )
+    if ann.empty:
+        st.info("目前沒有公告資料。")
     else:
-
-        announcement_columns = get_announcement_columns(
-            ann
-        )
+        announcement_columns = get_announcement_columns(ann)
 
         for _, row in ann.head(5).iterrows():
-
             render_announcement(
                 row,
                 announcement_columns
             )
+
+
+elif page == "🔍 知識搜尋":
 
 
 # ============================================================
