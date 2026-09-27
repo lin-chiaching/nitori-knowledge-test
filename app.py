@@ -566,33 +566,41 @@ TRAINING_CONTENT_COLUMNS = [
 
 @st.cache_data(ttl=60)
 def load_training_overview():
-    sheet = find_sheet(["課程總表"])
 
-if not sheet:
-    return pd.DataFrame(
-        columns=TRAINING_OVERVIEW_COLUMNS
-    )
+    try:
 
-df = pd.read_excel(
-    EXCEL_PATH,
-    sheet_name=sheet
-)
+        sheet = find_sheet(["課程總表"])
 
-    if df.empty:
-        return pd.DataFrame(columns=TRAINING_OVERVIEW_COLUMNS)
+        if not sheet:
+            return pd.DataFrame(
+                columns=TRAINING_OVERVIEW_COLUMNS
+            )
 
-    for col in TRAINING_OVERVIEW_COLUMNS:
-        if col not in df.columns:
-            df[col] = ""
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet
+        )
 
-    df = df[TRAINING_OVERVIEW_COLUMNS].copy()
+        for col in TRAINING_OVERVIEW_COLUMNS:
 
-    # 新人只看 Level 1
-    df["Level"] = df["Level"].astype(str).str.strip()
-    df = df[df["Level"].isin(["", "1"])].copy()
+            if col not in df.columns:
+                df[col] = ""
 
-    return df
+        df = df[
+            TRAINING_OVERVIEW_COLUMNS
+        ].copy()
 
+        return df
+
+    except Exception as e:
+
+        st.warning(
+            f"無法讀取課程總表：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=TRAINING_OVERVIEW_COLUMNS
+        )
 
 @st.cache_data(ttl=60)
 def load_training_content():
