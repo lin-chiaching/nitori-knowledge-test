@@ -3118,6 +3118,7 @@ elif page == "🎓 新人訓練中心":
 
     training_overview = load_training_overview()
     training_content = load_training_content()
+    training_videos = load_training_videos()
 
     if training_overview.empty:
 
