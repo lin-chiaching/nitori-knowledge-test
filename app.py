@@ -3322,7 +3322,32 @@ elif page == "🎓 新人訓練中心":
 
         st.markdown("### 👥 新人名單")
 
-        st.info("目前尚未建立新人資料")
+        new_staff = employee_data[
+            employee_data["角色"]
+            .astype(str)
+            .str.strip()
+            == "新人"
+        ].copy()
+
+        if new_staff.empty:
+
+            st.info("目前尚未建立新人資料")
+
+        else:
+
+            st.dataframe(
+                new_staff[
+                    [
+                        "員工編號",
+                        "姓名",
+                        "職稱",
+                        "部門",
+                        "到職日"
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True
+           )
         
     training_overview = (
         load_training_overview()
