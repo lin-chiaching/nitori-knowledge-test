@@ -3253,11 +3253,21 @@ elif page == "🎓 新人訓練中心":
     st.title(
         "🎓 新人訓練中心"
     )
-
+    role = st.radio(
+    "請選擇使用身分",
+    ["👨‍🎓 新人", "👩‍🏫 小老師"],
+    horizontal=True
+    )
     st.caption(
         "新人訓練 Level 1｜共 3 天"
     )
+    if role == "👨‍🎓 新人":
 
+    # 這裡放新人頁面
+
+    elif role == "👩‍🏫 小老師":
+
+    # 這裡放小老師頁面
     training_overview = (
         load_training_overview()
     )
