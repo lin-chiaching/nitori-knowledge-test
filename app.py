@@ -3306,6 +3306,10 @@ elif page == "🎓 新人訓練中心":
     st.caption(
         "新人訓練 Level 1｜共 3 天"
     )
+    employee_data = (
+    load_employee_data()
+    ) 
+    
     if role == "👨‍🎓 新人":
 
         st.subheader("👨‍🎓 我的訓練")
@@ -3359,10 +3363,6 @@ elif page == "🎓 新人訓練中心":
 
     training_videos = (
         load_training_videos()
-    )
-    
-    employee_data = (
-    load_employee_data()
     )
 
     
