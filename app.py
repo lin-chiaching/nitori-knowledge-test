@@ -3269,8 +3269,6 @@ elif page == "🎓 新人訓練中心":
 
         st.markdown("### 📚 我的課程")
 
-        st.info("目前正在進行：DAY 1")
-
     elif role == "👩‍🏫 小老師":
 
         st.subheader("👩‍🏫 小老師管理")
