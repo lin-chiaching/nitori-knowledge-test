@@ -658,7 +658,48 @@ def load_training_content():
         return pd.DataFrame(
             columns=TRAINING_CONTENT_COLUMNS
         )
+@st.cache_data(ttl=60)
+def load_training_videos():
 
+    try:
+
+        sheet = find_sheet(["課程影片"])
+
+        if not sheet:
+            return pd.DataFrame(
+                columns=TRAINING_VIDEO_COLUMNS
+            )
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet
+        )
+
+        if df.empty:
+            return pd.DataFrame(
+                columns=TRAINING_VIDEO_COLUMNS
+            )
+
+        for col in TRAINING_VIDEO_COLUMNS:
+
+            if col not in df.columns:
+                df[col] = ""
+
+        df = df[
+            TRAINING_VIDEO_COLUMNS
+        ].copy()
+
+        return df
+
+    except Exception as e:
+
+        st.warning(
+            f"無法讀取課程影片：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=TRAINING_VIDEO_COLUMNS
+        )
 
 # ============================================================
 # 待審核問題
