@@ -3263,7 +3263,13 @@ elif page == "🎓 新人訓練中心":
     )
     if role == "👨‍🎓 新人":
 
-        st.write("這裡是新人頁面")
+        st.subheader("👨‍🎓 我的訓練")
+
+        st.write("歡迎加入宜得利！")
+
+        st.markdown("### 📚 我的課程")
+
+        st.info("目前正在進行：DAY 1")
 
     elif role == "👩‍🏫 小老師":
 
