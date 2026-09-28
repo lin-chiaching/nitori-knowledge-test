@@ -3528,7 +3528,6 @@ elif page == "🎓 新人訓練中心":
                                     <div style="
                                         color: #666;
                                         font-size: 14px;
-                                        margin-bottom: 0;
                                     ">
                                         請先觀看課程影片，再繼續閱讀下方課程內容。
                                     </div>
@@ -3538,13 +3537,11 @@ elif page == "🎓 新人訓練中心":
                             )
 
                             if video_name:
-
                                 st.markdown(
                                     f"**🎞️ {video_name}**"
                                 )
 
                             if video_description:
-
                                 st.caption(
                                     video_description
                                 )
