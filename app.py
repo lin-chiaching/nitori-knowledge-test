@@ -3323,18 +3323,11 @@ elif page == "🎓 新人訓練中心":
                             if video_description:
                                 st.caption(video_description)
 
-                            components.html(
-                                f"""
-                                <iframe
-                                    src="{video_url}"
-                                    width="100%"
-                                    height="500"
-                                    frameborder="0"
-                                    allowfullscreen>
-                                </iframe>
-                                """,
-                                height=520
-                           )
+                            st.link_button(
+                                "▶ 在 SharePoint 觀看影片",
+                                video_url,
+                                use_container_width=True
+                            )
                     if course_content.empty:
 
                         st.info(
