@@ -258,16 +258,6 @@ def clean_announcement_title(text):
 # ============================================================
 
 def get_announcement_columns(df):
-    """
-    自動判斷公告 Excel 的欄位。
-
-    支援：
-    - 標題
-    - 內容／說明／公告內容
-    - 公告日期
-    - 活動日期／活動期限
-    - 點數期限
-    """
 
     cols = list(df.columns)
 
@@ -338,6 +328,7 @@ def get_announcement_columns(df):
 
 
 def get_announcement_values(row, columns):
+
     title = ""
     content = ""
     date = ""
@@ -379,11 +370,6 @@ def get_announcement_values(row, columns):
 
 
 def render_announcement(row, columns):
-    """
-    統一公告顯示方式。
-    首頁與公告頁都使用同一個函式，
-    避免兩邊顯示欄位不一致。
-    """
 
     (
         title,
@@ -428,6 +414,7 @@ def render_announcement(row, columns):
 
 @st.cache_data(ttl=60)
 def get_excel_sheets():
+
     if not EXCEL_PATH.exists():
         return []
 
@@ -437,9 +424,11 @@ def get_excel_sheets():
 
 
 def find_sheet(candidates, fallback_index=None):
+
     sheets = get_excel_sheets()
 
     for name in candidates:
+
         if name in sheets:
             return name
 
@@ -454,6 +443,7 @@ def find_sheet(candidates, fallback_index=None):
 
 @st.cache_data(ttl=60)
 def load_data():
+
     sheet = find_sheet(
         ["知識庫", "問題集", "Sheet1"],
         0
@@ -471,6 +461,7 @@ def load_data():
 
 @st.cache_data(ttl=60)
 def load_synonyms():
+
     sheet = find_sheet(
         ["搜尋詞對照", "關鍵字對照"]
     )
@@ -487,6 +478,7 @@ def load_synonyms():
 
 @st.cache_data(ttl=60)
 def load_announcements():
+
     sheet = find_sheet(
         ["內部公告", "公告"]
     )
@@ -501,16 +493,20 @@ def load_announcements():
     ).fillna("")
 
     for col in df.columns:
+
         if any(
             x in str(col)
             for x in ["內容", "說明", "公告"]
         ):
+
             df[col] = df[col].map(
                 clean_announcement_content
             )
 
     for col in df.columns:
+
         if "標題" in str(col):
+
             df[col] = df[col].map(
                 clean_announcement_title
             )
@@ -520,6 +516,7 @@ def load_announcements():
 
 @st.cache_data(ttl=60)
 def load_tools():
+
     sheet = find_sheet(
         ["常用工具", "工具"]
     )
@@ -532,6 +529,7 @@ def load_tools():
         sheet_name=sheet,
         dtype=str
     ).fillna("")
+
 
 # =========================================================
 # 新人訓練中心
@@ -559,14 +557,19 @@ TRAINING_VIDEO_COLUMNS = [
     "影片名稱",
     "影片說明",
 ]
+
+
 @st.cache_data(ttl=60)
 def load_training_overview():
 
     try:
 
-        sheet = find_sheet(["課程總表"])
+        sheet = find_sheet(
+            ["課程總表"]
+        )
 
         if not sheet:
+
             return pd.DataFrame(
                 columns=TRAINING_OVERVIEW_COLUMNS
             )
@@ -597,15 +600,18 @@ def load_training_overview():
             columns=TRAINING_OVERVIEW_COLUMNS
         )
 
-@st.cache_data(ttl=60)
+
 @st.cache_data(ttl=60)
 def load_training_content():
 
     try:
 
-        sheet = find_sheet(["課程內容"])
+        sheet = find_sheet(
+            ["課程內容"]
+        )
 
         if not sheet:
+
             return pd.DataFrame(
                 columns=TRAINING_CONTENT_COLUMNS
             )
@@ -616,6 +622,7 @@ def load_training_content():
         )
 
         if df.empty:
+
             return pd.DataFrame(
                 columns=TRAINING_CONTENT_COLUMNS
             )
@@ -636,7 +643,9 @@ def load_training_content():
         )
 
         df = df[
-            df["Level"].isin(["", "1"])
+            df["Level"].isin(
+                ["", "1"]
+            )
         ].copy()
 
         return df
@@ -650,14 +659,19 @@ def load_training_content():
         return pd.DataFrame(
             columns=TRAINING_CONTENT_COLUMNS
         )
+
+
 @st.cache_data(ttl=60)
 def load_training_videos():
 
     try:
 
-        sheet = find_sheet(["課程影片"])
+        sheet = find_sheet(
+            ["課程影片"]
+        )
 
         if not sheet:
+
             return pd.DataFrame(
                 columns=TRAINING_VIDEO_COLUMNS
             )
@@ -668,6 +682,7 @@ def load_training_videos():
         )
 
         if df.empty:
+
             return pd.DataFrame(
                 columns=TRAINING_VIDEO_COLUMNS
             )
@@ -693,6 +708,7 @@ def load_training_videos():
             columns=TRAINING_VIDEO_COLUMNS
         )
 
+
 # ============================================================
 # 待審核問題
 # ============================================================
@@ -710,6 +726,7 @@ PENDING_COLUMNS = [
 def load_pending_questions():
 
     if not EXCEL_PATH.exists():
+
         return pd.DataFrame(
             columns=PENDING_COLUMNS
         )
@@ -719,6 +736,7 @@ def load_pending_questions():
         sheets = get_excel_sheets()
 
         if "待審核問題" not in sheets:
+
             return pd.DataFrame(
                 columns=PENDING_COLUMNS
             )
@@ -730,10 +748,13 @@ def load_pending_questions():
         ).fillna("")
 
         for col in PENDING_COLUMNS:
+
             if col not in df.columns:
                 df[col] = ""
 
-        return df[PENDING_COLUMNS].copy()
+        return df[
+            PENDING_COLUMNS
+        ].copy()
 
     except Exception as e:
 
@@ -762,7 +783,10 @@ HISTORY_COLUMNS = [
 ]
 
 
-def get_history_identifier(row, index):
+def get_history_identifier(
+    row,
+    index
+):
 
     identifier_fields = [
         "序號",
@@ -840,7 +864,6 @@ def build_change_history(
         old_exists = i < len(old_df)
         new_exists = i < len(new_df)
 
-        # 新增
         if not old_exists and new_exists:
 
             new_row = new_df.iloc[i]
@@ -861,7 +884,6 @@ def build_change_history(
 
             continue
 
-        # 刪除
         if old_exists and not new_exists:
 
             old_row = old_df.iloc[i]
@@ -891,6 +913,7 @@ def build_change_history(
         )
 
         if identifier.startswith("第 "):
+
             identifier = get_history_identifier(
                 old_row,
                 i
@@ -931,7 +954,9 @@ def build_change_history(
     )
 
 
-def save_change_history(history_df):
+def save_change_history(
+    history_df
+):
 
     if history_df.empty:
         return True
@@ -957,6 +982,7 @@ def save_change_history(history_df):
                 HISTORY_COLUMNS,
                 1
             ):
+
                 ws.cell(
                     1,
                     c,
@@ -973,6 +999,7 @@ def save_change_history(history_df):
                 HISTORY_COLUMNS,
                 1
             ):
+
                 ws.cell(
                     1,
                     c,
@@ -1032,7 +1059,9 @@ def save_sheet(
 
         return False
 
-    if not clean_text(editor_name):
+    if not clean_text(
+        editor_name
+    ):
 
         st.error(
             "❌ 請先填寫修改人姓名。"
@@ -1178,7 +1207,9 @@ def save_knowledge_data(
 # 新增待審核問題
 # ============================================================
 
-def add_pending_question(question):
+def add_pending_question(
+    question
+):
 
     question = clean_text(
         question
@@ -1446,7 +1477,9 @@ def load_complaints():
 # 搜尋詞擴充
 # ============================================================
 
-def expand_search_word(keyword):
+def expand_search_word(
+    keyword
+):
 
     keyword = clean_text(
         keyword
@@ -1526,7 +1559,9 @@ def expand_search_word(keyword):
 # 搜尋
 # ============================================================
 
-def split_search_terms(keyword):
+def split_search_terms(
+    keyword
+):
 
     keyword = clean_text(
         keyword
@@ -1536,13 +1571,34 @@ def split_search_terms(keyword):
         return []
 
     stop_words = {
-        "請問", "想問", "想詢問", "請教",
-        "麻煩問一下", "可以請問", "可以",
-        "嗎", "呢", "如何", "怎麼", "怎樣",
-        "什麼", "是否", "有沒有", "有無",
-        "我要", "我想", "需要", "一下",
-        "問題", "請", "幫我", "告訴我",
-        "想知道", "請幫忙", "謝謝", "謝謝您"
+        "請問",
+        "想問",
+        "想詢問",
+        "請教",
+        "麻煩問一下",
+        "可以請問",
+        "可以",
+        "嗎",
+        "呢",
+        "如何",
+        "怎麼",
+        "怎樣",
+        "什麼",
+        "是否",
+        "有沒有",
+        "有無",
+        "我要",
+        "我想",
+        "需要",
+        "一下",
+        "問題",
+        "請",
+        "幫我",
+        "告訴我",
+        "想知道",
+        "請幫忙",
+        "謝謝",
+        "謝謝您"
     }
 
     parts = re.split(
@@ -1600,7 +1656,9 @@ def split_search_terms(keyword):
     )
 
 
-def build_search_terms(keyword):
+def build_search_terms(
+    keyword
+):
 
     original = clean_text(
         keyword
@@ -1614,7 +1672,9 @@ def build_search_terms(keyword):
     )
 
     expanded_terms = []
-    expanded_terms.extend(terms)
+    expanded_terms.extend(
+        terms
+    )
 
     for term in terms:
 
@@ -1715,6 +1775,7 @@ def calculate_fuzzy_similarity(
             and positions[-1]
             != max_start - 1
         ):
+
             positions.append(
                 max_start - 1
             )
@@ -1783,6 +1844,7 @@ def search_knowledge(
     )
 
     if not original_keyword:
+
         return df.head(
             top_n
         ).copy()
@@ -1792,6 +1854,7 @@ def search_knowledge(
     )
 
     if not search_terms:
+
         return df.head(
             top_n
         ).copy()
@@ -1889,11 +1952,13 @@ def search_knowledge(
             continue
 
         if term not in meaningful_terms:
+
             meaningful_terms.append(
                 term
             )
 
     if not meaningful_terms:
+
         meaningful_terms = [
             normalized_query
         ]
@@ -1941,8 +2006,14 @@ def search_knowledge(
                         field_weight / 100
                     )
 
-                    if weighted_exact > best_exact_field_score:
-                        best_exact_field_score = weighted_exact
+                    if (
+                        weighted_exact
+                        > best_exact_field_score
+                    ):
+
+                        best_exact_field_score = (
+                            weighted_exact
+                        )
 
                 fuzzy = calculate_fuzzy_similarity(
                     term,
@@ -1962,8 +2033,14 @@ def search_knowledge(
                         )
                     )
 
-                    if weighted_fuzzy > best_fuzzy_field_score:
-                        best_fuzzy_field_score = weighted_fuzzy
+                    if (
+                        weighted_fuzzy
+                        > best_fuzzy_field_score
+                    ):
+
+                        best_fuzzy_field_score = (
+                            weighted_fuzzy
+                        )
 
             best_term_score = max(
                 best_exact_field_score,
@@ -2018,7 +2095,8 @@ def search_knowledge(
         term_coverage_scores.append(
             min(
                 1.0,
-                coverage + multi_exact_bonus
+                coverage
+                + multi_exact_bonus
             )
         )
 
@@ -2049,10 +2127,21 @@ def search_knowledge(
             )
         )
 
-    result["_term_coverage"] = term_coverage_scores
-    result["_term_quality"] = term_quality_scores
-    result["_fuzzy_score"] = fuzzy_scores
-    result["_direct_score"] = direct_scores
+    result["_term_coverage"] = (
+        term_coverage_scores
+    )
+
+    result["_term_quality"] = (
+        term_quality_scores
+    )
+
+    result["_fuzzy_score"] = (
+        fuzzy_scores
+    )
+
+    result["_direct_score"] = (
+        direct_scores
+    )
 
     full_query_scores = []
 
@@ -2104,7 +2193,9 @@ def search_knowledge(
             )
         )
 
-    result["_full_query_score"] = full_query_scores
+    result["_full_query_score"] = (
+        full_query_scores
+    )
 
     result["_final_score"] = (
         result["_score"] * 0.40
@@ -2142,7 +2233,9 @@ def search_knowledge(
 # 客服小幫手
 # ============================================================
 
-def ask_customer_assistant(question):
+def ask_customer_assistant(
+    question
+):
 
     result = search_knowledge(
         question,
@@ -2204,22 +2297,27 @@ with st.sidebar:
     st.divider()
 
     menu_items = [
-    "🏠 首頁",
-    "🔍 知識搜尋",
-    "📊 客訴資料統計",
-    "🗺️ 門市地圖",
-    "🎓 新人訓練中心",
-    "📢 公告＆常用工具",
-    "🛠️ 資料維護"
-]
+        "🏠 首頁",
+        "🔍 知識搜尋",
+        "📊 客訴資料統計",
+        "🗺️ 門市地圖",
+        "🎓 新人訓練中心",
+        "📢 公告＆常用工具",
+        "🛠️ 資料維護"
+    ]
 
     if "current_page" not in st.session_state:
-        st.session_state["current_page"] = "🏠  首頁"
+
+        st.session_state[
+            "current_page"
+        ] = "🏠 首頁"
 
     for item in menu_items:
 
         is_current = (
-            st.session_state["current_page"] == item
+            st.session_state[
+                "current_page"
+            ] == item
         )
 
         if is_current:
@@ -2248,7 +2346,11 @@ with st.sidebar:
                 key=f"menu_{item}",
                 use_container_width=True
             ):
-                st.session_state["current_page"] = item
+
+                st.session_state[
+                    "current_page"
+                ] = item
+
                 st.rerun()
 
     st.divider()
@@ -2267,7 +2369,9 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-page = st.session_state["current_page"]
+page = st.session_state[
+    "current_page"
+]
 
 
 # ============================================================
@@ -2409,7 +2513,9 @@ def render_change_history(
                         mask
                         | display_history[col]
                         .astype(str)
-                        .map(normalize_search_text)
+                        .map(
+                            normalize_search_text
+                        )
                         .str.contains(
                             search_value,
                             na=False
@@ -2461,11 +2567,22 @@ if page == "🏠 首頁":
     current_hour = datetime.now().hour
 
     if current_hour < 12:
-        greeting = "🌅 早安，今天也辛苦了！"
+
+        greeting = (
+            "🌅 早安，今天也辛苦了！"
+        )
+
     elif current_hour < 18:
-        greeting = "☀️ 午安，辛苦了一半，繼續加油！"
+
+        greeting = (
+            "☀️ 午安，辛苦了一半，繼續加油！"
+        )
+
     else:
-        greeting = "🌙 辛苦了，今天的工作也接近尾聲囉！"
+
+        greeting = (
+            "🌙 辛苦了，今天的工作也接近尾聲囉！"
+        )
 
     st.title(
         greeting
@@ -2488,7 +2605,12 @@ if page == "🏠 首頁":
         "電話結束前，確認顧客是否還有其他需要協助的事項。"
     ]
 
-    today_index = datetime.now().timetuple().tm_yday % len(daily_tips)
+    today_index = (
+        datetime.now()
+        .timetuple()
+        .tm_yday
+        % len(daily_tips)
+    )
 
     st.subheader(
         "🌱 每日客服小提醒"
@@ -2505,19 +2627,26 @@ if page == "🏠 首頁":
     ann = load_announcements()
 
     if ann.empty:
+
         st.info(
             "目前沒有公告資料。"
         )
+
     else:
-        announcement_columns = get_announcement_columns(
-            ann
+
+        announcement_columns = (
+            get_announcement_columns(
+                ann
+            )
         )
 
         for _, row in ann.head(5).iterrows():
+
             render_announcement(
                 row,
                 announcement_columns
             )
+
 
 # ============================================================
 # 知識搜尋
@@ -2845,24 +2974,28 @@ elif page == "📊 客訴資料統計":
         card1, card2, card3, card4 = st.columns(4)
 
         with card1:
+
             st.metric(
                 "📋 篩選後客訴",
                 f"{total_count} 件"
             )
 
         with card2:
+
             st.metric(
                 "📅 本月客訴",
                 f"{current_month_count} 件"
             )
 
         with card3:
+
             st.metric(
                 "📦 商品相關",
                 f"{product_count} 件"
             )
 
         with card4:
+
             st.metric(
                 "📝 其他類型",
                 f"{other_count} 件"
@@ -2900,8 +3033,10 @@ elif page == "📊 客訴資料統計":
                 "_月份"
             )
 
-            monthly_chart = monthly_data.set_index(
-                "_月份"
+            monthly_chart = (
+                monthly_data.set_index(
+                    "_月份"
+                )
             )
 
             st.line_chart(
@@ -2945,8 +3080,10 @@ elif page == "📊 客訴資料統計":
 
             else:
 
-                type_chart = type_data.set_index(
-                    "客訴類型"
+                type_chart = (
+                    type_data.set_index(
+                        "客訴類型"
+                    )
                 )
 
                 st.bar_chart(
@@ -2986,8 +3123,10 @@ elif page == "📊 客訴資料統計":
 
             else:
 
-                detail_chart = detail_data.set_index(
-                    "客訴細項"
+                detail_chart = (
+                    detail_data.set_index(
+                        "客訴細項"
+                    )
                 )
 
                 st.bar_chart(
@@ -3027,8 +3166,10 @@ elif page == "📊 客訴資料統計":
 
         else:
 
-            channel_chart = channel_data.set_index(
-                "購買通路"
+            channel_chart = (
+                channel_data.set_index(
+                    "購買通路"
+                )
             )
 
             st.bar_chart(
@@ -3089,11 +3230,20 @@ elif page == "🗺️ 門市地圖":
         "可使用路名、捷運站、車站名稱、門市名稱或店號搜尋。"
     )
 
+    POWER_BI_URL = (
+        "https://app.powerbi.com/reportEmbed?"
+        "reportId=851d09f1-f169-4049-9090-640f09cdc385"
+        "&autoAuth=true"
+        "&ctid=94d67acc-8c17-4d3b-8463-9829cf08ef55"
+    )
+
     components.iframe(
         POWER_BI_URL,
         height=760,
         scrolling=True
     )
+
+
 # ============================================================
 # 新人訓練中心
 # ============================================================
@@ -3108,9 +3258,17 @@ elif page == "🎓 新人訓練中心":
         "新人訓練 Level 1｜共 3 天"
     )
 
-    training_overview = load_training_overview()
-    training_content = load_training_content()
-    training_videos = load_training_videos()
+    training_overview = (
+        load_training_overview()
+    )
+
+    training_content = (
+        load_training_content()
+    )
+
+    training_videos = (
+        load_training_videos()
+    )
 
     if training_overview.empty:
 
@@ -3132,7 +3290,11 @@ elif page == "🎓 新人訓練中心":
             ("DAY3", "🛋️", "家具與商品")
         ]
 
-        for i, (day, icon, description) in enumerate(days):
+        for i, (
+            day,
+            icon,
+            description
+        ) in enumerate(days):
 
             day_data = training_overview[
                 training_overview["DAY"]
@@ -3179,9 +3341,11 @@ elif page == "🎓 新人訓練中心":
 
                         st.rerun()
 
-        selected_day = st.session_state.get(
-            "training_day",
-            ""
+        selected_day = (
+            st.session_state.get(
+                "training_day",
+                ""
+            )
         )
 
         if selected_day:
@@ -3258,9 +3422,11 @@ elif page == "🎓 新人訓練中心":
 
                             st.rerun()
 
-            selected_course = st.session_state.get(
-                "training_course",
-                ""
+            selected_course = (
+                st.session_state.get(
+                    "training_course",
+                    ""
+                )
             )
 
             if selected_course:
@@ -3287,30 +3453,49 @@ elif page == "🎓 新人訓練中心":
                         f"### 📖 {course_name}"
                     )
 
-                    course_content = training_content[
-                        training_content["課程ID"]
-                        .astype(str)
-                        .str.strip()
-                        == selected_course
-                    ].copy()
-                    
-                    video_row = training_videos[
-                           training_videos["課程ID"].astype(str).str.strip() == selected_course
-                    ]
-                    st.write("影片資料筆數：", len(video_row))
-                    
+                    course_content = (
+                        training_content[
+                            training_content["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            == selected_course
+                        ].copy()
+                    )
+
+                    # ====================================================
+                    # 課程影片
+                    # ====================================================
+
+                    video_row = (
+                        training_videos[
+                            training_videos["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            == selected_course
+                        ]
+                    )
+
                     if not video_row.empty:
 
                         video_url = clean_text(
-                            video_row.iloc[0].get("影片URL", "")
+                            video_row.iloc[0].get(
+                                "影片URL",
+                                ""
+                            )
                         )
 
                         video_name = clean_text(
-                        video_row.iloc[0].get("影片名稱", "")
+                            video_row.iloc[0].get(
+                                "影片名稱",
+                                ""
+                            )
                         )
 
                         video_description = clean_text(
-                        video_row.iloc[0].get("影片說明", "")
+                            video_row.iloc[0].get(
+                                "影片說明",
+                                ""
+                            )
                         )
 
                         if video_url:
@@ -3322,53 +3507,62 @@ elif page == "🎓 新人訓練中心":
                                     border: 1px solid #eadfd3;
                                     border-radius: 16px;
                                     padding: 24px;
-                                    margin: 10px 0 24px 0;
+                                    margin: 10px 0 16px 0;
                                 ">
                                     <div style="
-                                    font-size: 24px;
-                                    font-weight: 700;
-                                    margin-bottom: 8px;
+                                        font-size: 24px;
+                                        font-weight: 700;
+                                        margin-bottom: 8px;
                                     ">
-                                   🎬 課程影片
-                                </div>
+                                        🎬 課程影片
+                                    </div>
 
-                                <div style="
-                                    font-size: 18px;
-                                    font-weight: 600;
-                                    margin-bottom: 6px;
-                                ">
-                                   📺 課程教學影片
-                                </div>
+                                    <div style="
+                                        font-size: 18px;
+                                        font-weight: 600;
+                                        margin-bottom: 6px;
+                                    ">
+                                        📺 課程教學影片
+                                    </div>
 
-                                <div style="
-                                    color: #666;
-                                    font-size: 14px;
-                                    margin-bottom: 18px;
-                                ">
-                                    請觀看影片後，再繼續閱讀下方課程內容。
+                                    <div style="
+                                        color: #666;
+                                        font-size: 14px;
+                                        margin-bottom: 0;
+                                    ">
+                                        請先觀看課程影片，再繼續閱讀下方課程內容。
+                                    </div>
                                 </div>
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                       )
+                                """,
+                                unsafe_allow_html=True
+                            )
 
                             if video_name:
-                           st.markdown(
-                               f"**🎞️ {video_name}**"
-                           )
 
-                       if video_description:
-                           st.caption(video_description)
+                                st.markdown(
+                                    f"**🎞️ {video_name}**"
+                                )
 
-                       st.link_button(
-                           "▶️  開始觀看影片",
-                           video_url,
-                           use_container_width=True
-                       )
+                            if video_description:
 
-                       st.caption(
-                           "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
-                       )
+                                st.caption(
+                                    video_description
+                                )
+
+                            st.link_button(
+                                "▶️ 開始觀看影片",
+                                video_url,
+                                use_container_width=True
+                            )
+
+                            st.caption(
+                                "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
+                            )
+
+                    # ====================================================
+                    # 課程內容
+                    # ====================================================
+
                     if course_content.empty:
 
                         st.info(
@@ -3460,6 +3654,7 @@ elif page == "🎓 新人訓練中心":
                                         note
                                     )
 
+
 # ============================================================
 # 公告＆常用工具
 # ============================================================
@@ -3493,8 +3688,10 @@ elif page == "📢 公告＆常用工具":
 
         else:
 
-            announcement_columns = get_announcement_columns(
-                ann
+            announcement_columns = (
+                get_announcement_columns(
+                    ann
+                )
             )
 
             for _, row in ann.iterrows():
@@ -3610,7 +3807,10 @@ elif page == "📢 公告＆常用工具":
                         )
 
                         if desc:
-                            st.write(desc)
+
+                            st.write(
+                                desc
+                            )
 
                         if url:
 
@@ -3899,7 +4099,9 @@ elif page == "🛠️ 資料維護":
 
             if show_all:
 
-                display_pending = pending.copy()
+                display_pending = (
+                    pending.copy()
+                )
 
                 st.caption(
                     f"目前顯示全部 {len(display_pending)} 筆問題"
@@ -4281,19 +4483,34 @@ elif page == "🛠️ 資料維護":
 # ============================================================
 
 if "assistant_searched" not in st.session_state:
-    st.session_state["assistant_searched"] = False
+
+    st.session_state[
+        "assistant_searched"
+    ] = False
 
 if "assistant_found" not in st.session_state:
-    st.session_state["assistant_found"] = False
+
+    st.session_state[
+        "assistant_found"
+    ] = False
 
 if "assistant_result" not in st.session_state:
-    st.session_state["assistant_result"] = pd.DataFrame()
+
+    st.session_state[
+        "assistant_result"
+    ] = pd.DataFrame()
 
 if "assistant_question_saved" not in st.session_state:
-    st.session_state["assistant_question_saved"] = ""
+
+    st.session_state[
+        "assistant_question_saved"
+    ] = ""
 
 if "assistant_submit_message" not in st.session_state:
-    st.session_state["assistant_submit_message"] = ""
+
+    st.session_state[
+        "assistant_submit_message"
+    ] = ""
 
 
 with st.popover("🐱"):
@@ -4345,8 +4562,10 @@ with st.popover("🐱"):
 
         else:
 
-            found, result = ask_customer_assistant(
-                question
+            found, result = (
+                ask_customer_assistant(
+                    question
+                )
             )
 
             st.session_state[
@@ -4391,9 +4610,11 @@ with st.popover("🐱"):
             False
         )
 
-        question_to_submit = st.session_state.get(
-            "assistant_question",
-            ""
+        question_to_submit = (
+            st.session_state.get(
+                "assistant_question",
+                ""
+            )
         )
 
         if found and not result.empty:
@@ -4443,13 +4664,17 @@ with st.popover("🐱"):
                 "**問題**"
             )
 
-            st.write(title)
+            st.write(
+                title
+            )
 
             st.markdown(
                 "**💬 建議回覆**"
             )
 
-            st.write(answer)
+            st.write(
+                answer
+            )
 
             if judgment:
 
@@ -4457,7 +4682,9 @@ with st.popover("🐱"):
                     "**🔎 判斷依據**"
                 )
 
-                st.write(judgment)
+                st.write(
+                    judgment
+                )
 
             if source:
 
@@ -4465,7 +4692,9 @@ with st.popover("🐱"):
                     "**📚 資料來源**"
                 )
 
-                st.write(source)
+                st.write(
+                    source
+                )
 
             st.caption(
                 f"相關度 {score:.1%}"
@@ -4541,14 +4770,17 @@ with st.popover("🐱"):
                 f"目前問題：{question_to_submit}"
             )
 
-            saved_question = st.session_state.get(
-                "assistant_question_saved",
-                ""
+            saved_question = (
+                st.session_state.get(
+                    "assistant_question_saved",
+                    ""
+                )
             )
 
             if (
                 saved_question
-                and saved_question == question_to_submit
+                and saved_question
+                == question_to_submit
             ):
 
                 st.success(
