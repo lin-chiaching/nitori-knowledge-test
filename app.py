@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
-st.write("Excel 工作表：", pd.ExcelFile(EXCEL_PATH).sheet_names)
+
 # ============================================================
 # 日系貓咪 UI
 # ============================================================
