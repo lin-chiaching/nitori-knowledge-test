@@ -3336,6 +3336,10 @@ elif page == "🎓 新人訓練中心":
         load_training_videos()
     )
 
+    employee_data = (
+    load_employee_data()
+    )
+    
     if training_overview.empty:
 
         st.warning(
