@@ -3352,7 +3352,7 @@ elif page == "🎓 新人訓練中心":
                             unsafe_allow_html=True
                        )
 
-                       if video_name:
+                            if video_name:
                            st.markdown(
                                f"**🎞️ {video_name}**"
                            )
