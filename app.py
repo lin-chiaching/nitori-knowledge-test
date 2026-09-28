@@ -557,13 +557,16 @@ TRAINING_CONTENT_COLUMNS = [
     "內容ID",
     "課程大項",
     "課程細項",
-    "教材",
-    "教學內容",
     "注意事項",
     "Level",
 ]
 
-
+TRAINING_VIDEO_COLUMNS = [
+    "課程ID",
+    "影片URL",
+    "影片名稱",
+    "影片說明",
+]
 @st.cache_data(ttl=60)
 def load_training_overview():
 
