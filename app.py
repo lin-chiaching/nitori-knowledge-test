@@ -3263,11 +3263,12 @@ elif page == "🎓 新人訓練中心":
     )
     if role == "👨‍🎓 新人":
 
-    # 這裡放新人頁面
+        st.write("這裡是新人頁面")
 
     elif role == "👩‍🏫 小老師":
 
-    # 這裡放小老師頁面
+        st.write("這裡是小老師頁面")
+
     training_overview = (
         load_training_overview()
     )
