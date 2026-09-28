@@ -3315,19 +3315,60 @@ elif page == "🎓 新人訓練中心":
 
                         if video_url:
 
-                            st.markdown("#### 🎬 課程影片")
+                            st.markdown(
+                                """
+                                <div style="
+                                    background: linear-gradient(135deg, #fff8f0, #ffffff);
+                                    border: 1px solid #eadfd3;
+                                    border-radius: 16px;
+                                    padding: 24px;
+                                    margin: 10px 0 24px 0;
+                                ">
+                                    <div style="
+                                    font-size: 24px;
+                                    font-weight: 700;
+                                    margin-bottom: 8px;
+                                    ">
+                                   🎬 課程影片
+                                </div>
 
-                            if video_name:
-                                st.write(f"**{video_name}**")
+                                <div style="
+                                    font-size: 18px;
+                                    font-weight: 600;
+                                    margin-bottom: 6px;
+                                ">
+                                   📺 課程教學影片
+                                </div>
 
-                            if video_description:
-                                st.caption(video_description)
+                                <div style="
+                                    color: #666;
+                                    font-size: 14px;
+                                    margin-bottom: 18px;
+                                ">
+                                    請觀看影片後，再繼續閱讀下方課程內容。
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                       )
 
-                            st.link_button(
-                                "▶ 在 SharePoint 觀看影片",
-                                video_url,
-                                use_container_width=True
-                            )
+                       if video_name:
+                           st.markdown(
+                               f"**🎞️ {video_name}**"
+                           )
+
+                       if video_description:
+                           st.caption(video_description)
+
+                       st.link_button(
+                           "▶️  開始觀看影片",
+                           video_url,
+                           use_container_width=True
+                       )
+
+                       st.caption(
+                           "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
+                       )
                     if course_content.empty:
 
                         st.info(
