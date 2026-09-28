@@ -3500,41 +3500,10 @@ elif page == "🎓 新人訓練中心":
 
                         if video_url:
 
-                            st.markdown(
-                                """
-                                <div style="
-                                    background: linear-gradient(135deg, #fff8f0, #ffffff);
-                                    border: 1px solid #eadfd3;
-                                    border-radius: 16px;
-                                    padding: 24px;
-                                    margin: 10px 0 16px 0;
-                                ">
-                                    <div style="
-                                        font-size: 24px;
-                                        font-weight: 700;
-                                        margin-bottom: 8px;
-                                    ">
-                                        🎬 課程影片
-                                    </div>
+                            st.markdown("### 🎬 課程影片")
+                            st.markdown("**📺 課程教學影片**")
+                            st.caption("請先觀看課程影片，再繼續閱讀下方課程內容。")
 
-                                    <div style="
-                                        font-size: 18px;
-                                        font-weight: 600;
-                                        margin-bottom: 6px;
-                                    ">
-                                        📺 課程教學影片
-                                    </div>
-
-                                    <div style="
-                                        color: #666;
-                                        font-size: 14px;
-                                    ">
-                                        請先觀看課程影片，再繼續閱讀下方課程內容。
-                                    </div>
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
 
                             if video_name:
                                 st.markdown(
