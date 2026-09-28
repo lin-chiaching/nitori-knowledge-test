@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
-
+st.write("目前使用的 Excel：", EXCEL_PATH.resolve())
 POWER_BI_URL = (
     "https://app.powerbi.com/reportEmbed?"
     "reportId=851d09f1-f169-4049-9090-640f09cdc385"
