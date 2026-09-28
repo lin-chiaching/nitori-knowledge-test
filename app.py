@@ -3305,7 +3305,8 @@ elif page == "🎓 新人訓練中心":
                     video_row = training_videos[
                            training_videos["課程ID"].astype(str).str.strip() == selected_course
                     ]
-
+                    st.write("影片資料筆數：", len(video_row))
+                    
                     if not video_row.empty:
 
                         video_url = clean_text(
