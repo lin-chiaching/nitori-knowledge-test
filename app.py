@@ -3323,11 +3323,18 @@ elif page == "🎓 新人訓練中心":
                             if video_description:
                                 st.caption(video_description)
 
-                            components.iframe(
-                                video_url,
-                                height=500,
-                                scrolling=False
-                            )
+                            components.html(
+                                f"""
+                                <iframe
+                                    src="{video_url}"
+                                    width="100%"
+                                    height="500"
+                                    frameborder="0"
+                                    allowfullscreen>
+                                </iframe>
+                                """,
+                                height=520
+                           )
                     if course_content.empty:
 
                         st.info(
