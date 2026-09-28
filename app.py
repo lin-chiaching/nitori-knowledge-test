@@ -3301,7 +3301,40 @@ elif page == "🎓 新人訓練中心":
                         .str.strip()
                         == selected_course
                     ].copy()
+                    
+                    video_row = training_videos[
+                           training_videos["課程ID"].astype(str).str.strip() == selected_course
+                    ]
 
+                    if not video_row.empty:
+
+                        video_url = clean_text(
+                            video_row.iloc[0].get("影片URL", "")
+                        )
+
+                        video_name = clean_text(
+                        video_row.iloc[0].get("影片名稱", "")
+                        )
+
+                        video_description = clean_text(
+                        video_row.iloc[0].get("影片說明", "")
+                        )
+
+                        if video_url:
+
+                            st.markdown("#### 🎬 課程影片")
+
+                            if video_name:
+                                st.write(f"**{video_name}**")
+
+                            if video_description:
+                                st.caption(video_description)
+
+                            components.iframe(
+                                video_url,
+                                height=500,
+                                scrolling=False
+                            )
                     if course_content.empty:
 
                         st.info(
