@@ -709,6 +709,51 @@ def load_training_videos():
         )
 
 
+@st.cache_data(ttl=60)
+def load_employee_data():
+
+    try:
+
+        sheet = find_sheet(["員工資料"])
+
+        if not sheet:
+            return pd.DataFrame(
+                columns=[
+                    "員工編號",
+                    "姓名",
+                    "職稱",
+                    "部門",
+                    "角色",
+                    "到職日"
+                ]
+            )
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet
+        )
+
+        if df.empty:
+            return pd.DataFrame(
+                columns=[
+                    "員工編號",
+                    "姓名",
+                    "職稱",
+                    "部門",
+                    "角色",
+                    "到職日"
+                ]
+            )
+
+        return df
+
+    except Exception as e:
+
+        st.warning(
+            f"無法讀取員工資料：{e}"
+        )
+
+        return pd.DataFrame()
 # ============================================================
 # 待審核問題
 # ============================================================
