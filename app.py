@@ -3452,17 +3452,18 @@ training_videos = (
 training_records = (
     load_training_records()
 ) 
-    if training_overview.empty:
 
-        st.warning(
-            "目前找不到「課程總表」資料，請確認 Excel 是否已建立該工作表。"
-        )
+if training_overview.empty:
 
-    elif role == "👨‍🎓 新人":
+    st.warning(
+        "目前找不到「課程總表」資料，請確認 Excel 是否已建立該工作表。"
+    )
 
-        st.markdown(
-            "### 🐾 選擇訓練日"
-        )
+elif role == "👨‍🎓 新人":
+
+    st.markdown(
+        "### 🐾 選擇訓練日"
+    )
 
         day_columns = st.columns(3)
 
