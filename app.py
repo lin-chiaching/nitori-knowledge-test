@@ -3384,44 +3384,62 @@ if not training_records.empty:
     )
 
 
-if role == "👩‍🏫 小老師":
+if role == "👨‍🎓 新人":
 
-        st.subheader("👩‍🏫 小老師管理")
+    st.subheader("👨‍🎓 我的訓練")
 
-        st.write("新人訓練管理")
+    st.write("歡迎加入宜得利！")
 
-        st.markdown("### 👥 新人名單")
+    st.markdown("### 📚 我的課程")
 
-        new_staff = employee_data[
-            employee_data["角色"]
-            .astype(str)
-            .str.strip()
-            == "新人"
-        ].copy()
+    if not training_records.empty:
 
-        if new_staff.empty:
+        st.markdown("#### 📊 我的學習紀錄")
 
-            st.info("目前尚未建立新人資料")
+        st.dataframe(
+            training_records,
+            use_container_width=True,
+            hide_index=True
+        )
 
-        else:
+elif role == "👩‍🏫 小老師":
 
-            st.dataframe(
-                new_staff[
-                    [
-                        "員工編號",
-                        "姓名",
-                        "職稱",
-                        "部門",
-                        "到職日"
-                    ]
-                ],
-                use_container_width=True,
-                hide_index=True
-           )
-        
-    training_overview = (
-        load_training_overview()
-    )
+    st.subheader("👩‍🏫 小老師管理")
+
+    st.write("新人訓練管理")
+
+    st.markdown("### 👥 新人名單")
+
+    new_staff = employee_data[
+        employee_data["角色"]
+        .astype(str)
+        .str.strip()
+        == "新人"
+    ].copy()
+
+    if new_staff.empty:
+
+        st.info("目前尚未建立新人資料")
+
+    else:
+
+        st.dataframe(
+            new_staff[
+                [
+                    "員工編號",
+                    "姓名",
+                    "職稱",
+                    "部門",
+                    "到職日"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
+
+training_overview = (
+    load_training_overview()
+)
 
     training_content = (
         load_training_content()
