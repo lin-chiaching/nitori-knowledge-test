@@ -832,9 +832,6 @@ def load_training_quiz():
             sheet_name="測驗題庫"
         )
 
-        st.write("🔍 測驗題庫原始資料筆數：", len(df))
-        st.write("🔍 測驗題庫欄位：", df.columns.tolist())
-
         df.columns = [
             str(column).strip()
             for column in df.columns
@@ -3910,20 +3907,6 @@ elif page == "🎓 新人訓練中心":
                         st.markdown(
                             "#### 📝 課程測驗"
                         )
-                        st.write("目前課程ID：", selected_course)
-
-                        st.write(
-                            "題庫資料筆數：",
-                            len(training_quiz)
-                        )
-
-                        st.write(
-                            "題庫課程ID：",
-                            training_quiz["課程ID"].astype(str).str.strip().unique().tolist()
-                        )  
-                        
-                        st.write("目前選擇的課程：", selected_course)
-                        st.write("題庫的課程ID：", training_quiz["課程ID"].tolist())
                         
                         quiz_questions = training_quiz[
                             training_quiz["課程ID"]
