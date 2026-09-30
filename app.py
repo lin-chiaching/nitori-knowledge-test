@@ -4191,6 +4191,42 @@ elif page == "🎓 新人訓練中心":
                             ] = correct_count
 
                             st.rerun()
+                        # =========================================
+                        # 顯示測驗結果
+                        # =========================================
+
+                        if st.session_state.get(
+                            "training_quiz_submitted",
+                            False
+                        ):
+
+                            score = st.session_state.get(
+                                "training_quiz_score",
+                                0
+                            )
+
+                            correct_count = st.session_state.get(
+                                "training_quiz_correct",
+                                0
+                            )
+
+                            total_questions = len(
+                                quiz_questions
+                            )
+
+                            st.divider()
+
+                            st.markdown(
+                                "### 🎉 測驗完成"
+                            )
+
+                            st.success(
+                                f"你的分數：{score} 分"
+                            )
+
+                            st.write(
+                                f"答對 {correct_count} / {total_questions} 題"
+                            )
     # ========================================================
     # 小老師
     # ========================================================
