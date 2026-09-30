@@ -3884,7 +3884,18 @@ elif page == "🎓 新人訓練中心":
                         st.markdown(
                             "#### 📝 課程測驗"
                         )
+                        st.write("目前課程ID：", selected_course)
 
+                        st.write(
+                            "題庫資料筆數：",
+                            len(training_quiz)
+                        )
+
+                        st.write(
+                            "題庫課程ID：",
+                            training_quiz["課程ID"].astype(str).str.strip().unique().tolist()
+                        )  
+                        
                         quiz_questions = training_quiz[
                             training_quiz["課程ID"]
                             .astype(str)
