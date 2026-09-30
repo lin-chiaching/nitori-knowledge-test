@@ -3417,6 +3417,8 @@ elif page == "🎓 新人訓練中心":
     training_videos = load_training_videos()
 
     training_records = load_training_records()
+    
+    training_quiz = load_training_quiz()
 
     training_records = load_training_records()
     # ========================================================
