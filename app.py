@@ -754,6 +754,61 @@ def load_employee_data():
         )
 
         return pd.DataFrame()
+@st.cache_data(ttl=60)
+def load_training_records():
+
+    try:
+
+        sheet = find_sheet(["新人學習紀錄"])
+
+        if not sheet:
+            return pd.DataFrame(
+                columns=[
+                    "員工編號",
+                    "姓名",
+                    "課程ID",
+                    "課程名稱",
+                    "DAY",
+                    "開始日期",
+                    "學習狀態",
+                    "測驗狀態",
+                    "實作",
+                    "完成日期",
+                    "教育者備註"
+                ]
+            )
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet
+        )
+
+        if df.empty:
+            return pd.DataFrame(
+                columns=[
+                    "員工編號",
+                    "姓名",
+                    "課程ID",
+                    "課程名稱",
+                    "DAY",
+                    "開始日期",
+                    "學習狀態",
+                    "測驗狀態",
+                    "實作",
+                    "完成日期",
+                    "教育者備註"
+                ]
+            )
+
+        return df
+
+    except Exception as e:
+
+        st.warning(
+            f"無法讀取新人學習紀錄：{e}"
+        )
+
+        return pd.DataFrame()
 # ============================================================
 # 待審核問題
 # ============================================================
