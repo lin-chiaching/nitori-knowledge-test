@@ -3441,17 +3441,17 @@ training_overview = (
     load_training_overview()
 )
 
-    training_content = (
-        load_training_content()
-    )
+training_content = (
+    load_training_content()
+)
 
-    training_videos = (
-        load_training_videos()
-    )
+training_videos = (
+    load_training_videos()
+)
 
-    training_records = (
-        load_training_records()
-    ) 
+training_records = (
+    load_training_records()
+) 
     if training_overview.empty:
 
         st.warning(
