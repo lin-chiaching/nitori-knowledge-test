@@ -3353,479 +3353,581 @@ elif page == "🎓 新人訓練中心":
     st.title(
         "🎓 新人訓練中心"
     )
-    role = st.radio(
-    "請選擇使用身分",
-    ["👨‍🎓 新人", "👩‍🏫 小老師"],
-    horizontal=True
-    )
+
     st.caption(
         "新人訓練 Level 1｜共 3 天"
     )
-    employee_data = (
-    load_employee_data()
-    ) 
-    
-    if role == "👨‍🎓 新人":
 
-        st.subheader("👨‍🎓 我的訓練")
+    # ========================================================
+    # 載入新人訓練資料
+    # ========================================================
 
-        st.write("歡迎加入宜得利！")
+    employee_data = load_employee_data()
 
-        st.markdown("### 📚 我的課程")
-        
-if not training_records.empty:
+    training_overview = load_training_overview()
 
-    st.markdown("#### 📊 我的學習紀錄")
+    training_content = load_training_content()
 
-    st.dataframe(
-        training_records,
-        use_container_width=True,
-        hide_index=True
+    training_videos = load_training_videos()
+
+    training_records = load_training_records()
+
+    # ========================================================
+    # 使用身分
+    # ========================================================
+
+    role = st.radio(
+        "請選擇使用身分",
+        [
+            "👨‍🎓 新人",
+            "👩‍🏫 小老師"
+        ],
+        horizontal=True,
+        key="training_role"
     )
 
+    # ========================================================
+    # 新人
+    # ========================================================
 
-if role == "👨‍🎓 新人":
+    if role == "👨‍🎓 新人":
 
-    st.subheader("👨‍🎓 我的訓練")
-
-    st.write("歡迎加入宜得利！")
-
-    st.markdown("### 📚 我的課程")
-
-    if not training_records.empty:
-
-        st.markdown("#### 📊 我的學習紀錄")
-
-        st.dataframe(
-            training_records,
-            use_container_width=True,
-            hide_index=True
+        st.subheader(
+            "👨‍🎓 我的訓練"
         )
 
-elif role == "👩‍🏫 小老師":
+        st.write(
+            "歡迎加入宜得利！"
+        )
 
-    st.subheader("👩‍🏫 小老師管理")
+        # ====================================================
+        # 我的學習紀錄
+        # ====================================================
 
-    st.write("新人訓練管理")
+        if not training_records.empty:
 
-    st.markdown("### 👥 新人名單")
+            st.markdown(
+                "### 📊 我的學習紀錄"
+            )
 
-    new_staff = employee_data[
-        employee_data["角色"]
-        .astype(str)
-        .str.strip()
-        == "新人"
-    ].copy()
+            st.dataframe(
+                training_records,
+                use_container_width=True,
+                hide_index=True
+            )
 
-    if new_staff.empty:
+        st.divider()
 
-        st.info("目前尚未建立新人資料")
+        # ====================================================
+        # 課程資料確認
+        # ====================================================
 
-    else:
+        if training_overview.empty:
 
-        st.dataframe(
-            new_staff[
-                [
+            st.warning(
+                "目前找不到「課程總表」資料，請確認 Excel 是否已建立該工作表。"
+            )
+
+        else:
+
+            st.markdown(
+                "### 📚 我的課程"
+            )
+
+            st.caption(
+                "請依照訓練日選擇課程。"
+            )
+
+            # =================================================
+            # 選擇 DAY
+            # =================================================
+
+            st.markdown(
+                "### 🐾 選擇訓練日"
+            )
+
+            day_columns = st.columns(3)
+
+            days = [
+                (
+                    "DAY1",
+                    "🌱",
+                    "基礎與接待"
+                ),
+                (
+                    "DAY2",
+                    "💻",
+                    "系統與網購"
+                ),
+                (
+                    "DAY3",
+                    "🛋️",
+                    "家具與商品"
+                )
+            ]
+
+            for i, (
+                day,
+                icon,
+                description
+            ) in enumerate(days):
+
+                day_data = training_overview[
+                    training_overview["DAY"]
+                    .astype(str)
+                    .str.strip()
+                    == day
+                ]
+
+                with day_columns[i]:
+
+                    with st.container(
+                        border=True
+                    ):
+
+                        st.markdown(
+                            f"## {icon} {day}"
+                        )
+
+                        st.write(
+                            description
+                        )
+
+                        st.caption(
+                            f"{len(day_data)} 個課程大項"
+                        )
+
+                        if st.button(
+                            f"進入 {day}",
+                            use_container_width=True,
+                            key=f"training_day_{day}"
+                        ):
+
+                            st.session_state[
+                                "training_day"
+                            ] = day
+
+                            st.session_state[
+                                "training_course"
+                            ] = ""
+
+                            st.rerun()
+
+            # =================================================
+            # 顯示選擇的 DAY
+            # =================================================
+
+            selected_day = st.session_state.get(
+                "training_day",
+                ""
+            )
+
+            if selected_day:
+
+                st.divider()
+
+                st.markdown(
+                    f"### 📚 {selected_day} 課程"
+                )
+
+                day_courses = training_overview[
+                    training_overview["DAY"]
+                    .astype(str)
+                    .str.strip()
+                    == selected_day
+                ].copy()
+
+                if day_courses.empty:
+
+                    st.info(
+                        f"{selected_day} 目前尚未建立課程。"
+                    )
+
+                else:
+
+                    for _, course in day_courses.iterrows():
+
+                        course_id = clean_text(
+                            course.get(
+                                "課程ID",
+                                ""
+                            )
+                        )
+
+                        course_name = clean_text(
+                            course.get(
+                                "課程大項",
+                                ""
+                            )
+                        )
+
+                        course_items = training_content[
+                            training_content["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            == course_id
+                        ]
+
+                        with st.container(
+                            border=True
+                        ):
+
+                            col1, col2 = st.columns(
+                                [5, 1]
+                            )
+
+                            with col1:
+
+                                st.subheader(
+                                    f"📘 {course_name}"
+                                )
+
+                                st.caption(
+                                    f"{len(course_items)} 個課程內容"
+                                )
+
+                            with col2:
+
+                                if st.button(
+                                    "查看課程",
+                                    key=f"course_{course_id}",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "training_course"
+                                    ] = course_id
+
+                                    st.rerun()
+
+                # =================================================
+                # 顯示選擇的課程
+                # =================================================
+
+                selected_course = st.session_state.get(
+                    "training_course",
+                    ""
+                )
+
+                if selected_course:
+
+                    course_row = training_overview[
+                        training_overview["課程ID"]
+                        .astype(str)
+                        .str.strip()
+                        == selected_course
+                    ]
+
+                    if not course_row.empty:
+
+                        course_name = clean_text(
+                            course_row.iloc[0].get(
+                                "課程大項",
+                                ""
+                            )
+                        )
+
+                        st.divider()
+
+                        st.markdown(
+                            f"### 📖 {course_name}"
+                        )
+
+                        course_content = (
+                            training_content[
+                                training_content["課程ID"]
+                                .astype(str)
+                                .str.strip()
+                                == selected_course
+                            ].copy()
+                        )
+
+                        # =========================================
+                        # 課程影片
+                        # =========================================
+
+                        st.markdown(
+                            "#### 🎬 課程教學影片"
+                        )
+
+                        video_row = (
+                            training_videos[
+                                training_videos["課程ID"]
+                                .astype(str)
+                                .str.strip()
+                                == selected_course
+                            ]
+                        )
+
+                        if video_row.empty:
+
+                            st.info(
+                                "目前尚未建立這個課程的教學影片。"
+                            )
+
+                        else:
+
+                            video_url = clean_text(
+                                video_row.iloc[0].get(
+                                    "影片URL",
+                                    ""
+                                )
+                            )
+
+                            video_name = clean_text(
+                                video_row.iloc[0].get(
+                                    "影片名稱",
+                                    ""
+                                )
+                            )
+
+                            video_description = clean_text(
+                                video_row.iloc[0].get(
+                                    "影片說明",
+                                    ""
+                                )
+                            )
+
+                            if video_name:
+
+                                st.markdown(
+                                    f"**🎞️ {video_name}**"
+                                )
+
+                            if video_description:
+
+                                st.caption(
+                                    video_description
+                                )
+
+                            if video_url:
+
+                                st.markdown(
+                                    """
+                                    <div style="
+                                        background-color:#f8f9fa;
+                                        border-left:5px solid #d4a373;
+                                        border-radius:10px;
+                                        padding:16px 20px;
+                                        margin:10px 0 18px 0;
+                                    ">
+                                        <div style="
+                                            font-size:20px;
+                                            font-weight:700;
+                                            color:#333333;
+                                        ">
+                                            🎬 課程教學影片
+                                        </div>
+
+                                        <div style="
+                                            font-size:14px;
+                                            color:#666666;
+                                            margin-top:6px;
+                                        ">
+                                            建議先觀看影片，再閱讀下方課程內容。
+                                        </div>
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
+
+                                st.link_button(
+                                    "▶️ 開始觀看影片",
+                                    video_url,
+                                    use_container_width=True
+                                )
+
+                                st.caption(
+                                    "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
+                                )
+
+                            else:
+
+                                st.warning(
+                                    "此課程尚未設定影片網址。"
+                                )
+
+                        # =========================================
+                        # 課程內容
+                        # =========================================
+
+                        st.divider()
+
+                        st.markdown(
+                            "#### 📚 課程內容"
+                        )
+
+                        if course_content.empty:
+
+                            st.info(
+                                "目前尚未建立這個課程的內容。"
+                            )
+
+                        else:
+
+                            for _, item in course_content.iterrows():
+
+                                content_id = clean_text(
+                                    item.get(
+                                        "內容ID",
+                                        ""
+                                    )
+                                )
+
+                                content_name = clean_text(
+                                    item.get(
+                                        "課程細項",
+                                        ""
+                                    )
+                                )
+
+                                with st.expander(
+                                    f"📌 {content_name}"
+                                ):
+
+                                    teaching = clean_text(
+                                        item.get(
+                                            "教學內容",
+                                            ""
+                                        )
+                                    )
+
+                                    material = clean_text(
+                                        item.get(
+                                            "教材",
+                                            ""
+                                        )
+                                    )
+
+                                    note = clean_text(
+                                        item.get(
+                                            "注意事項",
+                                            ""
+                                        )
+                                    )
+
+                                    st.markdown(
+                                        "#### 🎯 學習內容"
+                                    )
+
+                                    if teaching:
+
+                                        st.write(
+                                            teaching
+                                        )
+
+                                    else:
+
+                                        st.info(
+                                            "尚未建立教學內容"
+                                        )
+
+                                    st.markdown(
+                                        "#### 📚 教材"
+                                    )
+
+                                    if material:
+
+                                        st.write(
+                                            material
+                                        )
+
+                                    else:
+
+                                        st.info(
+                                            "尚未建立教材"
+                                        )
+
+                                    if note:
+
+                                        st.markdown(
+                                            "#### ⚠️ 注意事項"
+                                        )
+
+                                        st.write(
+                                            note
+                                        )
+
+    # ========================================================
+    # 小老師
+    # ========================================================
+
+    elif role == "👩‍🏫 小老師":
+
+        st.subheader(
+            "👩‍🏫 小老師管理"
+        )
+
+        st.write(
+            "新人訓練管理"
+        )
+
+        st.markdown(
+            "### 👥 新人名單"
+        )
+
+        if employee_data.empty:
+
+            st.info(
+                "目前尚未建立員工資料。"
+            )
+
+        else:
+
+            new_staff = employee_data[
+                employee_data["角色"]
+                .astype(str)
+                .str.strip()
+                == "新人"
+            ].copy()
+
+            if new_staff.empty:
+
+                st.info(
+                    "目前尚未建立新人資料"
+                )
+
+            else:
+
+                display_columns = [
                     "員工編號",
                     "姓名",
                     "職稱",
                     "部門",
                     "到職日"
                 ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
 
-training_overview = (
-    load_training_overview()
-)
-
-training_content = (
-    load_training_content()
-)
-
-training_videos = (
-    load_training_videos()
-)
-
-training_records = (
-    load_training_records()
-) 
-
-if training_overview.empty:
-
-    st.warning(
-        "目前找不到「課程總表」資料，請確認 Excel 是否已建立該工作表。"
-    )
-
-elif role == "👨‍🎓 新人":
-
-    st.markdown(
-        "### 🐾 選擇訓練日"
-    )
-
-    day_columns = st.columns(3)
-
-    days = [
-        ("DAY1", "🌱", "基礎與接待"),
-        ("DAY2", "💻", "系統與網購"),
-        ("DAY3", "🛋️", "家具與商品")
-    ]
-
-    for i, (
-        day,
-        icon,
-        description
-    ) in enumerate(days):
-
-            day_data = training_overview[
-                training_overview["DAY"]
-                .astype(str)
-                .str.strip()
-                == day
-            ]
-
-            with day_columns[i]:
-
-                with st.container(
-                    border=True
-                ):
-
-                    st.markdown(
-                        f"## {icon} {day}"
-                    )
-
-                    st.write(
-                        description
-                    )
-
-                    st.caption(
-                        f"{len(day_data)} 個課程大項"
-                    )
-
-                    if st.button(
-                        f"進入 {day}",
-                        use_container_width=True,
-                        key=f"training_day_{day}"
-                    ):
-
-                        st.session_state[
-                            "training_day"
-                        ] = day
-
-                        st.session_state[
-                            "training_course"
-                        ] = ""
-
-                        st.session_state[
-                            "training_content"
-                        ] = ""
-
-                        st.rerun()
-
-        selected_day = (
-            st.session_state.get(
-                "training_day",
-                ""
-            )
-        )
-
-        if selected_day:
-
-            st.divider()
-
-            st.markdown(
-                f"### 📚 {selected_day} 課程"
-            )
-
-            day_courses = training_overview[
-                training_overview["DAY"]
-                .astype(str)
-                .str.strip()
-                == selected_day
-            ].copy()
-
-            for _, course in day_courses.iterrows():
-
-                course_id = clean_text(
-                    course.get(
-                        "課程ID",
-                        ""
-                    )
-                )
-
-                course_name = clean_text(
-                    course.get(
-                        "課程大項",
-                        ""
-                    )
-                )
-
-                course_items = training_content[
-                    training_content["課程ID"]
-                    .astype(str)
-                    .str.strip()
-                    == course_id
+                display_columns = [
+                    column
+                    for column in display_columns
+                    if column in new_staff.columns
                 ]
 
-                with st.container(
-                    border=True
-                ):
-
-                    col1, col2 = st.columns(
-                        [5, 1]
-                    )
-
-                    with col1:
-
-                        st.subheader(
-                            f"📘 {course_name}"
-                        )
-
-                        st.caption(
-                            f"{len(course_items)} 個課程內容"
-                        )
-
-                    with col2:
-
-                        if st.button(
-                            "查看課程",
-                            key=f"course_{course_id}",
-                            use_container_width=True
-                        ):
-
-                            st.session_state[
-                                "training_course"
-                            ] = course_id
-
-                            st.session_state[
-                                "training_content"
-                            ] = ""
-
-                            st.rerun()
-
-            selected_course = (
-                st.session_state.get(
-                    "training_course",
-                    ""
+                st.dataframe(
+                    new_staff[display_columns],
+                    use_container_width=True,
+                    hide_index=True
                 )
+
+        st.divider()
+
+        st.markdown(
+            "### 📚 課程管理"
+        )
+
+        if training_overview.empty:
+
+            st.info(
+                "目前尚未建立課程總表。"
             )
 
-            if selected_course:
+        else:
 
-                course_row = training_overview[
-                    training_overview["課程ID"]
-                    .astype(str)
-                    .str.strip()
-                    == selected_course
-                ]
-
-                if not course_row.empty:
-
-                    course_name = clean_text(
-                        course_row.iloc[0].get(
-                            "課程大項",
-                            ""
-                        )
-                    )
-
-                    st.divider()
-
-                    st.markdown(
-                        f"### 📖 {course_name}"
-                    )
-
-                    course_content = (
-                        training_content[
-                            training_content["課程ID"]
-                            .astype(str)
-                            .str.strip()
-                            == selected_course
-                        ].copy()
-                    )
-
-                    # ====================================================
-                    # 課程影片
-                    # ====================================================
-
-                    video_row = (
-                        training_videos[
-                            training_videos["課程ID"]
-                            .astype(str)
-                            .str.strip()
-                            == selected_course
-                        ]
-                    )
-
-                    if not video_row.empty:
-
-                        video_url = clean_text(
-                            video_row.iloc[0].get(
-                                "影片URL",
-                                ""
-                            )
-                        )
-
-                        video_name = clean_text(
-                            video_row.iloc[0].get(
-                                "影片名稱",
-                                ""
-                            )
-                        )
-
-                        video_description = clean_text(
-                            video_row.iloc[0].get(
-                                "影片說明",
-                                ""
-                            )
-                        )
-
-                        if video_url:
-
-                            st.markdown(
-                                """
-                                <div style="
-                                    background-color: #f8f9fa;
-                                    border-left: 5px solid #d4a373;
-                                    border-radius: 10px;
-                                    padding: 16px 20px;
-                                    margin: 10px 0 18px 0;
-                                ">
-                                    <div style="
-                                        font-size: 20px;
-                                        font-weight: 700;
-                                        color: #333333;
-                                    ">
-                                        🎬 課程教學影片
-                                    </div>
-                                    <div style="
-                                        font-size: 14px;
-                                        color: #666666;
-                                        margin-top: 6px;
-                                    ">
-                                        建議先觀看影片，再閱讀下方課程內容。
-                                    </div>
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
-
-
-                            if video_name:
-                                st.markdown(
-                                    f"**🎞️ {video_name}**"
-                                )
-
-                            if video_description:
-                                st.caption(
-                                    video_description
-                                )
-
-                            st.link_button(
-                                "▶️ 開始觀看影片",
-                                video_url,
-                                use_container_width=True
-                            )
-
-                            st.caption(
-                                "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
-                            )
-
-                    # ====================================================
-                    # 課程內容
-                    # ====================================================
-
-                    if course_content.empty:
-
-                        st.info(
-                            "目前尚未建立這個課程的內容。"
-                        )
-
-                    else:
-
-                        for _, item in course_content.iterrows():
-
-                            content_id = clean_text(
-                                item.get(
-                                    "內容ID",
-                                    ""
-                                )
-                            )
-
-                            content_name = clean_text(
-                                item.get(
-                                    "課程細項",
-                                    ""
-                                )
-                            )
-
-                            with st.expander(
-                                f"📌 {content_name}"
-                            ):
-
-                                teaching = clean_text(
-                                    item.get(
-                                        "教學內容",
-                                        ""
-                                    )
-                                )
-
-                                material = clean_text(
-                                    item.get(
-                                        "教材",
-                                        ""
-                                    )
-                                )
-
-                                note = clean_text(
-                                    item.get(
-                                        "注意事項",
-                                        ""
-                                    )
-                                )
-
-                                st.markdown(
-                                    "#### 🎯 學習內容"
-                                )
-
-                                if teaching:
-
-                                    st.write(
-                                        teaching
-                                    )
-
-                                else:
-
-                                    st.info(
-                                        "尚未建立教學內容"
-                                    )
-
-                                st.markdown(
-                                    "#### 📚 教材"
-                                )
-
-                                if material:
-
-                                    st.write(
-                                        material
-                                    )
-
-                                else:
-
-                                    st.info(
-                                        "尚未建立教材"
-                                    )
-
-                                if note:
-
-                                    st.markdown(
-                                        "#### ⚠️ 注意事項"
-                                    )
-
-                                    st.write(
-                                        note
-                                    )
+            st.dataframe(
+                training_overview,
+                use_container_width=True,
+                hide_index=True
+            )
 
 
 # ============================================================
