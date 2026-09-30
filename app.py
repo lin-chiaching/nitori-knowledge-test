@@ -3465,19 +3465,19 @@ elif role == "👨‍🎓 新人":
         "### 🐾 選擇訓練日"
     )
 
-        day_columns = st.columns(3)
+    day_columns = st.columns(3)
 
-        days = [
-            ("DAY1", "🌱", "基礎與接待"),
-            ("DAY2", "💻", "系統與網購"),
-            ("DAY3", "🛋️", "家具與商品")
-        ]
+    days = [
+        ("DAY1", "🌱", "基礎與接待"),
+        ("DAY2", "💻", "系統與網購"),
+        ("DAY3", "🛋️", "家具與商品")
+    ]
 
-        for i, (
-            day,
-            icon,
-            description
-        ) in enumerate(days):
+    for i, (
+        day,
+        icon,
+        description
+    ) in enumerate(days):
 
             day_data = training_overview[
                 training_overview["DAY"]
