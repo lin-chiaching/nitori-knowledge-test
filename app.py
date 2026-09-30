@@ -832,6 +832,32 @@ def load_training_quiz():
             sheet_name="測驗題庫"
         )
 
+        st.write("🔍 測驗題庫原始資料筆數：", len(df))
+        st.write("🔍 測驗題庫欄位：", df.columns.tolist())
+
+        df.columns = [
+            str(column).strip()
+            for column in df.columns
+        ]
+
+        for column in TRAINING_QUIZ_COLUMNS:
+
+            if column not in df.columns:
+                df[column] = ""
+
+        return df[
+            TRAINING_QUIZ_COLUMNS
+        ].fillna("")
+
+    except Exception as e:
+
+        st.error(
+            f"讀取「測驗題庫」失敗：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=TRAINING_QUIZ_COLUMNS
+        )
         df.columns = [
             str(column).strip()
             for column in df.columns
