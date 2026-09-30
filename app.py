@@ -3951,95 +3951,96 @@ elif page == "🎓 新人訓練中心":
                                      ] = selected_course
 
                                      st.rerun()
-                            else:
 
-                                st.markdown(
-                                    "### 📝 開始測驗"
-                                )
+                             else:
 
-                                st.caption(
-                                    "請選擇每一題的答案，完成後按下「送出測驗」。"
-                                )
+                                 st.markdown(
+                                     "### 📝 開始測驗"
+                                 )
 
-                                with st.form(
-                                    f"quiz_form_{selected_course}"
-                                ):
+                                 st.caption(
+                                     "請選擇每一題的答案，完成後按下「送出測驗」。"
+                                 )
 
-                                    answers = {}
+                                 with st.form(
+                                     f"quiz_form_{selected_course}"
+                                 ):
 
-                                    for index, (_, question_row) in enumerate(
-                                        quiz_questions.iterrows(),
-                                        start=1
-                                    ):
+                                     answers = {}
 
-                                        question_id = clean_text(
-                                            question_row.get(
-                                                "題目ID",
-                                                ""
-                                            )
-                                        )
+                                     for index, (_, question_row) in enumerate(
+                                         quiz_questions.iterrows(),
+                                         start=1
+                                     ):
 
-                                        question = clean_text(
-                                            question_row.get(
-                                                "題目",
-                                                ""
-                                            )
-                                        )
+                                         question_id = clean_text(
+                                             question_row.get(
+                                                 "題目ID",
+                                                 ""
+                                             )
+                                         )
 
-                                        options = {
-                                            "A": clean_text(
-                                                question_row.get(
-                                                    "選項A",
-                                                    ""
-                                                )
-                                            ),
-                                            "B": clean_text(
-                                                question_row.get(
-                                                    "選項B",
-                                                    ""
-                                                )
-                                            ),
-                                            "C": clean_text(
-                                                question_row.get(
-                                                    "選項C",
-                                                    ""
-                                                )
-                                            ),
-                                            "D": clean_text(
-                                                question_row.get(
-                                                    "選項D",
-                                                    ""
-                                                )
-                                            )
-                                        }
+                                         question = clean_text(
+                                             question_row.get(
+                                                 "題目",
+                                                 ""
+                                             )
+                                         )
 
-                                        st.markdown(
-                                            f"### 第 {index} 題"
-                                        )
+                                         options = {
+                                             "A": clean_text(
+                                                 question_row.get(
+                                                     "選項A",
+                                                     ""
+                                                 )
+                                             ),
+                                             "B": clean_text(
+                                                 question_row.get(
+                                                     "選項B",
+                                                     ""
+                                                 )
+                                             ),
+                                             "C": clean_text(
+                                                 question_row.get(
+                                                     "選項C",
+                                                     ""
+                                                 )
+                                             ),
+                                             "D": clean_text(
+                                                 question_row.get(
+                                                     "選項D",
+                                                     ""
+                                                 )
+                                             )
+                                         }
 
-                                        answer = st.radio(
-                                            question,
-                                            options=[
-                                                "A",
-                                                "B",
-                                                "C",
-                                                "D"
-                                            ],
-                                            format_func=lambda x, opts=options:
-                                                f"{x}. {opts[x]}",
-                                            key=f"quiz_{selected_course}_{question_id}"
-                                        )
+                                         st.markdown(
+                                             f"### 第 {index} 題"
+                                         )
 
-                                        answers[question_id] = answer
+                                         answer = st.radio(
+                                             question,
+                                             options=[
+                                                 "A",
+                                                 "B",
+                                                 "C",
+                                                 "D"
+                                             ],
+                                             format_func=lambda x, opts=options:
+                                                 f"{x}. {opts[x]}",
+                                             key=f"quiz_{selected_course}_{question_id}"
+                                         )
 
-                                        if index < len(quiz_questions):
+                                         answers[question_id] = answer
 
-                                            st.divider()
+                                         if index < len(quiz_questions):
 
-                                    submitted = st.form_submit_button(
-                                        "📨 送出測驗",
-                                        use_container_width=True
-                                    )
+                                             st.divider()
+
+                                     submitted = st.form_submit_button(
+                                         "📨 送出測驗",
+                                         use_container_width=True
+                                     )
                               # =========================================
                               # 測驗進行中
                               # =========================================
