@@ -558,6 +558,19 @@ TRAINING_VIDEO_COLUMNS = [
     "影片說明",
 ]
 
+TRAINING_QUIZ_COLUMNS = [
+    "題目ID",
+    "課程ID",
+    "題型",
+    "題目",
+    "選項A",
+    "選項B",
+    "選項C",
+    "選項D",
+    "正確答案",
+    "解說",
+    "Level",
+]
 
 @st.cache_data(ttl=60)
 def load_training_overview():
@@ -809,6 +822,39 @@ def load_training_records():
         )
 
         return pd.DataFrame()
+@st.cache_data
+def load_training_quiz():
+
+    try:
+
+        df = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name="測驗題庫"
+        )
+
+        df.columns = [
+            str(column).strip()
+            for column in df.columns
+        ]
+
+        for column in TRAINING_QUIZ_COLUMNS:
+
+            if column not in df.columns:
+                df[column] = ""
+
+        return df[
+            TRAINING_QUIZ_COLUMNS
+        ].fillna("")
+
+    except Exception as e:
+
+        st.error(
+            f"讀取「測驗題庫」失敗：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=TRAINING_QUIZ_COLUMNS
+        )
 # ============================================================
 # 待審核問題
 # ============================================================
@@ -3372,6 +3418,7 @@ elif page == "🎓 新人訓練中心":
 
     training_records = load_training_records()
 
+    training_records = load_training_records()
     # ========================================================
     # 使用身分
     # ========================================================
