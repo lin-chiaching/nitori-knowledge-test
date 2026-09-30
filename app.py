@@ -3375,17 +3375,17 @@ elif page == "🎓 新人訓練中心":
         
     if not training_records.empty:
 
-    st.markdown("#### 📊 我的學習紀錄")
+        st.markdown("#### 📊 我的學習紀錄")
 
-    st.dataframe(
-        training_records,
-        use_container_width=True,
-        hide_index=True
-    )
+        st.dataframe(
+            training_records,
+            use_container_width=True,
+            hide_index=True
+        )
 
-else:
+    else:
 
-    st.info("目前尚未建立學習紀錄")
+        st.info("目前尚未建立學習紀錄")
 
     elif role == "👩‍🏫 小老師":
 
