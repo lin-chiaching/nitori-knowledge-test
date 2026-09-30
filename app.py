@@ -3951,28 +3951,7 @@ elif page == "🎓 新人訓練中心":
                                      ] = selected_course
 
                                      st.rerun()
-                             else:
-
-                                 st.markdown("### 📝 開始測驗")
-                                 
-                                 st.write("目前題目數：", len(quiz_questions))
-
-                                 st.caption(
-                                     "請選擇每一題的答案，完成後按下「送出測驗」。"
-                                 )
-
-                                 for index, (_, question_row) in enumerate(
-                                     quiz_questions.iterrows(),
-                                     start=1
-                                 ):
-
-                                     question = clean_text(
-                                         question_row.get(
-                                             "題目",
-                                             ""
-                                         )
-                                     )
-
+                             
                               # =========================================
                               # 測驗進行中
                               # =========================================
