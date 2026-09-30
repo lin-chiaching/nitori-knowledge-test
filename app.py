@@ -3896,6 +3896,9 @@ elif page == "🎓 新人訓練中心":
                             training_quiz["課程ID"].astype(str).str.strip().unique().tolist()
                         )  
                         
+                        st.write("目前選擇的課程：", selected_course)
+                        st.write("題庫的課程ID：", training_quiz["課程ID"].tolist())
+                        
                         quiz_questions = training_quiz[
                             training_quiz["課程ID"]
                             .astype(str)
