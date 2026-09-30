@@ -3898,27 +3898,191 @@ elif page == "🎓 新人訓練中心":
                                 "目前尚未建立這個課程的測驗題目。"
                             )
 
-                        else:
+                         else:
 
-                            st.caption(
-                                f"本課程共有 {len(quiz_questions)} 題"
-                            )
+                             st.caption(
+                                 f"本課程共有 {len(quiz_questions)} 題"
+                             )
 
-                            if st.button(
-                                "📝 開始測驗",
-                                use_container_width=True,
-                                key=f"start_quiz_{selected_course}"
-                            ):
+                             # =========================================
+                             # 開始測驗
+                             # =========================================
 
-                                st.session_state[
-                                    "training_quiz_start"
-                                ] = True
+                             if not st.session_state.get(
+                                 "training_quiz_start",
+                                 False
+                             ):
 
-                                st.session_state[
-                                    "training_quiz_course"
-                                ] = selected_course
+                                 if st.button(
+                                     "📝 開始測驗",
+                                     use_container_width=True,
+                                     key=f"start_quiz_{selected_course}"
+                                 ):
 
-                                st.rerun()
+                                     st.session_state[
+                                         "training_quiz_start"
+                                     ] = True
+
+                                     st.session_state[
+                                         "training_quiz_course"
+                                     ] = selected_course
+
+                                     st.rerun()
+
+                              # =========================================
+                              # 測驗進行中
+                              # =========================================
+
+                              else:
+
+                                  st.markdown(
+                                      "### 📝 開始測驗"
+                                  )
+
+                                  st.caption(
+                                      "請選擇每一題的答案，完成後按下「送出測驗」。"
+                                  )
+
+                                  with st.form(
+                                      f"quiz_form_{selected_course}"
+                                  ):
+
+                                      answers = {}
+
+                                      for index, (_, question_row) in enumerate(
+                                          quiz_questions.iterrows(),
+                                          start=1
+                                      ):
+
+                                          question_id = clean_text(
+                                              question_row.get(
+                                                  "題目ID",
+                                                  ""
+                                               )
+                                           )
+
+                                           question = clean_text(
+                                               question_row.get(
+                                                   "題目",
+                                                   ""
+                                                )
+                                            )
+
+                                            options = {
+                                                "A": clean_text(
+                                                    question_row.get(
+                                                        "選項A",
+                                                        ""
+                                                    )
+                                                ),
+                                                "B": clean_text(
+                                                    question_row.get(
+                                                        "選項B",
+                                                        ""
+                                                    )
+                                                ),
+                                                "C": clean_text(
+                                                    question_row.get(
+                                                        "選項C",
+                                                        ""
+                                                    )
+                                                 ),
+                                                 "D": clean_text(
+                                                     question_row.get(
+                                                         "選項D",
+                                                         ""
+                                                     )
+                                                 )
+                                             }
+
+                                             st.markdown(
+                                                 f"### 第 {index} 題"
+                                             )
+
+                                             st.write(
+                                                 question
+                                             )
+
+                                             answer = st.radio(
+                                                 "請選擇答案",
+                                                 options=[
+                                                     "A",
+                                                     "B",
+                                                     "C",
+                                                     "D"
+                                                 ],
+                                                 format_func=lambda x, opts=options:
+                                                     f"{x}. {opts[x]}",
+                                                 key=f"quiz_{selected_course}_{question_id}"
+                                             )
+
+                                             answers[question_id] = answer
+
+                                             if index < len(quiz_questions):
+
+                                                 st.divider()
+
+                                         submitted = st.form_submit_button(
+                                             "📨 送出測驗",
+                                             use_container_width=True
+                                         )
+
+                                    # =========================================
+                                    # 計算測驗結果
+                                    # =========================================
+
+                                    if submitted:
+
+                                        correct_count = 0
+
+                                        for _, question_row in quiz_questions.iterrows():
+
+                                            question_id = clean_text(
+                                                question_row.get(
+                                                    "題目ID",
+                                                    ""
+                                                )
+                                             )
+
+                                             correct_answer = clean_text(
+                                                 question_row.get(
+                                                     "正確答案",
+                                                     ""
+                                                 )
+                                             ).upper()
+
+                                             user_answer = answers.get(
+                                                 question_id,
+                                                 ""
+                                             ).upper()
+
+                                             if user_answer == correct_answer:
+
+                                                 correct_count += 1
+
+                                         total_questions = len(
+                                             quiz_questions
+                                         )
+
+                                         score = round(
+                                             correct_count
+                                             / total_questions
+                                             * 100
+                                         )
+
+                                         st.session_state[
+                                             "training_quiz_submitted"
+                                         ] = True
+
+                                         st.session_state[
+                                             "training_quiz_score"
+                                         ] = score
+
+                                         st.session_state[
+                                             "training_quiz_correct"
+                                         ] = correct_count
+
+                                         st.rerun()
     # ========================================================
     # 小老師
     # ========================================================
