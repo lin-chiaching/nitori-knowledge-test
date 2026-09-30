@@ -4027,58 +4027,58 @@ elif page == "🎓 新人訓練中心":
                                     # 計算測驗結果
                                     # =========================================
 
-                                    if submitted:
+                        if submitted:
 
-                                        correct_count = 0
+                            correct_count = 0
 
-                                        for _, question_row in quiz_questions.iterrows():
+                            for _, question_row in quiz_questions.iterrows():
 
-                                            question_id = clean_text(
-                                                question_row.get(
-                                                    "題目ID",
-                                                    ""
-                                                )
-                                             )
+                                question_id = clean_text(
+                                    question_row.get(
+                                        "題目ID",
+                                        ""
+                                    )
+                                )
 
-                                             correct_answer = clean_text(
-                                                 question_row.get(
-                                                     "正確答案",
-                                                     ""
-                                                 )
-                                             ).upper()
+                                correct_answer = clean_text(
+                                    question_row.get(
+                                        "正確答案",
+                                        ""
+                                    )
+                                ).upper()
 
-                                             user_answer = answers.get(
-                                                 question_id,
-                                                 ""
-                                             ).upper()
+                                user_answer = answers.get(
+                                    question_id,
+                                    ""
+                                ).upper()
 
-                                             if user_answer == correct_answer:
+                                if user_answer == correct_answer:
 
-                                                 correct_count += 1
+                                    correct_count += 1
 
-                                         total_questions = len(
-                                             quiz_questions
-                                         )
+                            total_questions = len(
+                                quiz_questions
+                            )
 
-                                         score = round(
-                                             correct_count
-                                             / total_questions
-                                             * 100
-                                         )
+                            score = round(
+                                correct_count
+                                / total_questions
+                                * 100
+                            )
 
-                                         st.session_state[
-                                             "training_quiz_submitted"
-                                         ] = True
+                            st.session_state[
+                                "training_quiz_submitted"
+                            ] = True
 
-                                         st.session_state[
-                                             "training_quiz_score"
-                                         ] = score
+                            st.session_state[
+                                "training_quiz_score"
+                            ] = score
 
-                                         st.session_state[
-                                             "training_quiz_correct"
-                                         ] = correct_count
+                            st.session_state[
+                                "training_quiz_correct"
+                            ] = correct_count
 
-                                         st.rerun()
+                            st.rerun()
     # ========================================================
     # 小老師
     # ========================================================
