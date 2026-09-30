@@ -3898,7 +3898,7 @@ elif page == "🎓 新人訓練中心":
                                 "目前尚未建立這個課程的測驗題目。"
                             )
 
-                         else:
+                        else:
 
                              st.caption(
                                  f"本課程共有 {len(quiz_questions)} 題"
