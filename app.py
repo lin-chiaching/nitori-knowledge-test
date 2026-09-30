@@ -3420,7 +3420,9 @@ elif page == "🎓 新人訓練中心":
         load_training_videos()
     )
 
-    
+    training_records = (
+        load_training_records()
+    ) 
     if training_overview.empty:
 
         st.warning(
