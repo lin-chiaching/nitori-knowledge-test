@@ -3954,6 +3954,8 @@ elif page == "🎓 新人訓練中心":
                              else:
 
                                  st.markdown("### 📝 開始測驗")
+                                 
+                                 st.write("目前題目數：", len(quiz_questions))
 
                                  st.caption(
                                      "請選擇每一題的答案，完成後按下「送出測驗」。"
