@@ -3932,11 +3932,6 @@ elif page == "🎓 新人訓練中心":
                             == selected_course
                         ].copy()
 
-                        st.write("抓到的測驗題數：", len(quiz_questions))
-                        st.dataframe(
-                            quiz_questions,
-                            use_container_width=True
-                        )
                         if quiz_questions.empty:
 
                             st.info(
