@@ -4230,7 +4230,7 @@ elif page == "🎓 新人訓練中心":
                             st.write(
                                 f"答對 {correct_count} / {total_questions} 題"
                             )
-                                                        st.markdown(
+                            st.markdown(
                                 "#### 📖 逐題檢討"
                             )
 
