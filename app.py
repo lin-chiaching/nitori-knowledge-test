@@ -3703,32 +3703,11 @@ elif page == "🎓 新人訓練中心":
                             if video_url:
 
                                 st.markdown(
-                                    """
-                                    <div style="
-                                        background-color:#f8f9fa;
-                                        border-left:5px solid #d4a373;
-                                        border-radius:10px;
-                                        padding:16px 20px;
-                                        margin:10px 0 18px 0;
-                                    ">
-                                        <div style="
-                                            font-size:20px;
-                                            font-weight:700;
-                                            color:#333333;
-                                        ">
-                                            🎬 課程教學影片
-                                        </div>
+                                    "### 🎬 課程教學影片"
+                                )
 
-                                        <div style="
-                                            font-size:14px;
-                                            color:#666666;
-                                            margin-top:6px;
-                                        ">
-                                            建議先觀看影片，再閱讀下方課程內容。
-                                        </div>
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True
+                                st.caption(
+                                    "建議先觀看影片，再閱讀下方課程內容。"
                                 )
 
                                 st.link_button(
