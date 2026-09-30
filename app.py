@@ -3953,7 +3953,67 @@ elif page == "🎓 新人訓練中心":
                                      st.rerun()
                              else:
 
-                                 st.write("✅ 測驗已開始")
+                                 st.markdown("### 📝 開始測驗")
+
+                                 st.caption(
+                                     "請選擇每一題的答案，完成後按下「送出測驗」。"
+                                 )
+
+                                 for index, (_, question_row) in enumerate(
+                                     quiz_questions.iterrows(),
+                                     start=1
+                                 ):
+
+                                     question = clean_text(
+                                         question_row.get(
+                                             "題目",
+                                             ""
+                                         )
+                                     )
+
+                                     options = {
+                                         "A": clean_text(
+                                             question_row.get(
+                                                 "選項A",
+                                                 ""
+                                             )
+                                          ),
+                                          "B": clean_text(
+                                              question_row.get(
+                                                  "選項B",
+                                                  ""
+                                              )
+                                          ),
+                                          "C": clean_text(
+                                              question_row.get(
+                                                  "選項C",
+                                                  ""
+                                              )
+                                          ),
+                                          "D": clean_text(
+                                              question_row.get(
+                                                  "選項D",
+                                                  ""
+                                              )
+                                          )
+                                      }
+
+                                      st.markdown(
+                                          f"### 第 {index} 題"
+                                      )   
+
+                                      st.radio(
+                                          question,
+                                          options=[
+                                              "A",
+                                              "B",
+                                              "C",
+                                              "D"
+                                          ],
+                                          format_func=lambda x, opts=options:
+                                              f"{x}. {opts[x]}",
+                                          key=f"quiz_{selected_course}_{index}"
+                                       )
                               # =========================================
                               # 測驗進行中
                               # =========================================
