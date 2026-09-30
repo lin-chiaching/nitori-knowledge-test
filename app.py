@@ -3919,7 +3919,50 @@ elif page == "🎓 新人訓練中心":
                                         st.write(
                                             note
                                         )
+                        # =========================================
+                        # 課程測驗
+                        # =========================================
 
+                        st.divider()
+
+                        st.markdown(
+                            "#### 📝 課程測驗"
+                        )
+
+                        quiz_questions = training_quiz[
+                            training_quiz["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            == selected_course
+                        ].copy()
+
+                        if quiz_questions.empty:
+
+                            st.info(
+                                "目前尚未建立這個課程的測驗題目。"
+                            )
+
+                        else:
+
+                            st.caption(
+                                f"本課程共有 {len(quiz_questions)} 題"
+                            )
+
+                            if st.button(
+                                "📝 開始測驗",
+                                use_container_width=True,
+                                key=f"start_quiz_{selected_course}"
+                            ):
+
+                                st.session_state[
+                                    "training_quiz_start"
+                                ] = True
+
+                                st.session_state[
+                                    "training_quiz_course"
+                                ] = selected_course
+
+                                st.rerun()
     # ========================================================
     # 小老師
     # ========================================================
