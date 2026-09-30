@@ -4032,7 +4032,10 @@ elif page == "🎓 新人訓練中心":
                                          )
 
                                          answers[question_id] = answer
-
+                                         
+                                         st.session_state[
+                                             f"quiz_answer_{question_id}"
+                                         ] = answer
                                          if index < len(quiz_questions):
 
                                              st.divider()
@@ -4227,6 +4230,73 @@ elif page == "🎓 新人訓練中心":
                             st.write(
                                 f"答對 {correct_count} / {total_questions} 題"
                             )
+                                                        st.markdown(
+                                "#### 📖 逐題檢討"
+                            )
+
+                            for index, (_, question_row) in enumerate(
+                                quiz_questions.iterrows(),
+                                start=1
+                            ):
+
+                                question_id = clean_text(
+                                    question_row.get(
+                                        "題目ID",
+                                        ""
+                                    )
+                                )
+
+                                question = clean_text(
+                                    question_row.get(
+                                        "題目",
+                                        ""
+                                    )
+                                )
+
+                                correct_answer = clean_text(
+                                    question_row.get(
+                                        "正確答案",
+                                        ""
+                                    )
+                                ).upper()
+
+                                user_answer = st.session_state.get(
+                                    f"quiz_answer_{question_id}",
+                                    ""
+                                ).upper()
+
+                                explanation = clean_text(
+                                    question_row.get(
+                                        "解說",
+                                        ""
+                                    )
+                                )
+
+                                st.markdown(
+                                    f"**第 {index} 題：{question}**"
+                                )
+
+                                if user_answer == correct_answer:
+
+                                    st.success(
+                                        f"✅ 答對｜你的答案：{user_answer}"
+                                    )
+
+                                else:
+
+                                    st.error(
+                                        f"❌ 答錯｜你的答案：{user_answer}｜正確答案：{correct_answer}"
+                                    )
+
+                                if explanation:
+
+                                    st.info(
+                                        f"💡 解說：{explanation}"
+                                    )
+
+                                if index < total_questions:
+
+                                    st.divider()
     # ========================================================
     # 小老師
     # ========================================================
