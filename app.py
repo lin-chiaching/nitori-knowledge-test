@@ -4150,42 +4150,6 @@ elif page == "🎓 新人訓練中心":
                             "請選擇每一題的答案，完成後按下「送出測驗」。"
                         )
 
-
-                                     score = 0
-
-                                     total_questions = len(
-                                         quiz_questions
-                                     )
-
-                                     for _, question_row in quiz_questions.iterrows():
-
-                                         question_id = clean_text(
-                                             question_row.get(
-                                                 "題目ID",
-                                                 ""
-                                             )
-                                         )
-
-                                         correct_answer = clean_text(
-                                             question_row.get(
-                                                 "正確答案",
-                                                 ""
-                                             )
-                                         )
-
-                                         user_answer = answers.get(
-                                             question_id,
-                                             ""
-                                         )
-
-                                         if user_answer == correct_answer:
-
-                                             score += 1
-
-                                     score_percent = round(
-                                         score / total_questions * 100
-                                     ) if total_questions > 0 else 0
-
                                      st.success(
                                          "🎉 測驗完成！"
                                      )
