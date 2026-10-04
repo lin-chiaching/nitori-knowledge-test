@@ -4297,6 +4297,46 @@ elif page == "🎓 新人訓練中心":
                                 if index < total_questions:
 
                                     st.divider()
+
+                                if st.button(
+                                "🔄 再測一次",
+                                use_container_width=True,
+                                key=f"retry_quiz_{selected_course}"
+                            ):
+
+                                st.session_state[
+                                    "training_quiz_start"
+                                ] = False
+
+                                st.session_state[
+                                    "training_quiz_submitted"
+                                ] = False
+
+                                st.session_state.pop(
+                                    "training_quiz_score",
+                                    None
+                                )
+
+                                st.session_state.pop(
+                                    "training_quiz_correct",
+                                    None
+                                )
+
+                                for _, question_row in quiz_questions.iterrows():
+
+                                    question_id = clean_text(
+                                        question_row.get(
+                                            "題目ID",
+                                            ""
+                                        )
+                                    )
+
+                                    st.session_state.pop(
+                                        f"quiz_answer_{question_id}",
+                                        None
+                                    )
+
+                                st.rerun()
     # ========================================================
     # 小老師
     # ========================================================
