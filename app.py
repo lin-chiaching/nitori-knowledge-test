@@ -4154,7 +4154,10 @@ elif page == "🎓 新人訓練中心":
                                              )
                                          ).upper()
 
-                                         user_answer = answers.get(
+                                         user_answer = st.session_state.get(
+                                             "training_quiz_answers",
+                                             {}
+                                         ).get(
                                              question_id,
                                              ""
                                          ).upper()
