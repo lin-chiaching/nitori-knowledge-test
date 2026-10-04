@@ -3962,7 +3962,8 @@ elif page == "🎓 新人訓練中心":
                                 training_videos["課程ID"]
                                 .astype(str)
                                 .str.strip()
-                                == selected_course
+                                ==
+                                selected_course
                             ]
                         )
 
@@ -4009,12 +4010,8 @@ elif page == "🎓 新人訓練中心":
 
                             if video_url:
 
-                                st.markdown(
-                                    "### 🎬 課程教學影片"
-                                )
-
                                 st.caption(
-                                    "建議先觀看影片，再閱讀下方課程內容。"
+                                    "請先觀看完整教學影片，觀看完成後再勾選下方確認。"
                                 )
 
                                 st.link_button(
@@ -4026,6 +4023,25 @@ elif page == "🎓 新人訓練中心":
                                 st.caption(
                                     "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
                                 )
+
+                                st.divider()
+
+                                video_completed = st.checkbox(
+                                    "☑️ 我已完成觀看本課程影片",
+                                    key=f"video_completed_{selected_course}"
+                                )
+
+                                if video_completed:
+
+                                    st.success(
+                                        "🎉 影片觀看完成，已解鎖測驗！"
+                                    )
+
+                                else:
+
+                                    st.info(
+                                        "🔒 完成影片觀看後，請勾選上方確認，即可解鎖測驗。"
+                                    )
 
                             else:
 
