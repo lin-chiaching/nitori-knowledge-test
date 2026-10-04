@@ -4132,9 +4132,6 @@ elif page == "🎓 新人訓練中心":
                                          "training_quiz_answers"
                                      ] = answers.copy()
 
-                                     st.write("DEBUG answers：", answers)
-                                     st.write("DEBUG 正確答案：", quiz_questions["正確答案"].tolist())
-
                                      correct_count = 0
 
                                      total_questions = len(
