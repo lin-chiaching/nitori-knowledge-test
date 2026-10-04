@@ -822,6 +822,85 @@ def load_training_records():
         )
 
         return pd.DataFrame()
+def save_training_record(
+    employee_id,
+    employee_name,
+    course_id,
+    course_name,
+    day,
+    start_date,
+    learning_status,
+    quiz_status,
+    completed_date
+):
+
+    try:
+
+        sheet = find_sheet(
+            ["新人學習紀錄"]
+        )
+
+        if not sheet:
+
+            st.error(
+                "找不到「新人學習紀錄」工作表。"
+            )
+
+            return False
+
+        records = pd.read_excel(
+            EXCEL_PATH,
+            sheet_name=sheet
+        )
+
+        new_record = {
+            "員工編號": employee_id,
+            "姓名": employee_name,
+            "課程ID": course_id,
+            "課程名稱": course_name,
+            "DAY": day,
+            "開始日期": start_date,
+            "學習狀態": learning_status,
+            "測驗狀態": quiz_status,
+            "實作": "",
+            "完成日期": completed_date,
+            "教育者備註": ""
+        }
+
+        new_record_df = pd.DataFrame(
+            [new_record]
+        )
+
+        records = pd.concat(
+            [
+                records,
+                new_record_df
+            ],
+            ignore_index=True
+        )
+
+        with pd.ExcelWriter(
+            EXCEL_PATH,
+            engine="openpyxl",
+            mode="a",
+            if_sheet_exists="replace"
+        ) as writer:
+
+            records.to_excel(
+                writer,
+                sheet_name=sheet,
+                index=False
+            )
+
+        return True
+
+    except Exception as e:
+
+        st.error(
+            f"儲存新人學習紀錄失敗：{e}"
+        )
+
+        return False
 @st.cache_data
 def load_training_quiz():
 
