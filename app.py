@@ -4425,6 +4425,8 @@ elif page == "🎓 新人訓練中心":
 
                                      if save_result:
 
+                                         load_training_records.clear()
+                                         
                                          st.info(
                                              "📋 測驗結果已記錄至新人學習紀錄。"
                                          )
