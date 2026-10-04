@@ -4298,7 +4298,9 @@ elif page == "🎓 新人訓練中心":
 
                                     st.divider()
 
-                                if st.button(
+                            st.divider()
+
+                            if st.button(
                                 "🔄 再測一次",
                                 use_container_width=True,
                                 key=f"retry_quiz_{selected_course}"
