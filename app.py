@@ -3685,7 +3685,8 @@ elif page == "🎓 新人訓練中心":
                     training_overview["DAY"]
                     .astype(str)
                     .str.strip()
-                    == selected_day
+                    ==
+                    selected_day
                 ].copy()
 
                 if day_courses.empty:
@@ -3695,6 +3696,15 @@ elif page == "🎓 新人訓練中心":
                     )
 
                 else:
+
+                    # =================================================
+                    # 取得目前登入新人
+                    # =================================================
+
+                    selected_employee_id = st.session_state.get(
+                        "training_employee_id",
+                        ""
+                    )
 
                     for _, course in day_courses.iterrows():
 
@@ -3716,8 +3726,71 @@ elif page == "🎓 新人訓練中心":
                             training_content["課程ID"]
                             .astype(str)
                             .str.strip()
-                            == course_id
+                            ==
+                            course_id
                         ]
+
+                        # =================================================
+                        # 查詢這位新人目前課程的學習紀錄
+                        # =================================================
+
+                        course_record = pd.DataFrame()
+
+                        if (
+                            selected_employee_id
+                            and not training_records.empty
+                        ):
+
+                            course_record = training_records[
+                                (
+                                    training_records["員工編號"]
+                                    .astype(str)
+                                    .str.strip()
+                                    ==
+                                    str(
+                                        selected_employee_id
+                                    ).strip()
+                                )
+                                &
+                                (
+                                    training_records["課程ID"]
+                                    .astype(str)
+                                    .str.strip()
+                                    ==
+                                    course_id
+                                )
+                            ].copy()
+
+                        quiz_status = ""
+
+                        if not course_record.empty:
+
+                            quiz_status = clean_text(
+                                course_record.iloc[0].get(
+                                    "測驗狀態",
+                                    ""
+                                )
+                            )
+
+                        # =================================================
+                        # 判斷課程狀態
+                        # =================================================
+
+                        if quiz_status == "通過":
+
+                            course_status = "✅ 已完成"
+
+                        elif quiz_status == "未通過":
+
+                            course_status = "⚠️ 測驗未通過"
+
+                        else:
+
+                            course_status = "📝 尚未完成"
+
+                        # =================================================
+                        # 顯示課程
+                        # =================================================
 
                         with st.container(
                             border=True
@@ -3737,6 +3810,10 @@ elif page == "🎓 新人訓練中心":
                                     f"{len(course_items)} 個課程內容"
                                 )
 
+                                st.caption(
+                                    course_status
+                                )
+
                             with col2:
 
                                 if st.button(
@@ -3750,7 +3827,6 @@ elif page == "🎓 新人訓練中心":
                                     ] = course_id
 
                                     st.rerun()
-
                 # =================================================
                 # 顯示選擇的課程
                 # =================================================
