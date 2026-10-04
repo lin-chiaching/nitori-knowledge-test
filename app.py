@@ -4131,6 +4131,11 @@ elif page == "🎓 新人訓練中心":
                                      st.session_state[
                                          "training_quiz_answers"
                                      ] = answers.copy()
+                                     
+                                     st.write("DEBUG answers：", answers)
+                                     st.write("DEBUG 正確答案：", quiz_questions["正確答案"].tolist())
+                                     st.write("DEBUG 欄位：", quiz_questions.columns.tolist())
+                                     st.write("DEBUG 第一題：", quiz_questions.iloc[0].to_dict())
 
                                      correct_count = 0
 
