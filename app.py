@@ -4204,41 +4204,6 @@ elif page == "🎓 新人訓練中心":
                                              )
                                          )
 
-                                     if score_percent >= 80:
-
-                                         quiz_status = "通過"
-
-                                     else:
-
-                                         quiz_status = "未通過"
-
-                                     saved = save_training_record(
-                                         employee_id=employee_id,
-                                         employee_name=employee_name,
-                                         course_id=selected_course,
-                                         course_name=course_name,
-                                         day=selected_day,
-                                         start_date="",
-                                         learning_status="已完成",
-                                         quiz_status=quiz_status,
-                                         completed_date=datetime.now().strftime(
-                                             "%Y-%m-%d"
-                                         )
-                                     )
-
-                                     if saved:
-
-                                         st.success(
-                                             "✅ 測驗結果已成功儲存！"
-                                         )
-
-                                     else:
-
-                                         st.error(
-                                             "⚠️ 測驗結果儲存失敗，請確認新人學習紀錄。"
-                                         )
-
-
                         # =========================================
                         # 顯示測驗結果
                         # =========================================
