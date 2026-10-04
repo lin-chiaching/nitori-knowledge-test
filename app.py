@@ -4182,132 +4182,450 @@ elif page == "🎓 新人訓練中心":
                              # 開始測驗
                              # =========================================
 
-                             if not st.session_state.get(
-                                 "training_quiz_start",
+                             video_completed = st.session_state.get(
+                                 f"video_completed_{selected_course}",
+                                 False
+                             )
+
+                             if not video_completed:
+
+                                 st.markdown(
+                                     "### 🔒 測驗尚未解鎖"
+                                 )
+
+                                 st.info(
+                                     "請先完成課程影片觀看，並勾選「我已完成觀看本課程影片」後，即可開始測驗。"
+                                 )
+
+                             else:
+
+                                 st.success(
+                                     "🔓 測驗已解鎖，可以開始測驗！"
+                                 )
+
+                                 if not st.session_state.get(
+                                     "training_quiz_start",
+                                     False
+                                 ):
+
+                                     if st.button(
+                                         "📝 開始測驗",
+                                         use_container_width=True,
+                                         key=f"start_quiz_{selected_course}"
+                                     ):
+
+                                         st.session_state[
+                                             "training_quiz_start"
+                                         ] = True
+
+                                         st.session_state[
+                                             "training_quiz_course"
+                                         ] = selected_course
+
+                                         st.session_state[
+                                             "training_quiz_submitted"
+                                         ] = False
+
+                                         st.rerun()
+
+                                 else:
+
+                                     st.markdown(
+                                         "### 📝 開始測驗"
+                                     )
+
+                                     st.caption(
+                                         "請選擇每一題的答案，完成後按下「送出測驗」。"
+                                     )
+
+                                     answers = {}
+
+                                     with st.form(
+                                         f"quiz_form_{selected_course}"
+                                     ):
+
+                                         for index, (_, question_row) in enumerate(
+                                             quiz_questions.iterrows(),
+                                             start=1
+                                         ):
+
+                                             question_id = clean_text(
+                                                 question_row.get(
+                                                     "題目ID",
+                                                     ""
+                                                 )
+                                             )
+
+                                             question = clean_text(
+                                                 question_row.get(
+                                                     "題目",
+                                                     ""
+                                                 )
+                                             )
+
+                                             options = {
+                                                 "A": clean_text(
+                                                     question_row.get(
+                                                         "選項A",
+                                                         ""
+                                                     )
+                                                 ),
+                                                 "B": clean_text(
+                                                     question_row.get(
+                                                         "選項B",
+                                                         ""
+                                                     )
+                                                 ),
+                                                 "C": clean_text(
+                                                     question_row.get(
+                                                         "選項C",
+                                                         ""
+                                                     )
+                                                 ),
+                                                 "D": clean_text(
+                                                     question_row.get(
+                                                         "選項D",
+                                                         ""
+                                                     )
+                                                 )
+                                             }
+
+                                             st.markdown(
+                                                 f"### 第 {index} 題"
+                                             )
+
+                                             answer = st.radio(
+                                                 question,
+                                                 options=[
+                                                     "A",
+                                                     "B",
+                                                     "C",
+                                                     "D"
+                                                 ],
+                                                 format_func=lambda x, opts=options:
+                                                     f"{x}. {opts[x]}",
+                                                 key=f"quiz_{selected_course}_{question_id}"
+                                             )
+
+                                             answers[question_id] = answer
+
+                                             st.session_state[
+                                                 f"quiz_answer_{question_id}"
+                                             ] = answer
+
+                                             if index < len(quiz_questions):
+
+                                                 st.divider()
+
+                                         submitted = st.form_submit_button(
+                                             "📨 送出測驗",
+                                             use_container_width=True
+                                         )
+
+                                     if submitted:
+
+                                         st.session_state[
+                                             "training_quiz_answers"
+                                         ] = answers.copy()
+
+                                         correct_count = 0
+
+                                         total_questions = len(
+                                             quiz_questions
+                                         )
+
+                                         for _, question_row in quiz_questions.iterrows():
+
+                                             question_id = clean_text(
+                                                 question_row.get(
+                                                     "題目ID",
+                                                     ""
+                                                 )
+                                             )
+
+                                             correct_answer = clean_text(
+                                                 question_row.get(
+                                                     "正確答案",
+                                                     ""
+                                                 )
+                                             ).upper()
+
+                                             user_answer = answers.get(
+                                                 question_id,
+                                                 ""
+                                             ).upper()
+
+                                             if user_answer == correct_answer:
+
+                                                 correct_count += 1
+
+                                         score = (
+                                             round(
+                                                 correct_count
+                                                 / total_questions
+                                                 * 100
+                                             )
+                                             if total_questions > 0
+                                             else 0
+                                         )
+
+                                         # =========================================
+                                         # 儲存測驗結果到 Session
+                                         # =========================================
+
+                                         st.session_state[
+                                             "training_quiz_submitted"
+                                         ] = True
+
+                                         st.session_state[
+                                             "training_quiz_score"
+                                         ] = score
+
+                                         st.session_state[
+                                             "training_quiz_correct"
+                                         ] = correct_count
+
+                                         # =========================================
+                                         # 測驗結果
+                                         # =========================================
+
+                                         quiz_status = (
+                                             "通過"
+                                             if score >= 80
+                                             else "未通過"
+                                         )
+
+                                         learning_status = (
+                                             "完成"
+                                             if score >= 80
+                                             else "學習中"
+                                         )
+
+                                         completed_date = (
+                                             pd.Timestamp.today().strftime(
+                                                 "%Y/%m/%d"
+                                             )
+                                             if score >= 80
+                                             else ""
+                                         )
+
+                                         # =========================================
+                                         # 取得課程名稱
+                                         # =========================================
+
+                                         course_name = selected_course
+
+                                         course_row = training_overview[
+                                             training_overview["課程ID"]
+                                             .astype(str)
+                                             .str.strip()
+                                             ==
+                                             str(selected_course).strip()
+                                         ]
+
+                                         if not course_row.empty:
+
+                                             course_name = clean_text(
+                                                 course_row.iloc[0].get(
+                                                     "課程大項",
+                                                     selected_course
+                                                 )
+                                             )
+
+                                         # =========================================
+                                         # 儲存新人學習紀錄
+                                         # =========================================
+
+                                         save_result = save_training_record(
+                                             employee_id=st.session_state.get(
+                                                 "training_employee_id",
+                                                 ""
+                                             ),
+                                             employee_name=st.session_state.get(
+                                                 "training_employee_name",
+                                                 ""
+                                             ),
+                                             course_id=selected_course,
+                                             course_name=course_name,
+                                             day=selected_day,
+                                             start_date=pd.Timestamp.today().strftime(
+                                                 "%Y/%m/%d"
+                                             ),
+                                             learning_status=learning_status,
+                                             quiz_status=quiz_status,
+                                             completed_date=completed_date
+                                         )
+
+                                         # =========================================
+                                         # 顯示測驗結果
+                                         # =========================================
+
+                                         if score >= 80:
+
+                                             st.success(
+                                                 f"🎉 測驗完成！分數：{score} 分，恭喜通過！"
+                                             )
+
+                                         else:
+
+                                             st.warning(
+                                                 f"測驗完成，分數：{score} 分，尚未達到 80 分及格標準。"
+                                             )
+
+                                         st.write(
+                                             f"答對 {correct_count} / {total_questions} 題"
+                                         )
+
+                                         if save_result:
+
+                                             load_training_records.clear()
+
+                                             st.info(
+                                                 "📋 測驗結果已記錄至新人學習紀錄。"
+                                             )
+
+                             # =========================================
+                             # 顯示測驗結果與逐題檢討
+                             # =========================================
+
+                             if st.session_state.get(
+                                 "training_quiz_submitted",
                                  False
                              ):
 
+                                 score = st.session_state.get(
+                                     "training_quiz_score",
+                                     0
+                                 )
+
+                                 correct_count = st.session_state.get(
+                                     "training_quiz_correct",
+                                     0
+                                 )
+
+                                 total_questions = len(
+                                     quiz_questions
+                                 )
+
+                                 st.divider()
+
+                                 st.markdown(
+                                     "### 🎉 測驗完成"
+                                 )
+
+                                 if score >= 80:
+
+                                     st.success(
+                                         f"你的分數：{score} 分｜恭喜通過！"
+                                     )
+
+                                 else:
+
+                                     st.warning(
+                                         f"你的分數：{score} 分｜尚未達到 80 分及格標準。"
+                                     )
+
+                                 st.write(
+                                     f"答對 {correct_count} / {total_questions} 題"
+                                 )
+
+                                 st.markdown(
+                                     "#### 📖 逐題檢討"
+                                 )
+
+                                 for index, (_, question_row) in enumerate(
+                                     quiz_questions.iterrows(),
+                                     start=1
+                                 ):
+
+                                     question_id = clean_text(
+                                         question_row.get(
+                                             "題目ID",
+                                             ""
+                                         )
+                                     )
+
+                                     question = clean_text(
+                                         question_row.get(
+                                             "題目",
+                                             ""
+                                         )
+                                     )
+
+                                     correct_answer = clean_text(
+                                         question_row.get(
+                                             "正確答案",
+                                             ""
+                                         )
+                                     ).upper()
+
+                                     user_answer = st.session_state.get(
+                                         f"quiz_answer_{question_id}",
+                                         ""
+                                     ).upper()
+
+                                     explanation = clean_text(
+                                         question_row.get(
+                                             "解說",
+                                             ""
+                                         )
+                                     )
+
+                                     st.markdown(
+                                         f"**第 {index} 題：{question}**"
+                                     )
+
+                                     if user_answer == correct_answer:
+
+                                         st.success(
+                                             f"✅ 答對｜你的答案：{user_answer}"
+                                         )
+
+                                     else:
+
+                                         st.error(
+                                             f"❌ 答錯｜你的答案：{user_answer}｜正確答案：{correct_answer}"
+                                         )
+
+                                     if explanation:
+
+                                         st.info(
+                                             f"💡 解說：{explanation}"
+                                         )
+
+                                     if index < total_questions:
+
+                                         st.divider()
+
+                                 st.divider()
+
                                  if st.button(
-                                     "📝 開始測驗",
+                                     "🔄 再測一次",
                                      use_container_width=True,
-                                     key=f"start_quiz_{selected_course}"
+                                     key=f"retry_quiz_{selected_course}"
                                  ):
 
                                      st.session_state[
                                          "training_quiz_start"
-                                     ] = True
+                                     ] = False
 
                                      st.session_state[
-                                         "training_quiz_course"
-                                     ] = selected_course
+                                         "training_quiz_submitted"
+                                     ] = False
 
-                                     st.rerun()
-
-                             else:
-
-                                 st.markdown(
-                                     "### 📝 開始測驗"
-                                 )
-
-                                 st.caption(
-                                     "請選擇每一題的答案，完成後按下「送出測驗」。"
-                                 )
-
-                                 answers = {}
-
-                                 with st.form(
-                                     f"quiz_form_{selected_course}"
-                                 ):
-
-                                     for index, (_, question_row) in enumerate(
-                                         quiz_questions.iterrows(),
-                                         start=1
-                                     ):
-
-                                         question_id = clean_text(
-                                             question_row.get(
-                                                 "題目ID",
-                                                 ""
-                                             )
-                                         )
-
-                                         question = clean_text(
-                                             question_row.get(
-                                                 "題目",
-                                                 ""
-                                             )
-                                         )
-
-                                         options = {
-                                             "A": clean_text(
-                                                 question_row.get(
-                                                     "選項A",
-                                                     ""
-                                                 )
-                                             ),
-                                             "B": clean_text(
-                                                 question_row.get(
-                                                     "選項B",
-                                                     ""
-                                                 )
-                                             ),
-                                             "C": clean_text(
-                                                 question_row.get(
-                                                     "選項C",
-                                                     ""
-                                                 )
-                                             ),
-                                             "D": clean_text(
-                                                 question_row.get(
-                                                     "選項D",
-                                                     ""
-                                                 )
-                                             )
-                                         }
-
-                                         st.markdown(
-                                             f"### 第 {index} 題"
-                                         )
-
-                                         answer = st.radio(
-                                             question,
-                                             options=[
-                                                 "A",
-                                                 "B",
-                                                 "C",
-                                                 "D"
-                                             ],
-                                             format_func=lambda x, opts=options:
-                                                 f"{x}. {opts[x]}",
-                                             key=f"quiz_{selected_course}_{question_id}"
-                                         )
-
-                                         answers[question_id] = answer
-
-                                         st.session_state[
-                                             f"quiz_answer_{question_id}"
-                                         ] = answer
-
-
-                                         if index < len(quiz_questions):
-
-                                             st.divider()
-
-                                     submitted = st.form_submit_button(
-                                         "📨 送出測驗",
-                                         use_container_width=True
+                                     st.session_state.pop(
+                                         "training_quiz_score",
+                                         None
                                      )
 
-                                 if submitted:
+                                     st.session_state.pop(
+                                         "training_quiz_correct",
+                                         None
+                                     )
 
-                                     st.session_state[
-                                         "training_quiz_answers"
-                                     ] = answers.copy()
-
-                                     correct_count = 0
-
-                                     total_questions = len(
-                                         quiz_questions
+                                     st.session_state.pop(
+                                         "training_quiz_answers",
+                                         None
                                      )
 
                                      for _, question_row in quiz_questions.iterrows():
@@ -4319,312 +4637,12 @@ elif page == "🎓 新人訓練中心":
                                              )
                                          )
 
-                                         correct_answer = clean_text(
-                                             question_row.get(
-                                                 "正確答案",
-                                                 ""
-                                             )
-                                         ).upper()
-
-                                         user_answer = st.session_state.get(
-                                             "training_quiz_answers",
-                                             {}
-                                         ).get(
-                                             question_id,
-                                             ""
-                                         ).upper()
-
-                                         if user_answer == correct_answer:
-
-                                             correct_count += 1
-
-                                     score = (
-                                         round(
-                                             correct_count
-                                             / total_questions
-                                             * 100
-                                         )
-                                         if total_questions > 0
-                                         else 0
-                                     )
-
-                                     # =========================================
-                                     # 測驗結果
-                                     # =========================================
-
-                                     quiz_status = (
-                                         "通過"
-                                         if score >= 80
-                                         else "未通過"
-                                     )
-
-                                     learning_status = (
-                                         "完成"
-                                         if score >= 80
-                                         else "學習中"
-                                     )
-
-                                     completed_date = (
-                                         pd.Timestamp.today().strftime(
-                                             "%Y/%m/%d"
-                                         )
-                                         if score >= 80
-                                         else ""
-                                     )
-
-                                     # =========================================
-                                     # 取得課程細項
-                                     # =========================================
-
-                                     course_name = ""
-
-                                     course_content = training_content[
-                                         training_content["課程ID"]
-                                         .astype(str)
-                                         .str.strip()
-                                         ==
-                                         selected_course
-                                     ].copy()
-
-                                     if not course_content.empty:
-
-                                         course_name = clean_text(
-                                             course_content.iloc[0].get(
-                                                 "課程細項",
-                                                 ""
-                                             )
+                                         st.session_state.pop(
+                                             f"quiz_answer_{question_id}",
+                                             None
                                          )
 
-                                     # =========================================
-                                     # 儲存新人學習紀錄
-                                     # =========================================
-
-                                     save_result = save_training_record(
-                                         employee_id=st.session_state.get(
-                                             "training_employee_id",
-                                             ""
-                                         ),
-                                         employee_name=st.session_state.get(
-                                             "training_employee_name",
-                                             ""
-                                         ),
-                                         course_id=selected_course,
-                                         course_name=course_name,
-                                         day=selected_day,
-                                         start_date=pd.Timestamp.today().strftime(
-                                             "%Y/%m/%d"
-                                         ),
-                                         learning_status=learning_status,
-                                         quiz_status=quiz_status,
-                                         completed_date=completed_date
-                                     )
-
-                                     # =========================================
-                                     # 顯示測驗結果
-                                     # =========================================
-
-                                     if score >= 80:
-
-                                         st.success(
-                                             f"🎉 測驗完成！分數：{score} 分，恭喜通過！"
-                                         )
-
-                                     else:
-
-                                         st.warning(
-                                             f"測驗完成，分數：{score} 分，尚未達到 80 分及格標準。"
-                                         )
-
-                                     st.write(
-                                         f"答對 {correct_count} / {total_questions} 題"
-                                     )
-
-                                     if save_result:
-
-                                         load_training_records.clear()
-                                         
-                                         st.info(
-                                             "📋 測驗結果已記錄至新人學習紀錄。"
-                                         )
-                                     # =========================================
-                                     # 儲存新人學習紀錄
-                                     # =========================================
-
-                                     employee_id = st.session_state.get(
-                                         "training_employee_id",
-                                         ""
-                                     )
-
-                                     employee_name = st.session_state.get(
-                                         "training_employee_name",
-                                         ""
-                                     )
-
-                                     course_name = selected_course
-
-                                     course_row = training_overview[
-                                         training_overview["課程ID"]
-                                         .astype(str)
-                                         .str.strip()
-                                         ==
-                                         str(selected_course).strip()
-                                     ]
-
-                                     if not course_row.empty:
-
-                                         course_name = clean_text(
-                                             course_row.iloc[0].get(
-                                                 "課程大項",
-                                                 selected_course
-                                             )
-                                         )
-
-                        # =========================================
-                        # 顯示測驗結果
-                        # =========================================
-
-                        if st.session_state.get(
-                            "training_quiz_submitted",
-                            False
-                        ):
-
-                            score = st.session_state.get(
-                                "training_quiz_score",
-                                0
-                            )
-
-                            correct_count = st.session_state.get(
-                                "training_quiz_correct",
-                                0
-                            )
-
-                            total_questions = len(
-                                quiz_questions
-                            )
-
-                            st.divider()
-
-                            st.markdown(
-                                "### 🎉 測驗完成"
-                            )
-
-                            st.success(
-                                f"你的分數：{score} 分"
-                            )
-
-                            st.write(
-                                f"答對 {correct_count} / {total_questions} 題"
-                            )
-
-                            st.markdown(
-                                "#### 📖 逐題檢討"
-                            )
-
-                            for index, (_, question_row) in enumerate(
-                                quiz_questions.iterrows(),
-                                start=1
-                            ):
-
-                                question_id = clean_text(
-                                    question_row.get(
-                                        "題目ID",
-                                        ""
-                                    )
-                                )
-
-                                question = clean_text(
-                                    question_row.get(
-                                        "題目",
-                                        ""
-                                    )
-                                )
-
-                                correct_answer = clean_text(
-                                    question_row.get(
-                                        "正確答案",
-                                        ""
-                                    )
-                                ).upper()
-
-                                user_answer = st.session_state.get(
-                                    f"quiz_answer_{question_id}",
-                                    ""
-                                ).upper()
-
-                                explanation = clean_text(
-                                    question_row.get(
-                                        "解說",
-                                        ""
-                                    )
-                                )
-
-                                st.markdown(
-                                    f"**第 {index} 題：{question}**"
-                                )
-
-                                if user_answer == correct_answer:
-
-                                    st.success(
-                                        f"✅ 答對｜你的答案：{user_answer}"
-                                    )
-
-                                else:
-
-                                    st.error(
-                                        f"❌ 答錯｜你的答案：{user_answer}｜正確答案：{correct_answer}"
-                                    )
-
-                                if explanation:
-
-                                    st.info(
-                                        f"💡 解說：{explanation}"
-                                    )
-
-                                if index < total_questions:
-
-                                    st.divider()
-
-                            st.divider()
-
-                            if st.button(
-                                "🔄 再測一次",
-                                use_container_width=True,
-                                key=f"retry_quiz_{selected_course}"
-                            ):
-
-                                st.session_state[
-                                    "training_quiz_start"
-                                ] = False
-
-                                st.session_state[
-                                    "training_quiz_submitted"
-                                ] = False
-
-                                st.session_state.pop(
-                                    "training_quiz_score",
-                                    None
-                                )
-
-                                st.session_state.pop(
-                                    "training_quiz_correct",
-                                    None
-                                )
-
-                                for _, question_row in quiz_questions.iterrows():
-
-                                    question_id = clean_text(
-                                        question_row.get(
-                                            "題目ID",
-                                            ""
-                                        )
-                                    )
-
-                                    st.session_state.pop(
-                                        f"quiz_answer_{question_id}",
-                                        None
-                                    )
-
-                                st.rerun()
+                                     st.rerun()
     # ========================================================
     # 小老師
     # ========================================================
