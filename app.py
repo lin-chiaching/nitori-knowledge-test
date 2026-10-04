@@ -4201,21 +4201,13 @@ elif page == "🎓 新人訓練中心":
 
                              if not video_completed:
 
-                                 with st.container(
-                                     border=True
-                                 ):
+                                 st.info(
+                                     "🔒 測驗尚未解鎖"
+                                 )
 
-                                     st.markdown(
-                                         "## 🔒 測驗尚未解鎖"
-                                     )
-
-                                     st.markdown(
-                                         "### 完成影片觀看後，請勾選「我已完成觀看本課程影片」"
-                                     )
-
-                                     st.caption(
-                                         "完成確認後，即可解鎖課程測驗。"
-                                     )
+                                 st.caption(
+                                     "完成影片觀看後，請勾選「我已完成觀看本課程影片」，即可解鎖測驗。"
+                                 )
 
                              else:
 
