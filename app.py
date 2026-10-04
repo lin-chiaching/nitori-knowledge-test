@@ -3766,7 +3766,8 @@ elif page == "🎓 新人訓練中心":
                         training_overview["課程ID"]
                         .astype(str)
                         .str.strip()
-                        == selected_course
+                        ==
+                        selected_course
                     ]
 
                     if not course_row.empty:
@@ -3778,21 +3779,100 @@ elif page == "🎓 新人訓練中心":
                             )
                         )
 
+                        # =================================================
+                        # 查詢目前新人學習狀態
+                        # =================================================
+
+                        selected_employee_id = st.session_state.get(
+                            "training_employee_id",
+                            ""
+                        )
+
+                        course_record = pd.DataFrame()
+
+                        if (
+                            selected_employee_id
+                            and not training_records.empty
+                        ):
+
+                            course_record = training_records[
+                                (
+                                    training_records["員工編號"]
+                                    .astype(str)
+                                    .str.strip()
+                                    ==
+                                    str(selected_employee_id).strip()
+                                )
+                                &
+                                (
+                                    training_records["課程ID"]
+                                    .astype(str)
+                                    .str.strip()
+                                    ==
+                                    str(selected_course).strip()
+                                )
+                            ].copy()
+
+                        # =================================================
+                        # 判斷課程狀態
+                        # =================================================
+
+                        learning_status = ""
+                        quiz_status = ""
+
+                        if not course_record.empty:
+
+                            learning_status = clean_text(
+                                course_record.iloc[0].get(
+                                    "學習狀態",
+                                    ""
+                                )
+                            )
+
+                            quiz_status = clean_text(
+                                course_record.iloc[0].get(
+                                    "測驗狀態",
+                                    ""
+                                )
+                            )
+
                         st.divider()
 
                         st.markdown(
                             f"### 📖 {course_name}"
                         )
 
+                        # =================================================
+                        # 顯示狀態
+                        # =================================================
+
+                        if quiz_status == "通過":
+
+                            st.success(
+                                "✅ 已完成｜測驗通過"
+                            )
+
+                        elif quiz_status == "未通過":
+
+                            st.warning(
+                                "⚠️ 測驗未通過｜可以重新學習並再次測驗"
+                            )
+
+                        else:
+
+                            st.info(
+                                "📝 尚未完成"
+                            )
+
                         course_content = (
                             training_content[
                                 training_content["課程ID"]
                                 .astype(str)
                                 .str.strip()
-                                == selected_course
+                                ==
+                                selected_course
                             ].copy()
                         )
-
                         # =========================================
                         # 課程影片
                         # =========================================
