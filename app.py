@@ -22,12 +22,7 @@ st.set_page_config(
 )
 
 EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
-st.write("目前使用的 Excel：", EXCEL_PATH.resolve())
 
-st.write("目前正確答案：", pd.read_excel(
-    EXCEL_PATH,
-    sheet_name="測驗題庫"
-).iloc[0]["正確答案"])
 # ============================================================
 # 日系貓咪 UI
 # ============================================================
@@ -4136,11 +4131,6 @@ elif page == "🎓 新人訓練中心":
                                      st.session_state[
                                          "training_quiz_answers"
                                      ] = answers.copy()
-                                     
-                                     st.write("DEBUG answers：", answers)
-                                     st.write("DEBUG 正確答案：", quiz_questions["正確答案"].tolist())
-                                     st.write("DEBUG 欄位：", quiz_questions.columns.tolist())
-                                     st.write("DEBUG 第一題：", quiz_questions.iloc[0].to_dict())
 
                                      correct_count = 0
 
