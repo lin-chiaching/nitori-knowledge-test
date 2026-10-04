@@ -4112,30 +4112,30 @@ elif page == "🎓 新人訓練中心":
 
                                          answers[question_id] = answer
 
-            if index < len(quiz_questions):
+                                         if index < len(quiz_questions):
 
-                st.divider()
+                                             st.divider()
 
-        submitted = st.form_submit_button(
-            "📨 送出測驗",
-            use_container_width=True
-        )
+                                     submitted = st.form_submit_button(
+                                         "📨 送出測驗",
+                                         use_container_width=True
+                                     )
 
-    if submitted:
+                                 if submitted:
 
-        st.success(
-            "🔥 我有收到送出測驗！"
-        )
+                                     st.success(
+                                         "🔥 我有收到送出測驗！"
+                                     )
 
-        st.write(
-            "目前 quiz_questions 筆數：",
-            len(quiz_questions)
-        )
+                                     st.write(
+                                         "目前 quiz_questions 筆數：",
+                                         len(quiz_questions)
+                                     )
 
-        st.write(
-            "目前 answers：",
-            answers
-        )
+                                     st.write(
+                                         "目前 answers：",
+                                         answers
+                                     )
                               # =========================================
                               # 測驗進行中
                               # =========================================
