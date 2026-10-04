@@ -4264,6 +4264,22 @@ elif page == "🎓 新人訓練中心":
                             )
 
                             # =========================================
+                            # 儲存測驗結果
+                            # =========================================
+
+                            st.session_state[
+                                "training_quiz_submitted"
+                            ] = True
+
+                            st.session_state[
+                                "training_quiz_score"
+                            ] = score
+
+                            st.session_state[
+                                "training_quiz_correct"
+                            ] = correct_count
+
+                            # =========================================
                             # 儲存新人學習紀錄
                             # =========================================
 
@@ -4327,6 +4343,22 @@ elif page == "🎓 新人訓練中心":
                                         completed_date=completed_date
                                     )
 
+                            st.rerun()
+
+
+                        # =========================================
+                        # 顯示測驗結果
+                        # =========================================
+
+                        if st.session_state.get(
+                            "training_quiz_submitted",
+                            False
+                        ):
+
+                            score = st.session_state.get(
+                                "training_quiz_score",
+                                0
+                            )
 
                             correct_count = st.session_state.get(
                                 "training_quiz_correct",
@@ -4350,6 +4382,7 @@ elif page == "🎓 新人訓練中心":
                             st.write(
                                 f"答對 {correct_count} / {total_questions} 題"
                             )
+
                             st.markdown(
                                 "#### 📖 逐題檢討"
                             )
