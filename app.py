@@ -4176,13 +4176,102 @@ elif page == "🎓 新人訓練中心":
                                          else 0
                                      )
 
-                                     st.success(
-                                         f"🎉 測驗完成！分數：{score} 分"
+                                     # =========================================
+                                     # 測驗結果
+                                     # =========================================
+
+                                     quiz_status = (
+                                         "通過"
+                                         if score >= 80
+                                         else "未通過"
                                      )
+
+                                     learning_status = (
+                                         "完成"
+                                         if score >= 80
+                                         else "學習中"
+                                     )
+
+                                     completed_date = (
+                                         pd.Timestamp.today().strftime(
+                                             "%Y/%m/%d"
+                                         )
+                                         if score >= 80
+                                         else ""
+                                     )
+
+                                     # =========================================
+                                     # 取得課程細項
+                                     # =========================================
+
+                                     course_name = ""
+
+                                     course_content = training_content[
+                                         training_content["課程ID"]
+                                         .astype(str)
+                                         .str.strip()
+                                         ==
+                                         selected_course
+                                     ].copy()
+
+                                     if not course_content.empty:
+
+                                         course_name = clean_text(
+                                             course_content.iloc[0].get(
+                                                 "課程細項",
+                                                 ""
+                                             )
+                                         )
+
+                                     # =========================================
+                                     # 儲存新人學習紀錄
+                                     # =========================================
+
+                                     save_result = save_training_record(
+                                         employee_id=st.session_state.get(
+                                             "training_employee_id",
+                                             ""
+                                         ),
+                                         employee_name=st.session_state.get(
+                                             "training_employee_name",
+                                             ""
+                                         ),
+                                         course_id=selected_course,
+                                         course_name=course_name,
+                                         day=selected_day,
+                                         start_date=pd.Timestamp.today().strftime(
+                                             "%Y/%m/%d"
+                                         ),
+                                         learning_status=learning_status,
+                                         quiz_status=quiz_status,
+                                         completed_date=completed_date
+                                     )
+
+                                     # =========================================
+                                     # 顯示測驗結果
+                                     # =========================================
+
+                                     if score >= 80:
+
+                                         st.success(
+                                             f"🎉 測驗完成！分數：{score} 分，恭喜通過！"
+                                         )
+
+                                     else:
+
+                                         st.warning(
+                                             f"測驗完成，分數：{score} 分，尚未達到 80 分及格標準。"
+                                         )
 
                                      st.write(
                                          f"答對 {correct_count} / {total_questions} 題"
                                      )
+
+                                     if save_result:
+
+                                         st.info(
+                                             "📋 測驗結果已記錄至新人學習紀錄。"
+                                         )
                                      # =========================================
                                      # 儲存新人學習紀錄
                                      # =========================================
