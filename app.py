@@ -4219,21 +4219,9 @@ elif page == "🎓 新人訓練中心":
 
                              else:
 
-                                 with st.container(
-                                     border=True
-                                 ):
-
-                                     st.markdown(
-                                         "## 🔓 測驗已解鎖"
-                                     )
-
-                                     st.markdown(
-                                         "### 已完成影片觀看，可以開始挑戰本課程測驗！"
-                                     )
-
-                                     st.caption(
-                                         "準備好後，點擊下方「📝 開始測驗」。"
-                                     )
+                                 st.success(
+                                     "🔓 測驗已解鎖，可以開始測驗！"
+                                 )
                                  if not st.session_state.get(
                                      "training_quiz_start",
                                      False
