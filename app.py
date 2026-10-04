@@ -4286,7 +4286,69 @@ elif page == "🎓 新人訓練中心":
                                 "training_quiz_score",
                                 0
                             )
+                            # =========================================
+                            # 儲存新人學習紀錄
+                            # =========================================
 
+                            employee_id = st.session_state.get(
+                                "training_employee_id",
+                                ""
+                            )
+
+                            employee_name = st.session_state.get(
+                                "training_employee_name",
+                                ""
+                            )
+
+                            if employee_id and employee_name:
+
+                                if score >= 80:
+
+                                    learning_status = "已完成"
+                                    quiz_status = "通過"
+
+                                    completed_date = (
+                                        pd.Timestamp.now()
+                                        .strftime("%Y/%m/%d")
+                                    )
+
+                                else:
+
+                                    learning_status = "學習中"
+                                    quiz_status = "未通過"
+
+                                    completed_date = ""
+
+                                course_row = training_overview[
+                                    training_overview["課程ID"]
+                                    .astype(str)
+                                    .str.strip()
+                                    == selected_course
+                                ]
+
+                                if not course_row.empty:
+
+                                    course_name = str(
+                                        course_row.iloc[0]["課程大項"]
+                                    ).strip()
+
+                                    day = str(
+                                        course_row.iloc[0]["DAY"]
+                                    ).strip()
+
+                                    save_training_record(
+                                        employee_id=employee_id,
+                                        employee_name=employee_name,
+                                        course_id=selected_course,
+                                        course_name=course_name,
+                                        day=day,
+                                        start_date=pd.Timestamp.now().strftime(
+                                            "%Y/%m/%d"
+                                        ),
+                                        learning_status=learning_status,
+                                        quiz_status=quiz_status,
+                                        completed_date=completed_date
+                                    )
                             correct_count = st.session_state.get(
                                 "training_quiz_correct",
                                 0
