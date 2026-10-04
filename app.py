@@ -901,7 +901,7 @@ def save_training_record(
         )
 
         return False
-@st.cache_data
+
 def load_training_quiz():
 
     try:
