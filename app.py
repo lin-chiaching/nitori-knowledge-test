@@ -4207,44 +4207,21 @@ elif page == "🎓 新人訓練中心":
 
                              else:
 
-                                 st.markdown(
-                                     """
-                                     <div style="
-                                         padding: 22px;
-                                         margin-top: 15px;
-                                         margin-bottom: 20px;
-                                         border-radius: 14px;
-                                         background-color: #f3f7f0;
-                                         border: 2px solid #b9cdb0;
-                                         text-align: center;
-                                     ">
-                                         <div style="
-                                             font-size: 32px;
-                                             margin-bottom: 8px;
-                                         ">
-                                             🔓
-                                         </div>
+                                 with st.container(
+                                     border=True
+                                 ):
 
-                                         <div style="
-                                             font-size: 21px;
-                                             font-weight: 700;
-                                             margin-bottom: 8px;
-                                         ">
-                                             測驗已解鎖
-                                         </div>
+                                     st.markdown(
+                                         "## 🔓 測驗已解鎖"
+                                     )
 
-                                         <div style="
-                                             font-size: 16px;
-                                             line-height: 1.7;
-                                         ">
-                                             已完成影片觀看<br>
-                                             可以開始挑戰本課程測驗！
-                                         </div>
-                                     </div>
-                                     """,
-                                     unsafe_allow_html=True
-                                 )
+                                     st.markdown(
+                                         "### 已完成影片觀看，可以開始挑戰本課程測驗！"
+                                     )
 
+                                     st.caption(
+                                         "準備好後，點擊下方「📝 開始測驗」。"
+                                     )
                                  if not st.session_state.get(
                                      "training_quiz_start",
                                      False
