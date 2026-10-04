@@ -4237,133 +4237,122 @@ elif page == "🎓 新人訓練中心":
                         # 計算測驗結果
                         # =========================================
 
-                        if submitted:
+                                 if submitted:
 
-                            correct_count = 0
+                                     score = 0
 
-                            for _, question_row in quiz_questions.iterrows():
+                                     total_questions = len(
+                                         quiz_questions
+                                     )
 
-                                question_id = clean_text(
-                                    question_row.get(
-                                        "題目ID",
-                                        ""
-                                    )
-                                )
+                                     for _, question_row in quiz_questions.iterrows():
 
-                                correct_answer = clean_text(
-                                    question_row.get(
-                                        "正確答案",
-                                        ""
-                                    )
-                                ).upper()
+                                         question_id = clean_text(
+                                             question_row.get(
+                                                 "題目ID",
+                                                 ""
+                                             )
+                                         )
 
-                                user_answer = answers.get(
-                                    question_id,
-                                    ""
-                                ).upper()
+                                         correct_answer = clean_text(
+                                             question_row.get(
+                                                 "正確答案",
+                                                 ""
+                                             )
+                                         )
 
-                                if user_answer == correct_answer:
+                                         user_answer = answers.get(
+                                             question_id,
+                                             ""
+                                         )
 
-                                    correct_count += 1
+                                         if user_answer == correct_answer:
 
-                            total_questions = len(
-                                quiz_questions
-                            )
+                                             score += 1
 
-                            score = round(
-                                correct_count
-                                / total_questions
-                                * 100
-                            )
+                                     score_percent = round(
+                                         score / total_questions * 100
+                                     ) if total_questions > 0 else 0
 
-                            st.success(
-                                f"測驗已送出！分數：{score} 分"
-                            )
+                                     st.success(
+                                         "🎉 測驗完成！"
+                                     )
 
-                            st.write(
-                                f"答對 {correct_count} / {total_questions} 題"
-                            )
-                            # =========================================
-                            # 儲存測驗結果
-                            # =========================================
+                                     st.metric(
+                                         "測驗分數",
+                                         f"{score} / {total_questions}"
+                                     )
 
-                            st.session_state[
-                                "training_quiz_submitted"
-                            ] = True
+                                     st.write(
+                                         f"答對率：{score_percent}%"
+                                     )
 
-                            st.session_state[
-                                "training_quiz_score"
-                            ] = score
+                                     # =========================================
+                                     # 儲存新人學習紀錄
+                                     # =========================================
 
-                            st.session_state[
-                                "training_quiz_correct"
-                            ] = correct_count
+                                     employee_id = st.session_state.get(
+                                         "training_employee_id",
+                                         ""
+                                     )
 
-                            # =========================================
-                            # 儲存新人學習紀錄
-                            # =========================================
+                                     employee_name = st.session_state.get(
+                                         "training_employee_name",
+                                         ""
+                                     )
 
-                            employee_id = st.session_state.get(
-                                "training_employee_id",
-                                ""
-                            )
+                                     course_name = selected_course
 
-                            employee_name = st.session_state.get(
-                                "training_employee_name",
-                                ""
-                            )
+                                     course_row = training_overview[
+                                         training_overview["課程ID"]
+                                         .astype(str)
+                                         .str.strip()
+                                         ==
+                                         str(selected_course).strip()
+                                     ]
 
-                            if employee_id and employee_name:
+                                     if not course_row.empty:
 
-                                if score >= 80:
+                                         course_name = clean_text(
+                                             course_row.iloc[0].get(
+                                                 "課程大項",
+                                                 selected_course
+                                             )
+                                         )
 
-                                    learning_status = "已完成"
-                                    quiz_status = "通過"
+                                     if score_percent >= 80:
 
-                                    completed_date = (
-                                        pd.Timestamp.now()
-                                        .strftime("%Y/%m/%d")
-                                    )
+                                         quiz_status = "通過"
 
-                                else:
+                                     else:
 
-                                    learning_status = "學習中"
-                                    quiz_status = "未通過"
+                                         quiz_status = "未通過"
 
-                                    completed_date = ""
+                                     saved = save_training_record(
+                                         employee_id=employee_id,
+                                         employee_name=employee_name,
+                                         course_id=selected_course,
+                                         course_name=course_name,
+                                         day=selected_day,
+                                         start_date="",
+                                         learning_status="已完成",
+                                         quiz_status=quiz_status,
+                                         completed_date=datetime.now().strftime(
+                                             "%Y-%m-%d"
+                                         )
+                                     )
 
-                                course_row = training_overview[
-                                    training_overview["課程ID"]
-                                    .astype(str)
-                                    .str.strip()
-                                    == selected_course
-                                ]
+                                     if saved:
 
-                                if not course_row.empty:
+                                         st.success(
+                                             "✅ 測驗結果已成功儲存！"
+                                         )
 
-                                    course_name = str(
-                                        course_row.iloc[0]["課程大項"]
-                                    ).strip()
+                                     else:
 
-                                    day = str(
-                                        course_row.iloc[0]["DAY"]
-                                    ).strip()
-
-                                    save_training_record(
-                                        employee_id=employee_id,
-                                        employee_name=employee_name,
-                                        course_id=selected_course,
-                                        course_name=course_name,
-                                        day=day,
-                                        start_date=pd.Timestamp.now().strftime(
-                                            "%Y/%m/%d"
-                                        ),
-                                        learning_status=learning_status,
-                                        quiz_status=quiz_status,
-                                        completed_date=completed_date
-                                    )
-
-                            st.rerun()
+                                         st.error(
+                                             "⚠️ 測驗結果儲存失敗，請確認新人學習紀錄。"
+                                         )
 
 
                         # =========================================
