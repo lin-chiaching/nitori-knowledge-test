@@ -4450,7 +4450,58 @@ elif page == "🎓 新人訓練中心":
                 .str.strip()
                 == "新人"
             ].copy()
+            if new_staff.empty:
 
+                st.info(
+                    "目前尚未建立新人資料。"
+                )
+
+            else:
+
+                st.markdown(
+                    "### 👤 請選擇你的身分"
+                )
+
+                new_staff["顯示名稱"] = (
+                    new_staff["姓名"]
+                    .astype(str)
+                    .str.strip()
+                    + "｜"
+                    + new_staff["員工編號"]
+                    .astype(str)
+                    .str.strip()
+                )
+
+                selected_employee_display = st.selectbox(
+                    "新人姓名",
+                    new_staff["顯示名稱"].tolist(),
+                    key="selected_training_employee"
+                )
+
+                selected_employee = new_staff[
+                    new_staff["顯示名稱"]
+                    == selected_employee_display
+                ].iloc[0]
+
+                selected_employee_id = str(
+                    selected_employee["員工編號"]
+                ).strip()
+
+                selected_employee_name = str(
+                    selected_employee["姓名"]
+                ).strip()
+
+                st.session_state[
+                    "training_employee_id"
+                ] = selected_employee_id
+
+                st.session_state[
+                    "training_employee_name"
+                ] = selected_employee_name
+
+                st.success(
+                    f"目前登入身分：{selected_employee_name}"
+                )
             if new_staff.empty:
 
                 st.info(
