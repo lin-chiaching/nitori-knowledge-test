@@ -4116,12 +4116,24 @@ elif page == "🎓 新人訓練中心":
 
                                              st.divider()
 
-                                     submitted = st.form_submit_button(
-                                         "📨 送出測驗",
-                                         use_container_width=True
-                                     )
+                                    submitted = st.form_submit_button(
+                                        "📨 送出測驗",
+                                        use_container_width=True
+                                    )
 
-                                     st.write("DEBUG submitted =", submitted)
+                                    if submitted:
+
+                                        st.success("🔥 我有收到送出測驗！")
+    
+                                        st.write(
+                                            "目前 quiz_questions 筆數：",
+                                            len(quiz_questions)
+                                        )
+
+                                        st.write(
+                                            "目前 answers：",
+                                            answers
+                                        )
                               # =========================================
                               # 測驗進行中
                               # =========================================
