@@ -4041,11 +4041,11 @@ elif page == "🎓 新人訓練中心":
                                      "請選擇每一題的答案，完成後按下「送出測驗」。"
                                  )
 
+                                 answers = {}
+
                                  with st.form(
                                      f"quiz_form_{selected_course}"
                                  ):
-
-                                     answers = {}
 
                                      for index, (_, question_row) in enumerate(
                                          quiz_questions.iterrows(),
@@ -4111,10 +4111,7 @@ elif page == "🎓 新人訓練中心":
                                          )
 
                                          answers[question_id] = answer
-                                         
-                                         st.session_state[
-                                             f"quiz_answer_{question_id}"
-                                         ] = answer
+
                                          if index < len(quiz_questions):
 
                                              st.divider()
