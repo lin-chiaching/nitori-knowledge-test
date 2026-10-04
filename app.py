@@ -4112,6 +4112,11 @@ elif page == "🎓 新人訓練中心":
 
                                          answers[question_id] = answer
 
+                                         st.session_state[
+                                             f"quiz_answer_{question_id}"
+                                         ] = answer
+
+
                                          if index < len(quiz_questions):
 
                                              st.divider()
