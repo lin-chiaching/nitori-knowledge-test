@@ -4123,20 +4123,54 @@ elif page == "🎓 新人訓練中心":
 
                                  if submitted:
 
+                                     correct_count = 0
+
+                                     total_questions = len(
+                                         quiz_questions
+                                     )
+
+                                     for _, question_row in quiz_questions.iterrows():
+
+                                         question_id = clean_text(
+                                             question_row.get(
+                                                 "題目ID",
+                                                 ""
+                                             )
+                                         )
+
+                                         correct_answer = clean_text(
+                                             question_row.get(
+                                                 "正確答案",
+                                                 ""
+                                             )
+                                         ).upper()
+
+                                         user_answer = answers.get(
+                                             question_id,
+                                             ""
+                                         ).upper()
+
+                                         if user_answer == correct_answer:
+
+                                             correct_count += 1
+
+                                     score = (
+                                         round(
+                                             correct_count
+                                             / total_questions
+                                             * 100
+                                         )
+                                         if total_questions > 0
+                                         else 0
+                                     )
+
                                      st.success(
-                                         "🔥 我有收到送出測驗！"
+                                         f"🎉 測驗完成！分數：{score} 分"
                                      )
 
                                      st.write(
-                                         "目前 quiz_questions 筆數：",
-                                         len(quiz_questions)
+                                         f"答對 {correct_count} / {total_questions} 題"
                                      )
-
-                                     st.write(
-                                         "目前 answers：",
-                                         answers
-                                     )
-                                     
                                      # =========================================
                                      # 儲存新人學習紀錄
                                      # =========================================
