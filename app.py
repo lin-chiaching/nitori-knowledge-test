@@ -4208,8 +4208,11 @@ elif page == "🎓 新人訓練中心":
 
                                 answers[question_id] = answer
 
-                                if index < len(quiz_questions):
+                                st.session_state[
+                                    f"quiz_answer_{question_id}"
+                                ] = answer
 
+                                if index < len(quiz_questions):
                                     st.divider()
 
                             submitted = st.form_submit_button(
@@ -4260,32 +4263,6 @@ elif page == "🎓 新人訓練中心":
                                 * 100
                             )
 
-                            st.session_state[
-                                "training_quiz_submitted"
-                            ] = True
-
-                            st.session_state[
-                                "training_quiz_score"
-                            ] = score
-
-                            st.session_state[
-                                "training_quiz_correct"
-                            ] = correct_count
-
-                            st.rerun()
-                        # =========================================
-                        # 顯示測驗結果
-                        # =========================================
-
-                        if st.session_state.get(
-                            "training_quiz_submitted",
-                            False
-                        ):
-
-                            score = st.session_state.get(
-                                "training_quiz_score",
-                                0
-                            )
                             # =========================================
                             # 儲存新人學習紀錄
                             # =========================================
@@ -4349,6 +4326,8 @@ elif page == "🎓 新人訓練中心":
                                         quiz_status=quiz_status,
                                         completed_date=completed_date
                                     )
+
+
                             correct_count = st.session_state.get(
                                 "training_quiz_correct",
                                 0
