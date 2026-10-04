@@ -4190,11 +4190,41 @@ elif page == "🎓 新人訓練中心":
                              if not video_completed:
 
                                  st.markdown(
-                                     "### 🔒 測驗尚未解鎖"
-                                 )
+                                     """
+                                     <div style="
+                                         padding: 22px;
+                                         margin-top: 15px;
+                                         margin-bottom: 20px;
+                                         border-radius: 14px;
+                                         background-color: #f7f3ed;
+                                         border: 2px solid #d8c7b0;
+                                         text-align: center;
+                                     ">
+                                         <div style="
+                                             font-size: 32px;
+                                             margin-bottom: 8px;
+                                         ">
+                                             🔒
+                                         </div>
 
-                                 st.info(
-                                     "請先完成課程影片觀看，並勾選「我已完成觀看本課程影片」後，即可開始測驗。"
+                                         <div style="
+                                             font-size: 21px;
+                                             font-weight: 700;
+                                             margin-bottom: 8px;
+                                         ">
+                                             測驗尚未解鎖
+                                         </div>
+
+                                         <div style="
+                                             font-size: 16px;
+                                             line-height: 1.7;
+                                         ">
+                                             完成影片觀看後，請勾選上方確認<br>
+                                             即可解鎖課程測驗
+                                         </div>
+                                     </div>
+                                     """,
+                                     unsafe_allow_html=True
                                  )
 
                              else:
