@@ -4026,10 +4026,22 @@ elif page == "🎓 新人訓練中心":
 
                                 st.divider()
 
-                                video_completed = st.checkbox(
-                                    "☑️ 我已完成觀看本課程影片",
-                                    key=f"video_completed_{selected_course}"
-                                )
+                                with st.container(
+                                    border=True
+                                ):
+
+                                    st.markdown(
+                                        "## ☑️ 影片觀看確認"
+                                    )
+
+                                    st.markdown(
+                                        "### 看完影片後，請勾選下面的確認框"
+                                    )
+
+                                    video_completed = st.checkbox(
+                                        "✅ 我已完成觀看本課程影片",
+                                        key=f"video_completed_{selected_course}"
+                                    )
 
                                 if video_completed:
 
