@@ -4128,6 +4128,10 @@ elif page == "🎓 新人訓練中心":
 
                                  if submitted:
 
+                                     st.session_state[
+                                         "training_quiz_answers"
+                                     ] = answers.copy()
+                                     
                                      correct_count = 0
 
                                      total_questions = len(
