@@ -3480,8 +3480,8 @@ elif page == "🎓 新人訓練中心":
     # 標題＋右上角快捷鍵
     # --------------------------------------------------------
 
-    title_col, home_col, record_col = st.columns(
-        [6, 1.2, 1.2]
+    title_col, home_col, record_col, keypoint_col = st.columns(
+        [5, 1.2, 1.2, 1.2]
     )
 
     with title_col:
@@ -3515,6 +3515,18 @@ elif page == "🎓 新人訓練中心":
         ):
 
             st.session_state["training_page"] = "records"
+
+            st.rerun()
+
+    with keypoint_col:
+
+        if st.button(
+            "📚 重點整理",
+            use_container_width=True,
+            key="training_top_keypoints"
+        ):
+
+            st.session_state["training_page"] = "keypoints"
 
             st.rerun()
 
