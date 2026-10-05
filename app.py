@@ -3891,14 +3891,6 @@ elif page == "🎓 新人訓練中心":
                 "目前先建立課程流程，影片功能下一步再接上。"
             )
 
-            if st.button(
-                "下一步：課程內容 →",
-                key="training_next_content",
-                use_container_width=True
-            ):
-                st.session_state["training_step"] = "content"
-                st.rerun()
-
         elif training_step == "content":
 
             st.markdown(
