@@ -4410,7 +4410,6 @@ elif page == "🛠️ 資料維護":
         [
             "📚 知識庫",
             "📢 公告",
-            "🔗 常用工具",
             "📝 待審核問題",
             "📊 客訴資料"
         ]
@@ -4551,71 +4550,6 @@ elif page == "🛠️ 資料維護":
                     ]
                 ) or "內部公告",
                 "announcement_history"
-            )
-
-    # ========================================================
-    # 常用工具
-    # ========================================================
-
-    with tab3:
-
-        df = load_tools()
-
-        if df.empty:
-
-            st.warning(
-                "找不到常用工具資料。"
-            )
-
-        else:
-
-            edited = st.data_editor(
-                df,
-                use_container_width=True,
-                num_rows="dynamic",
-                height=550,
-                key="tools_editor"
-            )
-
-            editor_name_tools = st.text_input(
-                "👤 修改人姓名（必填）",
-                placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
-                key="editor_name_tools",
-                help="儲存常用工具時必須填寫。"
-            )
-
-            if st.button(
-                "💾 儲存常用工具",
-                type="primary",
-                key="save_tools",
-                disabled=not editor_name_tools.strip()
-            ):
-
-                if save_sheet(
-                    find_sheet(
-                        [
-                            "常用工具",
-                            "工具"
-                        ]
-                    ),
-                    edited,
-                    editor_name_tools
-                ):
-
-                    st.success(
-                        "常用工具已儲存！"
-                    )
-
-                    st.rerun()
-
-            render_change_history(
-                find_sheet(
-                    [
-                        "常用工具",
-                        "工具"
-                    ]
-                ) or "常用工具",
-                "tools_history"
             )
 
     # ========================================================
