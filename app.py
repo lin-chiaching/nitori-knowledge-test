@@ -3716,6 +3716,7 @@ elif page == "🎓 新人訓練中心":
 
             if st.button(
                 "下一步：課程內容 →",
+                key="training_next_content",
                 use_container_width=True
             ):
                 st.session_state["training_step"] = "content"
@@ -3738,6 +3739,7 @@ elif page == "🎓 新人訓練中心":
 
             if st.button(
                 "下一步：開始測驗 →",
+                key="training_next_quiz",
                 use_container_width=True
             ):
                 st.session_state["training_step"] = "quiz"
@@ -3760,6 +3762,7 @@ elif page == "🎓 新人訓練中心":
 
             if st.button(
                 "完成課程",
+                key="training_finish",
                 use_container_width=True
             ):
                 st.session_state["training_page"] = "home"
