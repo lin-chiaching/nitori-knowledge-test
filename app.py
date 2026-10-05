@@ -514,24 +514,6 @@ def load_announcements():
 
     return df
 
-
-@st.cache_data(ttl=60)
-def load_tools():
-
-    sheet = find_sheet(
-        ["常用工具", "工具"]
-    )
-
-    if not sheet:
-        return pd.DataFrame()
-
-    return pd.read_excel(
-        EXCEL_PATH,
-        sheet_name=sheet,
-        dtype=str
-    ).fillna("")
-
-
 # =========================================================
 # 新人訓練中心
 # =========================================================
@@ -2529,7 +2511,6 @@ with st.sidebar:
         "📊 客訴資料統計",
         "🗺️ 門市地圖",
         "🎓 新人訓練中心",
-        "📢 公告＆常用工具",
         "🛠️ 資料維護"
     ]
 
