@@ -3661,10 +3661,82 @@ elif page == "🎓 新人訓練中心":
 
         st.subheader("📊 我的學習紀錄")
 
-        st.info(
-            "這裡之後會顯示新人各課程的學習進度與測驗結果。"
+        st.caption(
+            "查看目前各課程的學習進度與測驗狀態。"
         )
 
+        st.divider()
+
+        # ----------------------------------------------------
+        # 暫時使用的學習紀錄
+        # ----------------------------------------------------
+
+        training_records_demo = [
+            {
+                "day": "DAY 1",
+                "course": "🏠 宜得利基礎",
+                "progress": 100,
+                "status": "✓ 已完成"
+            },
+            {
+                "day": "DAY 1",
+                "course": "💬 接客基礎",
+                "progress": 60,
+                "status": "學習中"
+            },
+            {
+                "day": "DAY 2",
+                "course": "🛋 商品基礎",
+                "progress": 0,
+                "status": "尚未開始"
+            },
+            {
+                "day": "DAY 2",
+                "course": "💻 系統操作",
+                "progress": 0,
+                "status": "尚未開始"
+            },
+            {
+                "day": "DAY 3",
+                "course": "☎️ 電話應對",
+                "progress": 0,
+                "status": "尚未開始"
+            },
+            {
+                "day": "DAY 3",
+                "course": "📝 實務練習",
+                "progress": 0,
+                "status": "尚未開始"
+            }
+        ]
+
+        # ----------------------------------------------------
+        # 顯示學習紀錄
+        # ----------------------------------------------------
+
+        for record in training_records_demo:
+
+            st.markdown(
+                f"### {record['day']}｜{record['course']}"
+            )
+
+            st.progress(
+                record["progress"] / 100
+            )
+
+            col1, col2 = st.columns([4, 1])
+
+            with col1:
+                st.caption(
+                    f"學習進度：{record['progress']}%"
+                )
+
+            with col2:
+                st.caption(
+                    record["status"]
+                )
+
+            st.divider()
 
     elif st.session_state["training_page"] == "course":
 
