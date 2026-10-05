@@ -3759,13 +3759,74 @@ elif page == "🎓 新人訓練中心":
         st.divider()
 
         # ====================================================
-        # 依 DAY 顯示課程
+        # 課程進度卡片
         # ====================================================
 
         for day in ["DAY 1", "DAY 2", "DAY 3"]:
 
             day_records = [
                 record
+                for record in training_records_demo
+                if record["day"] == day
+            ]
+
+            if not day_records:
+                continue
+
+            day_name = day_records[0]["day_name"]
+
+            st.markdown(
+                f"### 📅 {day}｜{day_name}"
+            )
+
+            card_col1, card_col2 = st.columns(2)
+
+            for index, record in enumerate(day_records):
+
+                if index % 2 == 0:
+                    current_col = card_col1
+                else:
+                    current_col = card_col2
+
+                with current_col:
+
+                    st.markdown(
+                        f"""
+                        <div style="
+                            border: 1px solid #E5E5E5;
+                            border-radius: 16px;
+                            padding: 22px;
+                            margin-bottom: 18px;
+                            background-color: #FFFFFF;
+                        ">
+
+                            <div style="
+                                font-size: 15px;
+                                color: #777777;
+                                margin-bottom: 8px;
+                            ">
+                                {record['course']}
+                            </div>
+
+                            <div style="
+                                font-size: 38px;
+                                font-weight: 700;
+                                margin: 8px 0;
+                            ">
+                                {record['progress']}%
+                            </div>
+
+                            <div style="
+                                font-size: 14px;
+                                color: #666666;
+                            ">
+                                {record['status']}
+                            </div>
+
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
                 for record in training_records_demo
                 if record["day"] == day
             ]
