@@ -4369,29 +4369,28 @@ elif page == "📢 公告":
     # --------------------------------------------------------
     # 內部公告
     # --------------------------------------------------------
+    ann = load_announcements()
 
-        ann = load_announcements()
+    if ann.empty:
 
-        if ann.empty:
+        st.info(
+            "目前沒有公告資料。"
+        )
 
-            st.info(
-                "目前沒有公告資料。"
+    else:
+
+        announcement_columns = (
+            get_announcement_columns(
+                ann
             )
+        )
 
-        else:
+        for _, row in ann.iterrows():
 
-            announcement_columns = (
-                get_announcement_columns(
-                    ann
-                )
+            render_announcement(
+                row,
+                announcement_columns
             )
-
-            for _, row in ann.iterrows():
-
-                render_announcement(
-                    row,
-                    announcement_columns
-                )
 
 # ============================================================
 # 資料維護
