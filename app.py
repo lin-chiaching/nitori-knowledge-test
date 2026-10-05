@@ -3662,83 +3662,149 @@ elif page == "🎓 新人訓練中心":
         st.subheader("📊 我的學習紀錄")
 
         st.caption(
-            "查看目前各課程的學習進度與測驗狀態。"
+            "查看目前各課程的學習進度與完成狀態。"
         )
 
         st.divider()
 
-        # ----------------------------------------------------
+        # ====================================================
         # 暫時使用的學習紀錄
-        # ----------------------------------------------------
+        # ====================================================
 
         training_records_demo = [
             {
                 "day": "DAY 1",
+                "day_name": "基礎訓練",
                 "course": "🏠 宜得利基礎",
                 "progress": 100,
                 "status": "✓ 已完成"
             },
             {
                 "day": "DAY 1",
+                "day_name": "基礎訓練",
                 "course": "💬 接客基礎",
                 "progress": 60,
-                "status": "學習中"
+                "status": "◐ 學習中"
             },
             {
                 "day": "DAY 2",
+                "day_name": "商品與系統",
                 "course": "🛋 商品基礎",
                 "progress": 0,
-                "status": "尚未開始"
+                "status": "○ 尚未開始"
             },
             {
                 "day": "DAY 2",
+                "day_name": "商品與系統",
                 "course": "💻 系統操作",
                 "progress": 0,
-                "status": "尚未開始"
+                "status": "○ 尚未開始"
             },
             {
                 "day": "DAY 3",
+                "day_name": "實務訓練",
                 "course": "☎️ 電話應對",
                 "progress": 0,
-                "status": "尚未開始"
+                "status": "○ 尚未開始"
             },
             {
                 "day": "DAY 3",
+                "day_name": "實務訓練",
                 "course": "📝 實務練習",
                 "progress": 0,
-                "status": "尚未開始"
+                "status": "○ 尚未開始"
             }
         ]
 
-        # ----------------------------------------------------
-        # 顯示學習紀錄
-        # ----------------------------------------------------
+        # ====================================================
+        # 整體進度
+        # ====================================================
 
-        for record in training_records_demo:
+        total_courses = len(training_records_demo)
 
-            st.markdown(
-                f"### {record['day']}｜{record['course']}"
+        completed_courses = sum(
+            1
+            for record in training_records_demo
+            if record["progress"] == 100
+        )
+
+        overall_progress = sum(
+            record["progress"]
+            for record in training_records_demo
+        ) / total_courses
+
+        st.markdown("### 🎓 整體學習進度")
+
+        progress_col1, progress_col2 = st.columns(
+            [1, 4]
+        )
+
+        with progress_col1:
+
+            st.metric(
+                "完成課程",
+                f"{completed_courses} / {total_courses}"
             )
+
+        with progress_col2:
 
             st.progress(
-                record["progress"] / 100
+                overall_progress / 100
             )
 
-            col1, col2 = st.columns([4, 1])
+            st.caption(
+                f"目前整體完成度：{overall_progress:.0f}%"
+            )
 
-            with col1:
-                st.caption(
-                    f"學習進度：{record['progress']}%"
-                )
+        st.divider()
 
-            with col2:
-                st.caption(
-                    record["status"]
-                )
+        # ====================================================
+        # 依 DAY 顯示課程
+        # ====================================================
 
-            st.divider()
+        for day in ["DAY 1", "DAY 2", "DAY 3"]:
 
-    elif st.session_state["training_page"] == "course":
+            day_records = [
+                record
+                for record in training_records_demo
+                if record["day"] == day
+            ]
+
+            if not day_records:
+                continue
+
+            day_name = day_records[0]["day_name"]
+
+            st.markdown(
+                f"### 📅 {day}｜{day_name}"
+            )
+
+            course_col1, course_col2 = st.columns(2)
+
+            for index, record in enumerate(day_records):
+
+                if index % 2 == 0:
+                    current_col = course_col1
+                else:
+                    current_col = course_col2
+
+                with current_col:
+
+                    st.markdown(
+                        f"#### {record['course']}"
+                    )
+
+                    st.progress(
+                        record["progress"] / 100
+                    )
+
+                    st.caption(
+                        f"{record['progress']}%　｜　{record['status']}"
+                    )
+
+                    st.markdown(
+                        "---"
+                    )
 
         course_id = st.session_state.get(
             "training_course_id",
