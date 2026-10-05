@@ -3878,23 +3878,6 @@ elif page == "🎓 新人訓練中心":
                 )
 
                 if selected_course:
-                       training_step = st.session_state.get(
-                            "training_step",
-                            "video"
-                        )
-
-                        if training_step == "video":
-                            step_text = "① 影片　→　② 課程內容　→　③ 測驗"
-
-                        elif training_step == "content":
-                            step_text = "① 影片 ✓　→　② 課程內容　→　③ 測驗"
-
-                        else:
-                            step_text = "① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
-
-                        st.info(
-                            f"📍 目前學習進度：{step_text}"
-                        )
 
                     course_row = training_overview[
                         training_overview["課程ID"]
