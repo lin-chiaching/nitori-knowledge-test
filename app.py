@@ -2511,6 +2511,7 @@ with st.sidebar:
         "📊 客訴資料統計",
         "🗺️ 門市地圖",
         "🎓 新人訓練中心",
+        "📢 公告",
         "🛠️ 資料維護"
     ]
 
@@ -4352,10 +4353,10 @@ elif page == "🎓 新人訓練中心":
 # 公告＆常用工具
 # ============================================================
 
-elif page == "📢 公告＆常用工具":
+elif page == "📢 公告":
 
     st.title(
-        "📢 公告＆常用工具"
+        "📢 內部公告"
     )
 
     tab1, tab2 = st.tabs(
@@ -4368,8 +4369,6 @@ elif page == "📢 公告＆常用工具":
     # --------------------------------------------------------
     # 內部公告
     # --------------------------------------------------------
-
-    with tab1:
 
         ann = load_announcements()
 
@@ -4393,126 +4392,6 @@ elif page == "📢 公告＆常用工具":
                     row,
                     announcement_columns
                 )
-
-    # --------------------------------------------------------
-    # 常用工具
-    # --------------------------------------------------------
-
-    with tab2:
-
-        tools = load_tools()
-
-        if tools.empty:
-
-            st.info(
-                "目前沒有常用工具資料。"
-            )
-
-        else:
-
-            cols = list(
-                tools.columns
-            )
-
-            name_col = next(
-                (
-                    c
-                    for c in cols
-                    if any(
-                        x in str(c)
-                        for x in [
-                            "名稱",
-                            "工具",
-                            "標題"
-                        ]
-                    )
-                ),
-                cols[0]
-            )
-
-            url_col = next(
-                (
-                    c
-                    for c in cols
-                    if any(
-                        x in str(c)
-                        for x in [
-                            "網址",
-                            "連結",
-                            "URL",
-                            "url"
-                        ]
-                    )
-                ),
-                None
-            )
-
-            desc_col = next(
-                (
-                    c
-                    for c in cols
-                    if any(
-                        x in str(c)
-                        for x in [
-                            "說明",
-                            "描述",
-                            "備註"
-                        ]
-                    )
-                ),
-                None
-            )
-
-            grid = st.columns(3)
-
-            for i, (_, row) in enumerate(
-                tools.iterrows()
-            ):
-
-                name = clean_text(
-                    row[name_col]
-                )
-
-                url = (
-                    clean_text(
-                        row[url_col]
-                    )
-                    if url_col
-                    else ""
-                )
-
-                desc = (
-                    clean_text(
-                        row[desc_col]
-                    )
-                    if desc_col
-                    else ""
-                )
-
-                with grid[i % 3]:
-
-                    with st.container(
-                        border=True
-                    ):
-
-                        st.subheader(
-                            "🔗 " + name
-                        )
-
-                        if desc:
-
-                            st.write(
-                                desc
-                            )
-
-                        if url:
-
-                            st.link_button(
-                                "開啟工具",
-                                url,
-                                use_container_width=True
-                            )
-
 
 # ============================================================
 # 資料維護
