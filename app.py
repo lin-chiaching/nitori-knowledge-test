@@ -3513,7 +3513,7 @@ elif page == "🎓 新人訓練中心":
     # 目前頁面
     # --------------------------------------------------------
 
-if st.session_state["training_page"] == "home":
+    if st.session_state["training_page"] == "home":
 
     st.subheader("📚 課程選擇")
 
