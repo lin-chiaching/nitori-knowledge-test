@@ -452,6 +452,7 @@ def load_data():
     if not sheet:
         return pd.DataFrame()
 
+    
     return pd.read_excel(
         EXCEL_PATH,
         sheet_name=sheet,
@@ -934,29 +935,7 @@ def load_training_quiz():
         return pd.DataFrame(
             columns=TRAINING_QUIZ_COLUMNS
         )
-        df.columns = [
-            str(column).strip()
-            for column in df.columns
-        ]
 
-        for column in TRAINING_QUIZ_COLUMNS:
-
-            if column not in df.columns:
-                df[column] = ""
-
-        return df[
-            TRAINING_QUIZ_COLUMNS
-        ].fillna("")
-
-    except Exception as e:
-
-        st.error(
-            f"讀取「測驗題庫」失敗：{e}"
-        )
-
-        return pd.DataFrame(
-            columns=TRAINING_QUIZ_COLUMNS
-        )
 # ============================================================
 # 待審核問題
 # ============================================================
@@ -3498,13 +3477,59 @@ elif page == "🗺️ 門市地圖":
 
 elif page == "🎓 新人訓練中心":
 
-    st.title(
-        "🎓 新人訓練中心"
-    )
+    # --------------------------------------------------------
+    # 頁面狀態
+    # --------------------------------------------------------
+    if "training_page" not in st.session_state:
+        st.session_state["training_page"] = "home"
 
-    st.caption(
-        "新人訓練 Level 1｜共 3 天"
-    )
+    if "training_step" not in st.session_state:
+        st.session_state["training_step"] = "video"
+
+    # --------------------------------------------------------
+    # 標題＋右上角快捷鍵
+    # --------------------------------------------------------
+    title_col, home_col, record_col = st.columns([6, 1.2, 1.2])
+
+    with title_col:
+        st.title("🎓 新人訓練中心")
+
+    with home_col:
+        if st.button("🏠 新人首頁", use_container_width=True):
+            st.session_state["training_page"] = "home"
+            st.session_state["training_step"] = "video"
+            st.rerun()
+
+    with record_col:
+        if st.button("📊 學習紀錄", use_container_width=True):
+            st.session_state["training_page"] = "records"
+            st.rerun()
+
+    st.caption("新人訓練 Level 1｜共 3 天")
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # 目前頁面
+    # --------------------------------------------------------
+
+    if st.session_state["training_page"] == "home":
+
+        st.subheader("📚 課程選擇")
+
+        st.info(
+            "請選擇今天要學習的課程，完成「影片 → 課程內容 → 測驗」三個步驟。"
+        )
+
+        st.write("這裡之後會放入 DAY 1、DAY 2、DAY 3 的課程。")
+
+    elif st.session_state["training_page"] == "records":
+
+        st.subheader("📊 我的學習紀錄")
+
+        st.info(
+            "這裡之後會顯示新人各課程的學習進度與測驗結果。"
+        )
 
     # ========================================================
     # 載入新人訓練資料
