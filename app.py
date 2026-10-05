@@ -3779,23 +3779,87 @@ elif page == "🎓 新人訓練中心":
                 "### ① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
             )
 
+            st.subheader("📝 課程測驗")
+
             st.info(
-                "📝 接下來這裡會顯示本課程的測驗題目。"
+                "請完成以下測驗，確認已了解本課程內容。"
             )
+
+            st.divider()
+
+            # ------------------------------------------------
+            # 測驗題目
+            # ------------------------------------------------
+
+            st.markdown("### 第 1 題")
 
             st.write(
-                "目前先建立課程流程，測驗功能下一步再接上。"
+                "以下哪一項是新人訓練的重要內容？"
             )
 
+            answer = st.radio(
+                "請選擇答案：",
+                [
+                    "A. 了解工作內容與基本規則",
+                    "B. 只需要記住商品價格",
+                    "C. 不需要了解顧客服務",
+                    "D. 不需要學習系統操作"
+                ],
+                key="training_quiz_answer"
+            )
+
+            st.divider()
+
+            # ------------------------------------------------
+            # 送出答案
+            # ------------------------------------------------
+
             if st.button(
-                "完成課程",
-                key="training_finish",
+                "送出答案",
+                key="training_submit_quiz",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "home"
-                st.session_state["training_step"] = "video"
-                st.rerun()
 
+                if answer == "A. 了解工作內容與基本規則":
+
+                    st.success(
+                        "🎉 答對了！"
+                    )
+
+                    st.write(
+                        "新人需要了解工作內容、基本規則及顧客服務方式。"
+                    )
+
+                    st.session_state["training_quiz_passed"] = True
+
+                else:
+
+                    st.error(
+                        "再想一下喔！請重新選擇答案。"
+                    )
+
+            # ------------------------------------------------
+            # 完成課程
+            # ------------------------------------------------
+
+            if st.session_state.get(
+                "training_quiz_passed",
+                False
+            ):
+
+                st.success(
+                    "✓ 測驗完成，可以結束本課程。"
+                )
+
+                if st.button(
+                    "完成課程",
+                    key="training_finish",
+                    use_container_width=True
+                ):
+                    st.session_state["training_page"] = "home"
+                    st.session_state["training_step"] = "video"
+                    st.session_state["training_quiz_passed"] = False
+                    st.rerun()
         # ----------------------------------------------------
         # 課程名稱
         # ----------------------------------------------------
