@@ -3658,6 +3658,109 @@ elif page == "🎓 新人訓練中心":
         st.info(
             "這裡之後會顯示新人各課程的學習進度與測驗結果。"
         )
+        elif st.session_state["training_page"] == "course":
+
+        course_id = st.session_state.get(
+            "training_course_id",
+            ""
+        )
+
+        training_step = st.session_state.get(
+            "training_step",
+            "video"
+        )
+
+        # ----------------------------------------------------
+        # 課程名稱
+        # ----------------------------------------------------
+        course_names = {
+            "DAY1_BASIC": "🏠 宜得利基礎",
+            "DAY1_SERVICE": "💬 接客基礎",
+            "DAY2_PRODUCT": "🛋 商品基礎",
+            "DAY2_SYSTEM": "💻 系統操作",
+            "DAY3_PHONE": "☎️ 電話應對",
+            "DAY3_PRACTICE": "📝 實務練習",
+        }
+
+        course_name = course_names.get(
+            course_id,
+            "新人訓練課程"
+        )
+
+        st.subheader(course_name)
+
+        st.caption(
+            f"課程ID：{course_id}"
+        )
+
+        st.divider()
+
+        # ----------------------------------------------------
+        # 學習步驟
+        # ----------------------------------------------------
+        if training_step == "video":
+
+            st.markdown(
+                "### ① 影片　→　② 課程內容　→　③ 測驗"
+            )
+
+            st.info(
+                "🎬 接下來這裡會播放本課程的訓練影片。"
+            )
+
+            st.write(
+                "目前先建立課程流程，影片功能下一步再接上。"
+            )
+
+            if st.button(
+                "下一步：課程內容 →",
+                use_container_width=True
+            ):
+                st.session_state["training_step"] = "content"
+                st.rerun()
+
+        elif training_step == "content":
+
+            st.markdown(
+                "### ① 影片 ✓　→　② 課程內容　→　③ 測驗"
+            )
+
+            st.info(
+                "📖 接下來這裡會顯示本課程的學習內容。"
+            )
+
+            st.write(
+                "目前先建立課程流程，課程內容下一步再接上。"
+            )
+
+            if st.button(
+                "下一步：開始測驗 →",
+                use_container_width=True
+            ):
+                st.session_state["training_step"] = "quiz"
+                st.rerun()
+
+        elif training_step == "quiz":
+
+            st.markdown(
+                "### ① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
+            )
+
+            st.info(
+                "📝 接下來這裡會顯示本課程的測驗題目。"
+            )
+
+            st.write(
+                "目前先建立課程流程，測驗功能下一步再接上。"
+            )
+
+            if st.button(
+                "完成課程",
+                use_container_width=True
+            ):
+                st.session_state["training_page"] = "home"
+                st.session_state["training_step"] = "video"
+                st.rerun()
     # ========================================================
     # 載入新人訓練資料
     # ========================================================
