@@ -3993,42 +3993,6 @@ elif page == "🎓 新人訓練中心":
 
         else:
 
-            # =================================================
-            # 快捷導覽
-            # =================================================
-
-            shortcut_col1, shortcut_col2, shortcut_col3 = st.columns(
-                [1, 1, 4]
-            )
-
-            with shortcut_col1:
-
-                if st.button(
-                    "🏠 首頁",
-                    use_container_width=True,
-                    key="training_home"
-                ):
-
-                    st.session_state[
-                        "current_page"
-                    ] = "🏠 首頁"
-
-                    st.rerun()
-
-            with shortcut_col2:
-
-                if st.button(
-                    "📊 學習紀錄",
-                    use_container_width=True,
-                    key="training_records"
-                ):
-
-                    st.session_state[
-                        "current_page"
-                    ] = "📊 學習紀錄"
-
-                    st.rerun()
-
             st.markdown(
                 "### 📚 我的課程"
             )
