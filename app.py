@@ -3513,16 +3513,142 @@ elif page == "🎓 新人訓練中心":
     # 目前頁面
     # --------------------------------------------------------
 
-    if st.session_state["training_page"] == "home":
+if st.session_state["training_page"] == "home":
 
-        st.subheader("📚 課程選擇")
+    st.subheader("📚 課程選擇")
 
-        st.info(
-            "請選擇今天要學習的課程，完成「影片 → 課程內容 → 測驗」三個步驟。"
+    st.info(
+        "請依照訓練進度選擇課程，完成「影片 → 課程內容 → 測驗」三個步驟。"
+    )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # DAY 1
+    # --------------------------------------------------------
+    st.markdown("### 📅 DAY 1｜宜得利基礎")
+
+    day1_col1, day1_col2 = st.columns(2)
+
+    with day1_col1:
+        st.markdown("#### 🏠 宜得利基礎")
+
+        st.caption(
+            "了解宜得利基本資訊、企業理念與新人需要掌握的基礎知識。"
         )
 
-        st.write("這裡之後會放入 DAY 1、DAY 2、DAY 3 的課程。")
+        if st.button(
+            "開始課程 →",
+            key="training_day1_basic",
+            use_container_width=True
+        ):
+            st.session_state["training_page"] = "course"
+            st.session_state["training_course_id"] = "DAY1_BASIC"
+            st.session_state["training_step"] = "video"
+            st.rerun()
 
+    with day1_col2:
+        st.markdown("#### 💬 接客基礎")
+
+        st.caption(
+            "學習接客基本概念與顧客應對方式。"
+        )
+
+        if st.button(
+            "開始課程 →",
+            key="training_day1_service",
+            use_container_width=True
+        ):
+            st.session_state["training_page"] = "course"
+            st.session_state["training_course_id"] = "DAY1_SERVICE"
+            st.session_state["training_step"] = "video"
+            st.rerun()
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # DAY 2
+    # --------------------------------------------------------
+    st.markdown("### 📅 DAY 2｜商品與系統")
+
+    day2_col1, day2_col2 = st.columns(2)
+
+    with day2_col1:
+        st.markdown("#### 🛋 商品基礎")
+
+        st.caption(
+            "認識家具、家飾及常見商品資訊。"
+        )
+
+        if st.button(
+            "開始課程 →",
+            key="training_day2_product",
+            use_container_width=True
+        ):
+            st.session_state["training_page"] = "course"
+            st.session_state["training_course_id"] = "DAY2_PRODUCT"
+            st.session_state["training_step"] = "video"
+            st.rerun()
+
+    with day2_col2:
+        st.markdown("#### 💻 系統操作")
+
+        st.caption(
+            "認識客服工作中常用的系統及基本操作。"
+        )
+
+        if st.button(
+            "開始課程 →",
+            key="training_day2_system",
+            use_container_width=True
+        ):
+            st.session_state["training_page"] = "course"
+            st.session_state["training_course_id"] = "DAY2_SYSTEM"
+            st.session_state["training_step"] = "video"
+            st.rerun()
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # DAY 3
+    # --------------------------------------------------------
+    st.markdown("### 📅 DAY 3｜實務訓練")
+
+    day3_col1, day3_col2 = st.columns(2)
+
+    with day3_col1:
+        st.markdown("#### ☎️ 電話應對")
+
+        st.caption(
+            "學習顧客來電時的基本接聽流程與應對方式。"
+        )
+
+        if st.button(
+            "開始課程 →",
+            key="training_day3_phone",
+            use_container_width=True
+        ):
+            st.session_state["training_page"] = "course"
+            st.session_state["training_course_id"] = "DAY3_PHONE"
+            st.session_state["training_step"] = "video"
+            st.rerun()
+
+    with day3_col2:
+        st.markdown("#### 📝 實務練習")
+
+        st.caption(
+            "透過實際案例進行新人訓練與確認。"
+        )
+
+        if st.button(
+            "開始課程 →",
+            key="training_day3_practice",
+            use_container_width=True
+        ):
+            st.session_state["training_page"] = "course"
+            st.session_state["training_course_id"] = "DAY3_PRACTICE"
+            st.session_state["training_step"] = "video"
+            st.rerun()
     elif st.session_state["training_page"] == "records":
 
         st.subheader("📊 我的學習紀錄")
