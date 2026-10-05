@@ -4091,15 +4091,6 @@ elif page == "🎓 新人訓練中心":
                 "✓ 已完成課程內容閱讀"
             )
 
-            if st.button(
-                "下一步：開始測驗 →",
-                key="training_next_quiz",
-                use_container_width=True
-            ):
-                st.session_state["training_step"] = "quiz"
-                st.rerun()
-
-
         elif training_step == "quiz":
 
             st.markdown(
