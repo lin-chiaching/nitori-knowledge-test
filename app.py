@@ -3510,7 +3510,6 @@ elif page == "🎓 新人訓練中心":
     st.divider()
 
     # --------------------------------------------------------
-    # --------------------------------------------------------
     # 目前頁面
     # --------------------------------------------------------
 
@@ -3524,14 +3523,15 @@ elif page == "🎓 新人訓練中心":
 
         st.divider()
 
-        # --------------------------------------------------------
+        # ----------------------------------------------------
         # DAY 1
-        # --------------------------------------------------------
+        # ----------------------------------------------------
         st.markdown("### 📅 DAY 1｜宜得利基礎")
 
         day1_col1, day1_col2 = st.columns(2)
 
         with day1_col1:
+
             st.markdown("#### 🏠 宜得利基礎")
 
             st.caption(
@@ -3549,6 +3549,7 @@ elif page == "🎓 新人訓練中心":
                 st.rerun()
 
         with day1_col2:
+
             st.markdown("#### 💬 接客基礎")
 
             st.caption(
@@ -3567,14 +3568,15 @@ elif page == "🎓 新人訓練中心":
 
         st.divider()
 
-        # --------------------------------------------------------
+        # ----------------------------------------------------
         # DAY 2
-        # --------------------------------------------------------
+        # ----------------------------------------------------
         st.markdown("### 📅 DAY 2｜商品與系統")
 
         day2_col1, day2_col2 = st.columns(2)
 
         with day2_col1:
+
             st.markdown("#### 🛋 商品基礎")
 
             st.caption(
@@ -3592,6 +3594,7 @@ elif page == "🎓 新人訓練中心":
                 st.rerun()
 
         with day2_col2:
+
             st.markdown("#### 💻 系統操作")
 
             st.caption(
@@ -3610,14 +3613,15 @@ elif page == "🎓 新人訓練中心":
 
         st.divider()
 
-        # --------------------------------------------------------
+        # ----------------------------------------------------
         # DAY 3
-        # --------------------------------------------------------
+        # ----------------------------------------------------
         st.markdown("### 📅 DAY 3｜實務訓練")
 
         day3_col1, day3_col2 = st.columns(2)
 
         with day3_col1:
+
             st.markdown("#### ☎️ 電話應對")
 
             st.caption(
@@ -3635,6 +3639,7 @@ elif page == "🎓 新人訓練中心":
                 st.rerun()
 
         with day3_col2:
+
             st.markdown("#### 📝 實務練習")
 
             st.caption(
@@ -3651,6 +3656,7 @@ elif page == "🎓 新人訓練中心":
                 st.session_state["training_step"] = "video"
                 st.rerun()
 
+
     elif st.session_state["training_page"] == "records":
 
         st.subheader("📊 我的學習紀錄")
@@ -3658,7 +3664,9 @@ elif page == "🎓 新人訓練中心":
         st.info(
             "這裡之後會顯示新人各課程的學習進度與測驗結果。"
         )
-        elif st.session_state["training_page"] == "course":
+
+
+    elif st.session_state["training_page"] == "course":
 
         course_id = st.session_state.get(
             "training_course_id",
@@ -3669,6 +3677,94 @@ elif page == "🎓 新人訓練中心":
             "training_step",
             "video"
         )
+
+        course_names = {
+            "DAY1_BASIC": "🏠 宜得利基礎",
+            "DAY1_SERVICE": "💬 接客基礎",
+            "DAY2_PRODUCT": "🛋 商品基礎",
+            "DAY2_SYSTEM": "💻 系統操作",
+            "DAY3_PHONE": "☎️ 電話應對",
+            "DAY3_PRACTICE": "📝 實務練習",
+        }
+
+        course_name = course_names.get(
+            course_id,
+            "新人訓練課程"
+        )
+
+        st.subheader(course_name)
+
+        st.caption(
+            f"課程ID：{course_id}"
+        )
+
+        st.divider()
+
+        if training_step == "video":
+
+            st.markdown(
+                "### ① 影片　→　② 課程內容　→　③ 測驗"
+            )
+
+            st.info(
+                "🎬 接下來這裡會播放本課程的訓練影片。"
+            )
+
+            st.write(
+                "目前先建立課程流程，影片功能下一步再接上。"
+            )
+
+            if st.button(
+                "下一步：課程內容 →",
+                use_container_width=True
+            ):
+                st.session_state["training_step"] = "content"
+                st.rerun()
+
+
+        elif training_step == "content":
+
+            st.markdown(
+                "### ① 影片 ✓　→　② 課程內容　→　③ 測驗"
+            )
+
+            st.info(
+                "📖 接下來這裡會顯示本課程的學習內容。"
+            )
+
+            st.write(
+                "目前先建立課程流程，課程內容下一步再接上。"
+            )
+
+            if st.button(
+                "下一步：開始測驗 →",
+                use_container_width=True
+            ):
+                st.session_state["training_step"] = "quiz"
+                st.rerun()
+
+
+        elif training_step == "quiz":
+
+            st.markdown(
+                "### ① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
+            )
+
+            st.info(
+                "📝 接下來這裡會顯示本課程的測驗題目。"
+            )
+
+            st.write(
+                "目前先建立課程流程，測驗功能下一步再接上。"
+            )
+
+            if st.button(
+                "完成課程",
+                use_container_width=True
+            ):
+                st.session_state["training_page"] = "home"
+                st.session_state["training_step"] = "video"
+                st.rerun()
 
         # ----------------------------------------------------
         # 課程名稱
