@@ -3522,7 +3522,6 @@ elif page == "🎓 新人訓練中心":
     
     training_quiz = load_training_quiz()
 
-    training_records = load_training_records()
     # ========================================================
     # 使用身分
     # ========================================================
@@ -3542,6 +3541,8 @@ elif page == "🎓 新人訓練中心":
     # ========================================================
 
     if role == "👨‍🎓 新人":
+        if "training_step" not in st.session_state:
+            st.session_state["training_step"] = "video"
 
         st.subheader(
             "👨‍🎓 我的訓練"
@@ -3862,6 +3863,10 @@ elif page == "🎓 新人訓練中心":
                                         "training_course"
                                     ] = course_id
 
+                                    st.session_state[
+                                        "training_step"
+                                    ] = "video"
+
                                     st.rerun()
                 # =================================================
                 # 顯示選擇的課程
@@ -3873,6 +3878,23 @@ elif page == "🎓 新人訓練中心":
                 )
 
                 if selected_course:
+                       training_step = st.session_state.get(
+                            "training_step",
+                            "video"
+                        )
+
+                        if training_step == "video":
+                            step_text = "① 影片　→　② 課程內容　→　③ 測驗"
+
+                        elif training_step == "content":
+                            step_text = "① 影片 ✓　→　② 課程內容　→　③ 測驗"
+
+                        else:
+                            step_text = "① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
+
+                        st.info(
+                            f"📍 目前學習進度：{step_text}"
+                        )
 
                     course_row = training_overview[
                         training_overview["課程ID"]
@@ -3985,6 +4007,11 @@ elif page == "🎓 新人訓練中心":
                                 selected_course
                             ].copy()
                         )
+                    if st.session_state.get(
+                        "training_step",
+                        "video"
+                    ) == "video":
+
                         # =========================================
                         # 課程影片
                         # =========================================
@@ -4090,6 +4117,27 @@ elif page == "🎓 新人訓練中心":
                                     st.info(
                                         "🔒 完成影片觀看後，請勾選上方確認，即可解鎖測驗。"
                                     )
+                                if video_completed:
+
+                                   if st.button(
+                                       "下一步 → 課程內容",
+                                       type="primary",
+                                       use_container_width=True,
+                                       key=f"next_content_{selected_course}"
+                                   ):
+
+                                    st.session_state[
+                                        "training_step"
+                                    ] = "content"
+
+                                    st.rerun()
+
+                            if st.session_state.get(
+                                "training_step",
+                                "video"
+                            ) == "video":
+
+                                st.stop()
 
                             else:
 
