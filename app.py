@@ -3480,38 +3480,70 @@ elif page == "🎓 新人訓練中心":
     # --------------------------------------------------------
     # 頁面狀態
     # --------------------------------------------------------
+
     if "training_page" not in st.session_state:
         st.session_state["training_page"] = "home"
 
     if "training_step" not in st.session_state:
         st.session_state["training_step"] = "video"
 
+    if "training_course_id" not in st.session_state:
+        st.session_state["training_course_id"] = ""
+
+    if "training_quiz_passed" not in st.session_state:
+        st.session_state["training_quiz_passed"] = False
+
     # --------------------------------------------------------
     # 標題＋右上角快捷鍵
     # --------------------------------------------------------
-    title_col, home_col, record_col = st.columns([6, 1.2, 1.2])
+
+    title_col, home_col, record_col = st.columns(
+        [6, 1.2, 1.2]
+    )
 
     with title_col:
+
         st.title("🎓 新人訓練中心")
 
     with home_col:
-        if st.button("🏠 新人首頁", use_container_width=True):
+
+        if st.button(
+            "🏠 新人首頁",
+            use_container_width=True,
+            key="training_top_home"
+        ):
+
             st.session_state["training_page"] = "home"
+
             st.session_state["training_step"] = "video"
+
+            st.session_state["training_course_id"] = ""
+
+            st.session_state["training_quiz_passed"] = False
+
             st.rerun()
 
     with record_col:
-        if st.button("📊 學習紀錄", use_container_width=True):
+
+        if st.button(
+            "📊 學習紀錄",
+            use_container_width=True,
+            key="training_top_records"
+        ):
+
             st.session_state["training_page"] = "records"
+
             st.rerun()
 
-    st.caption("新人訓練 Level 1｜共 3 天")
+    st.caption(
+        "新人訓練 Level 1｜共 3 天"
+    )
 
     st.divider()
 
-    # --------------------------------------------------------
-    # 目前頁面
-    # --------------------------------------------------------
+    # ========================================================
+    # 🏠 新人首頁
+    # ========================================================
 
     if st.session_state["training_page"] == "home":
 
@@ -3526,13 +3558,18 @@ elif page == "🎓 新人訓練中心":
         # ----------------------------------------------------
         # DAY 1
         # ----------------------------------------------------
-        st.markdown("### 📅 DAY 1｜宜得利基礎")
+
+        st.markdown(
+            "### 📅 DAY 1｜宜得利基礎"
+        )
 
         day1_col1, day1_col2 = st.columns(2)
 
         with day1_col1:
 
-            st.markdown("#### 🏠 宜得利基礎")
+            st.markdown(
+                "#### 🏠 宜得利基礎"
+            )
 
             st.caption(
                 "了解宜得利基本資訊、企業理念與新人需要掌握的基礎知識。"
@@ -3543,14 +3580,30 @@ elif page == "🎓 新人訓練中心":
                 key="training_day1_basic",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "course"
-                st.session_state["training_course_id"] = "DAY1_BASIC"
-                st.session_state["training_step"] = "video"
+
+                st.session_state[
+                    "training_page"
+                ] = "course"
+
+                st.session_state[
+                    "training_course_id"
+                ] = "DAY1_BASIC"
+
+                st.session_state[
+                    "training_step"
+                ] = "video"
+
+                st.session_state[
+                    "training_quiz_passed"
+                ] = False
+
                 st.rerun()
 
         with day1_col2:
 
-            st.markdown("#### 💬 接客基礎")
+            st.markdown(
+                "#### 💬 接客基礎"
+            )
 
             st.caption(
                 "學習接客基本概念與顧客應對方式。"
@@ -3561,9 +3614,23 @@ elif page == "🎓 新人訓練中心":
                 key="training_day1_service",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "course"
-                st.session_state["training_course_id"] = "DAY1_SERVICE"
-                st.session_state["training_step"] = "video"
+
+                st.session_state[
+                    "training_page"
+                ] = "course"
+
+                st.session_state[
+                    "training_course_id"
+                ] = "DAY1_SERVICE"
+
+                st.session_state[
+                    "training_step"
+                ] = "video"
+
+                st.session_state[
+                    "training_quiz_passed"
+                ] = False
+
                 st.rerun()
 
         st.divider()
@@ -3571,13 +3638,18 @@ elif page == "🎓 新人訓練中心":
         # ----------------------------------------------------
         # DAY 2
         # ----------------------------------------------------
-        st.markdown("### 📅 DAY 2｜商品與系統")
+
+        st.markdown(
+            "### 📅 DAY 2｜商品與系統"
+        )
 
         day2_col1, day2_col2 = st.columns(2)
 
         with day2_col1:
 
-            st.markdown("#### 🛋 商品基礎")
+            st.markdown(
+                "#### 🛋 商品基礎"
+            )
 
             st.caption(
                 "認識家具、家飾及常見商品資訊。"
@@ -3588,14 +3660,30 @@ elif page == "🎓 新人訓練中心":
                 key="training_day2_product",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "course"
-                st.session_state["training_course_id"] = "DAY2_PRODUCT"
-                st.session_state["training_step"] = "video"
+
+                st.session_state[
+                    "training_page"
+                ] = "course"
+
+                st.session_state[
+                    "training_course_id"
+                ] = "DAY2_PRODUCT"
+
+                st.session_state[
+                    "training_step"
+                ] = "video"
+
+                st.session_state[
+                    "training_quiz_passed"
+                ] = False
+
                 st.rerun()
 
         with day2_col2:
 
-            st.markdown("#### 💻 系統操作")
+            st.markdown(
+                "#### 💻 系統操作"
+            )
 
             st.caption(
                 "認識客服工作中常用的系統及基本操作。"
@@ -3606,9 +3694,23 @@ elif page == "🎓 新人訓練中心":
                 key="training_day2_system",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "course"
-                st.session_state["training_course_id"] = "DAY2_SYSTEM"
-                st.session_state["training_step"] = "video"
+
+                st.session_state[
+                    "training_page"
+                ] = "course"
+
+                st.session_state[
+                    "training_course_id"
+                ] = "DAY2_SYSTEM"
+
+                st.session_state[
+                    "training_step"
+                ] = "video"
+
+                st.session_state[
+                    "training_quiz_passed"
+                ] = False
+
                 st.rerun()
 
         st.divider()
@@ -3616,13 +3718,18 @@ elif page == "🎓 新人訓練中心":
         # ----------------------------------------------------
         # DAY 3
         # ----------------------------------------------------
-        st.markdown("### 📅 DAY 3｜實務訓練")
+
+        st.markdown(
+            "### 📅 DAY 3｜實務訓練"
+        )
 
         day3_col1, day3_col2 = st.columns(2)
 
         with day3_col1:
 
-            st.markdown("#### ☎️ 電話應對")
+            st.markdown(
+                "#### ☎️ 電話應對"
+            )
 
             st.caption(
                 "學習顧客來電時的基本接聽流程與應對方式。"
@@ -3633,14 +3740,30 @@ elif page == "🎓 新人訓練中心":
                 key="training_day3_phone",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "course"
-                st.session_state["training_course_id"] = "DAY3_PHONE"
-                st.session_state["training_step"] = "video"
+
+                st.session_state[
+                    "training_page"
+                ] = "course"
+
+                st.session_state[
+                    "training_course_id"
+                ] = "DAY3_PHONE"
+
+                st.session_state[
+                    "training_step"
+                ] = "video"
+
+                st.session_state[
+                    "training_quiz_passed"
+                ] = False
+
                 st.rerun()
 
         with day3_col2:
 
-            st.markdown("#### 📝 實務練習")
+            st.markdown(
+                "#### 📝 實務練習"
+            )
 
             st.caption(
                 "透過實際案例進行新人訓練與確認。"
@@ -3651,15 +3774,34 @@ elif page == "🎓 新人訓練中心":
                 key="training_day3_practice",
                 use_container_width=True
             ):
-                st.session_state["training_page"] = "course"
-                st.session_state["training_course_id"] = "DAY3_PRACTICE"
-                st.session_state["training_step"] = "video"
+
+                st.session_state[
+                    "training_page"
+                ] = "course"
+
+                st.session_state[
+                    "training_course_id"
+                ] = "DAY3_PRACTICE"
+
+                st.session_state[
+                    "training_step"
+                ] = "video"
+
+                st.session_state[
+                    "training_quiz_passed"
+                ] = False
+
                 st.rerun()
 
+    # ========================================================
+    # 📊 學習紀錄
+    # ========================================================
 
     elif st.session_state["training_page"] == "records":
 
-        st.subheader("🎓 我的學習進度")
+        st.subheader(
+            "🎓 我的學習進度"
+        )
 
         st.caption(
             "查看目前新人訓練課程的學習進度。"
@@ -3667,11 +3809,12 @@ elif page == "🎓 新人訓練中心":
 
         st.divider()
 
-        # ====================================================
+        # ----------------------------------------------------
         # 暫時使用的學習資料
-        # ====================================================
+        # ----------------------------------------------------
 
         training_records_demo = [
+
             {
                 "day": "DAY 1",
                 "day_name": "基礎訓練",
@@ -3679,6 +3822,7 @@ elif page == "🎓 新人訓練中心":
                 "progress": 100,
                 "status": "✓ 已完成"
             },
+
             {
                 "day": "DAY 1",
                 "day_name": "基礎訓練",
@@ -3686,6 +3830,7 @@ elif page == "🎓 新人訓練中心":
                 "progress": 60,
                 "status": "◐ 學習中"
             },
+
             {
                 "day": "DAY 2",
                 "day_name": "商品與系統",
@@ -3693,6 +3838,7 @@ elif page == "🎓 新人訓練中心":
                 "progress": 0,
                 "status": "○ 尚未開始"
             },
+
             {
                 "day": "DAY 2",
                 "day_name": "商品與系統",
@@ -3700,6 +3846,7 @@ elif page == "🎓 新人訓練中心":
                 "progress": 0,
                 "status": "○ 尚未開始"
             },
+
             {
                 "day": "DAY 3",
                 "day_name": "實務訓練",
@@ -3707,6 +3854,7 @@ elif page == "🎓 新人訓練中心":
                 "progress": 0,
                 "status": "○ 尚未開始"
             },
+
             {
                 "day": "DAY 3",
                 "day_name": "實務訓練",
@@ -3716,9 +3864,9 @@ elif page == "🎓 新人訓練中心":
             }
         ]
 
-        # ====================================================
-        # 計算整體進度
-        # ====================================================
+        # ----------------------------------------------------
+        # 整體進度
+        # ----------------------------------------------------
 
         total_courses = len(
             training_records_demo
@@ -3738,38 +3886,38 @@ elif page == "🎓 新人訓練中心":
             / total_courses
         )
 
-        # ====================================================
-        # 頂部進度區
-        # ====================================================
+        # ----------------------------------------------------
+        # 頂部進度卡
+        # ----------------------------------------------------
 
         st.markdown(
             f"""
             <div style="
-                background: #F8F5F0;
-                border-radius: 20px;
-                padding: 28px;
-                margin-bottom: 30px;
+                background:#F8F5F0;
+                border-radius:20px;
+                padding:28px;
+                margin-bottom:30px;
             ">
 
                 <div style="
-                    font-size: 16px;
-                    color: #777777;
-                    margin-bottom: 8px;
+                    font-size:16px;
+                    color:#777777;
+                    margin-bottom:8px;
                 ">
                     🎓 新人訓練整體進度
                 </div>
 
                 <div style="
-                    font-size: 42px;
-                    font-weight: 700;
-                    margin-bottom: 8px;
+                    font-size:42px;
+                    font-weight:700;
+                    margin-bottom:8px;
                 ">
                     {overall_progress:.0f}%
                 </div>
 
                 <div style="
-                    font-size: 15px;
-                    color: #666666;
+                    font-size:15px;
+                    color:#666666;
                 ">
                     已完成 {completed_courses} / {total_courses} 門課程
                 </div>
@@ -3779,9 +3927,9 @@ elif page == "🎓 新人訓練中心":
             unsafe_allow_html=True
         )
 
-        # ====================================================
-        # 各 DAY 課程
-        # ====================================================
+        # ----------------------------------------------------
+        # DAY 課程卡片
+        # ----------------------------------------------------
 
         for day in [
             "DAY 1",
@@ -3818,43 +3966,65 @@ elif page == "🎓 新人訓練中心":
                 with current_col:
 
                     if record["progress"] == 100:
+
                         status_color = "#2E7D32"
+
                     elif record["progress"] > 0:
+
                         status_color = "#B7791F"
+
                     else:
+
                         status_color = "#888888"
 
                     st.markdown(
                         f"""
                         <div style="
-                            border: 1px solid #E8E8E8;
-                            border-radius: 18px;
-                            padding: 24px;
-                            margin-bottom: 20px;
-                            background: #FFFFFF;
-                            min-height: 170px;
+                            border:1px solid #E8E8E8;
+                            border-radius:18px;
+                            padding:24px;
+                            margin-bottom:20px;
+                            background:#FFFFFF;
+                            min-height:190px;
                         ">
 
                             <div style="
-                                font-size: 17px;
-                                font-weight: 600;
-                                margin-bottom: 18px;
+                                font-size:17px;
+                                font-weight:600;
+                                margin-bottom:18px;
                             ">
                                 {record["course"]}
                             </div>
 
                             <div style="
-                                font-size: 36px;
-                                font-weight: 700;
-                                margin-bottom: 8px;
+                                font-size:36px;
+                                font-weight:700;
+                                margin-bottom:8px;
                             ">
                                 {record["progress"]}%
                             </div>
 
                             <div style="
-                                font-size: 14px;
-                                color: {status_color};
-                                font-weight: 600;
+                                height:8px;
+                                background:#EEEEEE;
+                                border-radius:10px;
+                                margin-bottom:14px;
+                            ">
+
+                                <div style="
+                                    width:{record["progress"]}%;
+                                    height:8px;
+                                    background:#B7A58A;
+                                    border-radius:10px;
+                                ">
+                                </div>
+
+                            </div>
+
+                            <div style="
+                                font-size:14px;
+                                color:{status_color};
+                                font-weight:600;
                             ">
                                 {record["status"]}
                             </div>
@@ -3863,1185 +4033,262 @@ elif page == "🎓 新人訓練中心":
                         """,
                         unsafe_allow_html=True
                     )
-    # ========================================================
-    # 載入新人訓練資料
-    # ========================================================
-
-    employee_data = load_employee_data()
-
-    training_overview = load_training_overview()
-
-    training_content = load_training_content()
-
-    training_videos = load_training_videos()
-
-    training_records = load_training_records()
-    
-    training_quiz = load_training_quiz()
-
-    # ========================================================
-    # 使用身分
-    # ========================================================
-
-    role = st.radio(
-        "請選擇使用身分",
-        [
-            "👨‍🎓 新人",
-            "👩‍🏫 小老師"
-        ],
-        horizontal=True,
-        key="training_role"
-    )
-
-    # ========================================================
-    # 新人
-    # ========================================================
-
-    if role == "👨‍🎓 新人":
-        if "training_step" not in st.session_state:
-            st.session_state["training_step"] = "video"
-
-        st.subheader(
-            "👨‍🎓 我的訓練"
-        )
-
-        st.write(
-            "歡迎加入宜得利！"
-        )
-
-        # ====================================================
-        # 我的學習紀錄
-        # ====================================================
-
-        if not training_records.empty:
-
-            st.markdown(
-                "### 📊 我的學習紀錄"
-            )
-
-            st.dataframe(
-                training_records,
-                use_container_width=True,
-                hide_index=True
-            )
 
         st.divider()
 
-        # ====================================================
-        # 課程資料確認
-        # ====================================================
+        if st.button(
+            "← 回到新人首頁",
+            key="training_records_back_home",
+            use_container_width=True
+        ):
 
-        if training_overview.empty:
+            st.session_state[
+                "training_page"
+            ] = "home"
 
-            st.warning(
-                "目前找不到「課程總表」資料，請確認 Excel 是否已建立該工作表。"
-            )
+            st.rerun()
 
-        else:
+    # ========================================================
+    # 📖 課程頁面
+    # ========================================================
+
+    elif st.session_state["training_page"] == "course":
+
+        course_id = st.session_state.get(
+            "training_course_id",
+            ""
+        )
+
+        training_step = st.session_state.get(
+            "training_step",
+            "video"
+        )
+
+        course_names = {
+
+            "DAY1_BASIC":
+                "🏠 宜得利基礎",
+
+            "DAY1_SERVICE":
+                "💬 接客基礎",
+
+            "DAY2_PRODUCT":
+                "🛋 商品基礎",
+
+            "DAY2_SYSTEM":
+                "💻 系統操作",
+
+            "DAY3_PHONE":
+                "☎️ 電話應對",
+
+            "DAY3_PRACTICE":
+                "📝 實務練習"
+        }
+
+        course_name = course_names.get(
+            course_id,
+            "新人訓練課程"
+        )
+
+        st.subheader(
+            course_name
+        )
+
+        st.caption(
+            f"課程ID：{course_id}"
+        )
+
+        st.divider()
+
+        # ----------------------------------------------------
+        # ① 影片
+        # ----------------------------------------------------
+
+        if training_step == "video":
 
             st.markdown(
-                "### 📚 我的課程"
+                "### ① 影片　→　② 課程內容　→　③ 測驗"
             )
 
-            st.caption(
-                "請依照訓練日選擇課程。"
+            st.info(
+                "🎬 接下來這裡會播放本課程的訓練影片。"
             )
 
-            # =================================================
-            # 選擇 DAY
-            # =================================================
+            st.write(
+                "目前先建立課程流程，影片功能下一步再接上。"
+            )
+
+            if st.button(
+                "下一步：課程內容 →",
+                key="training_next_content",
+                use_container_width=True
+            ):
+
+                st.session_state[
+                    "training_step"
+                ] = "content"
+
+                st.rerun()
+
+        # ----------------------------------------------------
+        # ② 課程內容
+        # ----------------------------------------------------
+
+        elif training_step == "content":
 
             st.markdown(
-                "### 🐾 選擇訓練日"
+                "### ① 影片 ✓　→　② 課程內容　→　③ 測驗"
             )
 
-            day_columns = st.columns(3)
-
-            days = [
-                (
-                    "DAY1",
-                    "🌱",
-                    "基礎與接待"
-                ),
-                (
-                    "DAY2",
-                    "💻",
-                    "系統與網購"
-                ),
-                (
-                    "DAY3",
-                    "🛋️",
-                    "家具與商品"
-                )
-            ]
-
-            for i, (
-                day,
-                icon,
-                description
-            ) in enumerate(days):
-
-                day_data = training_overview[
-                    training_overview["DAY"]
-                    .astype(str)
-                    .str.strip()
-                    == day
-                ]
-
-                with day_columns[i]:
-
-                    with st.container(
-                        border=True
-                    ):
-
-                        st.markdown(
-                            f"## {icon} {day}"
-                        )
-
-                        st.write(
-                            description
-                        )
-
-                        st.caption(
-                            f"{len(day_data)} 個課程大項"
-                        )
-
-                        if st.button(
-                            f"進入 {day}",
-                            use_container_width=True,
-                            key=f"training_day_{day}"
-                        ):
-
-                            st.session_state[
-                                "training_day"
-                            ] = day
-
-                            st.session_state[
-                                "training_course"
-                            ] = ""
-
-                            st.rerun()
-
-            # =================================================
-            # 顯示選擇的 DAY
-            # =================================================
-
-            selected_day = st.session_state.get(
-                "training_day",
-                ""
+            st.subheader(
+                "📖 課程內容"
             )
 
-            if selected_day:
+            st.info(
+                "請閱讀以下課程內容，完成後即可進入測驗。"
+            )
 
-                st.divider()
+            st.markdown(
+                "#### 本課程學習重點"
+            )
 
-                st.markdown(
-                    f"### 📚 {selected_day} 課程"
-                )
+            st.markdown(
+                """
+                **1. 課程介紹**
 
-                day_courses = training_overview[
-                    training_overview["DAY"]
-                    .astype(str)
-                    .str.strip()
-                    ==
-                    selected_day
-                ].copy()
+                了解本課程的學習目的，以及新人需要掌握的基本內容。
 
-                if day_courses.empty:
+                **2. 基礎知識**
 
-                    st.info(
-                        f"{selected_day} 目前尚未建立課程。"
+                認識工作中會接觸到的基本資訊與注意事項。
+
+                **3. 實務應用**
+
+                將課程內容應用於日常工作與顧客應對。
+                """
+            )
+
+            st.divider()
+
+            st.success(
+                "✓ 已完成課程內容閱讀"
+            )
+
+            if st.button(
+                "下一步：開始測驗 →",
+                key="training_next_quiz",
+                use_container_width=True
+            ):
+
+                st.session_state[
+                    "training_step"
+                ] = "quiz"
+
+                st.rerun()
+
+        # ----------------------------------------------------
+        # ③ 測驗
+        # ----------------------------------------------------
+
+        elif training_step == "quiz":
+
+            st.markdown(
+                "### ① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
+            )
+
+            st.subheader(
+                "📝 課程測驗"
+            )
+
+            st.info(
+                "請完成以下測驗，確認已了解本課程內容。"
+            )
+
+            st.divider()
+
+            st.markdown(
+                "### 第 1 題"
+            )
+
+            st.write(
+                "以下哪一項是新人訓練的重要內容？"
+            )
+
+            answer = st.radio(
+                "請選擇答案：",
+                [
+                    "A. 了解工作內容與基本規則",
+                    "B. 只需要記住商品價格",
+                    "C. 不需要了解顧客服務",
+                    "D. 不需要學習系統操作"
+                ],
+                key="training_quiz_answer"
+            )
+
+            st.divider()
+
+            if st.button(
+                "送出答案",
+                key="training_submit_quiz",
+                use_container_width=True
+            ):
+
+                if answer == "A. 了解工作內容與基本規則":
+
+                    st.success(
+                        "🎉 答對了！"
                     )
+
+                    st.write(
+                        "新人需要了解工作內容、基本規則及顧客服務方式。"
+                    )
+
+                    st.session_state[
+                        "training_quiz_passed"
+                    ] = True
 
                 else:
 
-                    # =================================================
-                    # 取得目前登入新人
-                    # =================================================
+                    st.session_state[
+                        "training_quiz_passed"
+                    ] = False
 
-                    selected_employee_id = st.session_state.get(
-                        "training_employee_id",
-                        ""
+                    st.error(
+                        "再想一下喔！請重新選擇答案。"
                     )
 
-                    for _, course in day_courses.iterrows():
+            if st.session_state.get(
+                "training_quiz_passed",
+                False
+            ):
 
-                        course_id = clean_text(
-                            course.get(
-                                "課程ID",
-                                ""
-                            )
-                        )
-
-                        course_name = clean_text(
-                            course.get(
-                                "課程大項",
-                                ""
-                            )
-                        )
-
-                        course_items = training_content[
-                            training_content["課程ID"]
-                            .astype(str)
-                            .str.strip()
-                            ==
-                            course_id
-                        ]
-
-                        # =================================================
-                        # 查詢這位新人目前課程的學習紀錄
-                        # =================================================
-
-                        course_record = pd.DataFrame()
-
-                        if (
-                            selected_employee_id
-                            and not training_records.empty
-                        ):
-
-                            course_record = training_records[
-                                (
-                                    training_records["員工編號"]
-                                    .astype(str)
-                                    .str.strip()
-                                    ==
-                                    str(
-                                        selected_employee_id
-                                    ).strip()
-                                )
-                                &
-                                (
-                                    training_records["課程ID"]
-                                    .astype(str)
-                                    .str.strip()
-                                    ==
-                                    course_id
-                                )
-                            ].copy()
-
-                        quiz_status = ""
-
-                        if not course_record.empty:
-
-                            quiz_status = clean_text(
-                                course_record.iloc[0].get(
-                                    "測驗狀態",
-                                    ""
-                                )
-                            )
-
-                        # =================================================
-                        # 判斷課程狀態
-                        # =================================================
-
-                        if quiz_status == "通過":
-
-                            course_status = "✅ 已完成"
-
-                        elif quiz_status == "未通過":
-
-                            course_status = "⚠️ 測驗未通過"
-
-                        else:
-
-                            course_status = "📝 尚未完成"
-
-                        # =================================================
-                        # 顯示課程
-                        # =================================================
-
-                        with st.container(
-                            border=True
-                        ):
-
-                            col1, col2 = st.columns(
-                                [5, 1]
-                            )
-
-                            with col1:
-
-                                st.subheader(
-                                    f"📘 {course_name}"
-                                )
-
-                                st.caption(
-                                    f"{len(course_items)} 個課程內容"
-                                )
-
-                                st.caption(
-                                    course_status
-                                )
-
-                            with col2:
-
-                                if st.button(
-                                    "查看課程",
-                                    key=f"course_{course_id}",
-                                    use_container_width=True
-                                ):
-
-                                    st.session_state[
-                                        "training_course"
-                                    ] = course_id
-
-                                    st.session_state[
-                                        "training_step"
-                                    ] = "video"
-
-                                    st.rerun()
-                # =================================================
-                # 顯示選擇的課程
-                # =================================================
-
-                selected_course = st.session_state.get(
-                    "training_course",
-                    ""
+                st.success(
+                    "✓ 測驗完成，可以結束本課程。"
                 )
 
-                if selected_course:
-
-                    course_row = training_overview[
-                        training_overview["課程ID"]
-                        .astype(str)
-                        .str.strip()
-                        ==
-                        selected_course
-                    ]
-
-                    if not course_row.empty:
-
-                        course_name = clean_text(
-                            course_row.iloc[0].get(
-                                "課程大項",
-                                ""
-                            )
-                        )
-
-                        # =================================================
-                        # 查詢目前新人學習狀態
-                        # =================================================
-
-                        selected_employee_id = st.session_state.get(
-                            "training_employee_id",
-                            ""
-                        )
-
-                        course_record = pd.DataFrame()
-
-                        if (
-                            selected_employee_id
-                            and not training_records.empty
-                        ):
-
-                            course_record = training_records[
-                                (
-                                    training_records["員工編號"]
-                                    .astype(str)
-                                    .str.strip()
-                                    ==
-                                    str(selected_employee_id).strip()
-                                )
-                                &
-                                (
-                                    training_records["課程ID"]
-                                    .astype(str)
-                                    .str.strip()
-                                    ==
-                                    str(selected_course).strip()
-                                )
-                            ].copy()
-
-                        # =================================================
-                        # 判斷課程狀態
-                        # =================================================
-
-                        learning_status = ""
-                        quiz_status = ""
-
-                        if not course_record.empty:
-
-                            learning_status = clean_text(
-                                course_record.iloc[0].get(
-                                    "學習狀態",
-                                    ""
-                                )
-                            )
-
-                            quiz_status = clean_text(
-                                course_record.iloc[0].get(
-                                    "測驗狀態",
-                                    ""
-                                )
-                            )
-
-                        st.divider()
-
-                        st.markdown(
-                            f"### 📖 {course_name}"
-                        )
-
-                        # =================================================
-                        # 顯示狀態
-                        # =================================================
-
-                        if quiz_status == "通過":
-
-                            st.success(
-                                "✅ 已完成｜測驗通過"
-                            )
-
-                        elif quiz_status == "未通過":
-
-                            st.warning(
-                                "⚠️ 測驗未通過｜可以重新學習並再次測驗"
-                            )
-
-                        else:
-
-                            st.info(
-                                "📝 尚未完成"
-                            )
-
-                        course_content = (
-                            training_content[
-                                training_content["課程ID"]
-                                .astype(str)
-                                .str.strip()
-                                ==
-                                selected_course
-                            ].copy()
-                        )
-                    if st.session_state.get(
-                        "training_step",
-                        "video"
-                    ) == "video":
-
-                        # =========================================
-                        # 課程影片
-                        # =========================================
-
-                        st.markdown(
-                            "#### 🎬 課程教學影片"
-                        )
-
-                        video_row = (
-                            training_videos[
-                                training_videos["課程ID"]
-                                .astype(str)
-                                .str.strip()
-                                ==
-                                selected_course
-                            ]
-                        )
-
-                        if video_row.empty:
-
-                            st.info(
-                                "目前尚未建立這個課程的教學影片。"
-                            )
-
-                        else:
-
-                            video_url = clean_text(
-                                video_row.iloc[0].get(
-                                    "影片URL",
-                                    ""
-                                )
-                            )
-
-                            video_name = clean_text(
-                                video_row.iloc[0].get(
-                                    "影片名稱",
-                                    ""
-                                )
-                            )
-
-                            video_description = clean_text(
-                                video_row.iloc[0].get(
-                                    "影片說明",
-                                    ""
-                                )
-                            )
-
-                            if video_name:
-
-                                st.markdown(
-                                    f"**🎞️ {video_name}**"
-                                )
-
-                            if video_description:
-
-                                st.caption(
-                                    video_description
-                                )
-
-                            if video_url:
-
-                                st.caption(
-                                    "請先觀看完整教學影片，觀看完成後再勾選下方確認。"
-                                )
-
-                                st.link_button(
-                                    "▶️ 開始觀看影片",
-                                    video_url,
-                                    use_container_width=True
-                                )
-
-                                st.caption(
-                                    "🔒 公司內部訓練影片｜需使用 Microsoft 365 帳號觀看"
-                                )
-
-                                st.divider()
-
-                                with st.container(
-                                    border=True
-                                ):
-
-                                    st.markdown(
-                                        "## ☑️ 影片觀看確認"
-                                    )
-
-                                    st.markdown(
-                                        "### 看完影片後，請勾選下面的確認框"
-                                    )
-
-                                    video_completed = st.checkbox(
-                                        "✅ 我已完成觀看本課程影片",
-                                        key=f"video_completed_{selected_course}"
-                                    )
-
-                                if video_completed:
-
-                                    st.success(
-                                        "🎉 影片觀看完成，已解鎖測驗！"
-                                    )
-
-                                else:
-
-                                    st.info(
-                                        "🔒 完成影片觀看後，請勾選上方確認，即可解鎖測驗。"
-                                    )
-                                if video_completed:
-
-                                   if st.button(
-                                       "下一步 → 課程內容",
-                                       type="primary",
-                                       use_container_width=True,
-                                       key=f"next_content_{selected_course}"
-                                   ):
-
-                                    st.session_state[
-                                        "training_step"
-                                    ] = "content"
-
-                                    st.rerun()
-
-                            if st.session_state.get(
-                                "training_step",
-                                "video"
-                            ) == "video":
-
-                                st.stop()
-
-                            else:
-
-                                st.warning(
-                                    "此課程尚未設定影片網址。"
-                                )
-
-                        # =========================================
-                        # 課程內容
-                        # =========================================
-
-                        st.divider()
-
-                        st.markdown(
-                            "#### 📚 課程內容"
-                        )
-
-                        if course_content.empty:
-
-                            st.info(
-                                "目前尚未建立這個課程的內容。"
-                            )
-
-                        else:
-
-                            for _, item in course_content.iterrows():
-
-                                content_id = clean_text(
-                                    item.get(
-                                        "內容ID",
-                                        ""
-                                    )
-                                )
-
-                                content_name = clean_text(
-                                    item.get(
-                                        "課程細項",
-                                        ""
-                                    )
-                                )
-
-                                with st.expander(
-                                    f"📌 {content_name}"
-                                ):
-
-                                    teaching = clean_text(
-                                        item.get(
-                                            "教學內容",
-                                            ""
-                                        )
-                                    )
-
-                                    material = clean_text(
-                                        item.get(
-                                            "教材",
-                                            ""
-                                        )
-                                    )
-
-                                    note = clean_text(
-                                        item.get(
-                                            "注意事項",
-                                            ""
-                                        )
-                                    )
-
-                                    st.markdown(
-                                        "#### 🎯 學習內容"
-                                    )
-
-                                    if teaching:
-
-                                        st.write(
-                                            teaching
-                                        )
-
-                                    else:
-
-                                        st.info(
-                                            "尚未建立教學內容"
-                                        )
-
-                                    st.markdown(
-                                        "#### 📚 教材"
-                                    )
-
-                                    if material:
-
-                                        st.write(
-                                            material
-                                        )
-
-                                    else:
-
-                                        st.info(
-                                            "尚未建立教材"
-                                        )
-
-                                    if note:
-
-                                        st.markdown(
-                                            "#### ⚠️ 注意事項"
-                                        )
-
-                                        st.write(
-                                            note
-                                        )
-                        # =========================================
-                        # 課程測驗
-                        # =========================================
-
-                        st.divider()
-
-                        st.markdown(
-                            "#### 📝 課程測驗"
-                        )
-                        
-                        quiz_questions = training_quiz[
-                            training_quiz["課程ID"]
-                            .astype(str)
-                            .str.strip()
-                            == selected_course
-                        ].copy()
-
-                        if quiz_questions.empty:
-
-                            st.info(
-                                "目前尚未建立這個課程的測驗題目。"
-                            )
-
-                        else:
-
-                             st.caption(
-                                 f"本課程共有 {len(quiz_questions)} 題"
-                             )
-
-                             # =========================================
-                             # 開始測驗
-                             # =========================================
-
-                             video_completed = st.session_state.get(
-                                 f"video_completed_{selected_course}",
-                                 False
-                             )
-
-                             if not video_completed:
-
-                                 st.info(
-                                     "🔒 測驗尚未解鎖"
-                                 )
-
-                                 st.caption(
-                                     "完成影片觀看後，請勾選「我已完成觀看本課程影片」，即可解鎖測驗。"
-                                 )
-
-                             else:
-
-                                 st.success(
-                                     "🔓 測驗已解鎖，可以開始測驗！"
-                                 )
-                                 if not st.session_state.get(
-                                     "training_quiz_start",
-                                     False
-                                 ):
-
-                                     if st.button(
-                                         "📝 開始測驗",
-                                         use_container_width=True,
-                                         key=f"start_quiz_{selected_course}"
-                                     ):
-
-                                         st.session_state[
-                                             "training_quiz_start"
-                                         ] = True
-
-                                         st.session_state[
-                                             "training_quiz_course"
-                                         ] = selected_course
-
-                                         st.session_state[
-                                             "training_quiz_submitted"
-                                         ] = False
-
-                                         st.rerun()
-
-                                 else:
-
-                                     st.markdown(
-                                         "### 📝 開始測驗"
-                                     )
-
-                                     st.caption(
-                                         "請選擇每一題的答案，完成後按下「送出測驗」。"
-                                     )
-
-                                     answers = {}
-
-                                     with st.form(
-                                         f"quiz_form_{selected_course}"
-                                     ):
-
-                                         for index, (_, question_row) in enumerate(
-                                             quiz_questions.iterrows(),
-                                             start=1
-                                         ):
-
-                                             question_id = clean_text(
-                                                 question_row.get(
-                                                     "題目ID",
-                                                     ""
-                                                 )
-                                             )
-
-                                             question = clean_text(
-                                                 question_row.get(
-                                                     "題目",
-                                                     ""
-                                                 )
-                                             )
-
-                                             options = {
-                                                 "A": clean_text(
-                                                     question_row.get(
-                                                         "選項A",
-                                                         ""
-                                                     )
-                                                 ),
-                                                 "B": clean_text(
-                                                     question_row.get(
-                                                         "選項B",
-                                                         ""
-                                                     )
-                                                 ),
-                                                 "C": clean_text(
-                                                     question_row.get(
-                                                         "選項C",
-                                                         ""
-                                                     )
-                                                 ),
-                                                 "D": clean_text(
-                                                     question_row.get(
-                                                         "選項D",
-                                                         ""
-                                                     )
-                                                 )
-                                             }
-
-                                             st.markdown(
-                                                 f"### 第 {index} 題"
-                                             )
-
-                                             answer = st.radio(
-                                                 question,
-                                                 options=[
-                                                     "A",
-                                                     "B",
-                                                     "C",
-                                                     "D"
-                                                 ],
-                                                 format_func=lambda x, opts=options:
-                                                     f"{x}. {opts[x]}",
-                                                 key=f"quiz_{selected_course}_{question_id}"
-                                             )
-
-                                             answers[question_id] = answer
-
-                                             st.session_state[
-                                                 f"quiz_answer_{question_id}"
-                                             ] = answer
-
-                                             if index < len(quiz_questions):
-
-                                                 st.divider()
-
-                                         submitted = st.form_submit_button(
-                                             "📨 送出測驗",
-                                             use_container_width=True
-                                         )
-
-                                     if submitted:
-
-                                         st.session_state[
-                                             "training_quiz_answers"
-                                         ] = answers.copy()
-
-                                         correct_count = 0
-
-                                         total_questions = len(
-                                             quiz_questions
-                                         )
-
-                                         for _, question_row in quiz_questions.iterrows():
-
-                                             question_id = clean_text(
-                                                 question_row.get(
-                                                     "題目ID",
-                                                     ""
-                                                 )
-                                             )
-
-                                             correct_answer = clean_text(
-                                                 question_row.get(
-                                                     "正確答案",
-                                                     ""
-                                                 )
-                                             ).upper()
-
-                                             user_answer = answers.get(
-                                                 question_id,
-                                                 ""
-                                             ).upper()
-
-                                             if user_answer == correct_answer:
-
-                                                 correct_count += 1
-
-                                         score = (
-                                             round(
-                                                 correct_count
-                                                 / total_questions
-                                                 * 100
-                                             )
-                                             if total_questions > 0
-                                             else 0
-                                         )
-
-                                         # =========================================
-                                         # 儲存測驗結果到 Session
-                                         # =========================================
-
-                                         st.session_state[
-                                             "training_quiz_submitted"
-                                         ] = True
-
-                                         st.session_state[
-                                             "training_quiz_score"
-                                         ] = score
-
-                                         st.session_state[
-                                             "training_quiz_correct"
-                                         ] = correct_count
-
-                                         # =========================================
-                                         # 測驗結果
-                                         # =========================================
-
-                                         quiz_status = (
-                                             "通過"
-                                             if score >= 80
-                                             else "未通過"
-                                         )
-
-                                         learning_status = (
-                                             "完成"
-                                             if score >= 80
-                                             else "學習中"
-                                         )
-
-                                         completed_date = (
-                                             pd.Timestamp.today().strftime(
-                                                 "%Y/%m/%d"
-                                             )
-                                             if score >= 80
-                                             else ""
-                                         )
-
-                                         # =========================================
-                                         # 取得課程名稱
-                                         # =========================================
-
-                                         course_name = selected_course
-
-                                         course_row = training_overview[
-                                             training_overview["課程ID"]
-                                             .astype(str)
-                                             .str.strip()
-                                             ==
-                                             str(selected_course).strip()
-                                         ]
-
-                                         if not course_row.empty:
-
-                                             course_name = clean_text(
-                                                 course_row.iloc[0].get(
-                                                     "課程大項",
-                                                     selected_course
-                                                 )
-                                             )
-
-                                         # =========================================
-                                         # 儲存新人學習紀錄
-                                         # =========================================
-
-                                         save_result = save_training_record(
-                                             employee_id=st.session_state.get(
-                                                 "training_employee_id",
-                                                 ""
-                                             ),
-                                             employee_name=st.session_state.get(
-                                                 "training_employee_name",
-                                                 ""
-                                             ),
-                                             course_id=selected_course,
-                                             course_name=course_name,
-                                             day=selected_day,
-                                             start_date=pd.Timestamp.today().strftime(
-                                                 "%Y/%m/%d"
-                                             ),
-                                             learning_status=learning_status,
-                                             quiz_status=quiz_status,
-                                             completed_date=completed_date
-                                         )
-
-                                         # =========================================
-                                         # 顯示測驗結果
-                                         # =========================================
-
-                                         if score >= 80:
-
-                                             st.success(
-                                                 f"🎉 測驗完成！分數：{score} 分，恭喜通過！"
-                                             )
-
-                                         else:
-
-                                             st.warning(
-                                                 f"測驗完成，分數：{score} 分，尚未達到 80 分及格標準。"
-                                             )
-
-                                         st.write(
-                                             f"答對 {correct_count} / {total_questions} 題"
-                                         )
-
-                                         if save_result:
-
-                                             load_training_records.clear()
-
-                                             st.info(
-                                                 "📋 測驗結果已記錄至新人學習紀錄。"
-                                             )
-
-                             # =========================================
-                             # 顯示測驗結果與逐題檢討
-                             # =========================================
-
-                             if st.session_state.get(
-                                 "training_quiz_submitted",
-                                 False
-                             ):
-
-                                 score = st.session_state.get(
-                                     "training_quiz_score",
-                                     0
-                                 )
-
-                                 correct_count = st.session_state.get(
-                                     "training_quiz_correct",
-                                     0
-                                 )
-
-                                 total_questions = len(
-                                     quiz_questions
-                                 )
-
-                                 st.divider()
-
-                                 st.markdown(
-                                     "### 🎉 測驗完成"
-                                 )
-
-                                 if score >= 80:
-
-                                     st.success(
-                                         f"你的分數：{score} 分｜恭喜通過！"
-                                     )
-
-                                 else:
-
-                                     st.warning(
-                                         f"你的分數：{score} 分｜尚未達到 80 分及格標準。"
-                                     )
-
-                                 st.write(
-                                     f"答對 {correct_count} / {total_questions} 題"
-                                 )
-
-                                 st.markdown(
-                                     "#### 📖 逐題檢討"
-                                 )
-
-                                 for index, (_, question_row) in enumerate(
-                                     quiz_questions.iterrows(),
-                                     start=1
-                                 ):
-
-                                     question_id = clean_text(
-                                         question_row.get(
-                                             "題目ID",
-                                             ""
-                                         )
-                                     )
-
-                                     question = clean_text(
-                                         question_row.get(
-                                             "題目",
-                                             ""
-                                         )
-                                     )
-
-                                     correct_answer = clean_text(
-                                         question_row.get(
-                                             "正確答案",
-                                             ""
-                                         )
-                                     ).upper()
-
-                                     user_answer = st.session_state.get(
-                                         f"quiz_answer_{question_id}",
-                                         ""
-                                     ).upper()
-
-                                     explanation = clean_text(
-                                         question_row.get(
-                                             "解說",
-                                             ""
-                                         )
-                                     )
-
-                                     st.markdown(
-                                         f"**第 {index} 題：{question}**"
-                                     )
-
-                                     if user_answer == correct_answer:
-
-                                         st.success(
-                                             f"✅ 答對｜你的答案：{user_answer}"
-                                         )
-
-                                     else:
-
-                                         st.error(
-                                             f"❌ 答錯｜你的答案：{user_answer}｜正確答案：{correct_answer}"
-                                         )
-
-                                     if explanation:
-
-                                         st.info(
-                                             f"💡 解說：{explanation}"
-                                         )
-
-                                     if index < total_questions:
-
-                                         st.divider()
-
-                                 st.divider()
-
-                                 if st.button(
-                                     "🔄 再測一次",
-                                     use_container_width=True,
-                                     key=f"retry_quiz_{selected_course}"
-                                 ):
-
-                                     st.session_state[
-                                         "training_quiz_start"
-                                     ] = False
-
-                                     st.session_state[
-                                         "training_quiz_submitted"
-                                     ] = False
-
-                                     st.session_state.pop(
-                                         "training_quiz_score",
-                                         None
-                                     )
-
-                                     st.session_state.pop(
-                                         "training_quiz_correct",
-                                         None
-                                     )
-
-                                     st.session_state.pop(
-                                         "training_quiz_answers",
-                                         None
-                                     )
-
-                                     for _, question_row in quiz_questions.iterrows():
-
-                                         question_id = clean_text(
-                                             question_row.get(
-                                                 "題目ID",
-                                                 ""
-                                             )
-                                         )
-
-                                         st.session_state.pop(
-                                             f"quiz_answer_{question_id}",
-                                             None
-                                         )
-
-                                     st.rerun()
+                if st.button(
+                    "完成課程",
+                    key="training_finish",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "training_page"
+                    ] = "home"
+
+                    st.session_state[
+                        "training_step"
+                    ] = "video"
+
+                    st.session_state[
+                        "training_course_id"
+                    ] = ""
+
+                    st.session_state[
+                        "training_quiz_passed"
+                    ] = False
+
+                    st.rerun()
     # ========================================================
     # 小老師
     # ========================================================
