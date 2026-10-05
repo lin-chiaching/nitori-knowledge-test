@@ -3515,13 +3515,13 @@ elif page == "🎓 新人訓練中心":
 
     if st.session_state["training_page"] == "home":
 
-    st.subheader("📚 課程選擇")
+        st.subheader("📚 課程選擇")
 
-    st.info(
-        "請依照訓練進度選擇課程，完成「影片 → 課程內容 → 測驗」三個步驟。"
-    )
+        st.info(
+            "請依照訓練進度選擇課程，完成「影片 → 課程內容 → 測驗」三個步驟。"
+        )
 
-    st.divider()
+        st.divider()
 
     # --------------------------------------------------------
     # DAY 1
