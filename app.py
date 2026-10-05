@@ -917,6 +917,13 @@ def load_training_quiz():
         return pd.DataFrame(
             columns=TRAINING_QUIZ_COLUMNS
         )
+        
+training_overview = load_training_overview()
+training_content = load_training_content()
+training_videos = load_training_videos()
+training_records = load_training_records()
+employee_data = load_employee_data()
+training_quiz = load_training_quiz()
 
 # ============================================================
 # 待審核問題
