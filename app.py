@@ -3659,16 +3659,16 @@ elif page == "🎓 新人訓練中心":
 
     elif st.session_state["training_page"] == "records":
 
-        st.subheader("📊 我的學習紀錄")
+        st.subheader("🎓 我的學習進度")
 
         st.caption(
-            "查看目前各課程的學習進度與完成狀態。"
+            "查看目前新人訓練課程的學習進度。"
         )
 
         st.divider()
 
         # ====================================================
-        # 暫時使用的學習紀錄
+        # 暫時使用的學習資料
         # ====================================================
 
         training_records_demo = [
@@ -3717,7 +3717,7 @@ elif page == "🎓 新人訓練中心":
         ]
 
         # ====================================================
-        # 整體學習進度
+        # 計算整體進度
         # ====================================================
 
         total_courses = len(
@@ -3738,33 +3738,49 @@ elif page == "🎓 新人訓練中心":
             / total_courses
         )
 
-        st.markdown("### 🎓 整體學習進度")
+        # ====================================================
+        # 頂部進度區
+        # ====================================================
 
-        progress_col1, progress_col2 = st.columns(
-            [1, 4]
+        st.markdown(
+            f"""
+            <div style="
+                background: #F8F5F0;
+                border-radius: 20px;
+                padding: 28px;
+                margin-bottom: 30px;
+            ">
+
+                <div style="
+                    font-size: 16px;
+                    color: #777777;
+                    margin-bottom: 8px;
+                ">
+                    🎓 新人訓練整體進度
+                </div>
+
+                <div style="
+                    font-size: 42px;
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                ">
+                    {overall_progress:.0f}%
+                </div>
+
+                <div style="
+                    font-size: 15px;
+                    color: #666666;
+                ">
+                    已完成 {completed_courses} / {total_courses} 門課程
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
         )
 
-        with progress_col1:
-
-            st.metric(
-                "完成課程",
-                f"{completed_courses} / {total_courses}"
-            )
-
-        with progress_col2:
-
-            st.progress(
-                overall_progress / 100
-            )
-
-            st.caption(
-                f"目前整體完成度：{overall_progress:.0f}%"
-            )
-
-        st.divider()
-
         # ====================================================
-        # 課程進度卡片
+        # 各 DAY 課程
         # ====================================================
 
         for day in [
@@ -3801,214 +3817,52 @@ elif page == "🎓 新人訓練中心":
 
                 with current_col:
 
+                    if record["progress"] == 100:
+                        status_color = "#2E7D32"
+                    elif record["progress"] > 0:
+                        status_color = "#B7791F"
+                    else:
+                        status_color = "#888888"
+
                     st.markdown(
                         f"""
                         <div style="
-                            border: 1px solid #E5E5E5;
-                            border-radius: 16px;
-                            padding: 22px;
-                            margin-bottom: 18px;
-                            background-color: #FFFFFF;
+                            border: 1px solid #E8E8E8;
+                            border-radius: 18px;
+                            padding: 24px;
+                            margin-bottom: 20px;
+                            background: #FFFFFF;
+                            min-height: 170px;
                         ">
 
                             <div style="
-                                font-size: 15px;
-                                color: #777777;
-                                margin-bottom: 8px;
+                                font-size: 17px;
+                                font-weight: 600;
+                                margin-bottom: 18px;
                             ">
-                                {record['course']}
+                                {record["course"]}
                             </div>
 
                             <div style="
-                                font-size: 38px;
+                                font-size: 36px;
                                 font-weight: 700;
-                                margin: 8px 0;
+                                margin-bottom: 8px;
                             ">
-                                {record['progress']}%
+                                {record["progress"]}%
                             </div>
 
                             <div style="
                                 font-size: 14px;
-                                color: #666666;
+                                color: {status_color};
+                                font-weight: 600;
                             ">
-                                {record['status']}
+                                {record["status"]}
                             </div>
 
                         </div>
                         """,
                         unsafe_allow_html=True
                     )
-
-    elif st.session_state["training_page"] == "course":
-
-        course_id = st.session_state.get(
-            "training_course_id",
-            ""
-        )
-
-        training_step = st.session_state.get(
-            "training_step",
-            "video"
-        )
-
-        course_names = {
-            "DAY1_BASIC": "🏠 宜得利基礎",
-            "DAY1_SERVICE": "💬 接客基礎",
-            "DAY2_PRODUCT": "🛋 商品基礎",
-            "DAY2_SYSTEM": "💻 系統操作",
-            "DAY3_PHONE": "☎️ 電話應對",
-            "DAY3_PRACTICE": "📝 實務練習",
-        }
-
-        course_name = course_names.get(
-            course_id,
-            "新人訓練課程"
-        )
-
-        st.subheader(course_name)
-
-        st.caption(
-            f"課程ID：{course_id}"
-        )
-
-        st.divider()
-
-        # ----------------------------------------------------
-        # 學習步驟
-        # ----------------------------------------------------
-
-        if training_step == "video":
-
-            st.markdown(
-                "### ① 影片　→　② 課程內容　→　③ 測驗"
-            )
-
-            st.info(
-                "🎬 接下來這裡會播放本課程的訓練影片。"
-            )
-
-            st.write(
-                "目前先建立課程流程，影片功能下一步再接上。"
-            )
-
-            if st.button(
-                "下一步：課程內容 →",
-                key="training_next_content",
-                use_container_width=True
-            ):
-                st.session_state["training_step"] = "content"
-                st.rerun()
-
-
-        elif training_step == "content":
-
-            st.markdown(
-                "### ① 影片 ✓　→　② 課程內容　→　③ 測驗"
-            )
-
-            st.subheader("📖 課程內容")
-
-            st.info(
-                "請閱讀以下課程內容，完成後即可進入測驗。"
-            )
-
-            st.markdown("#### 本課程學習重點")
-
-            st.markdown("""
-            **1. 課程介紹**
-
-            了解本課程的學習目的，以及新人需要掌握的基本內容。
-
-            **2. 基礎知識**
-
-            認識工作中會接觸到的基本資訊與注意事項。
-
-            **3. 實務應用**
-
-            將課程內容應用於日常工作與顧客應對。
-            """)
-
-            st.divider()
-
-            st.success(
-                "✓ 已完成課程內容閱讀"
-            )
-
-        elif training_step == "quiz":
-
-            st.markdown(
-                "### ① 影片 ✓　→　② 課程內容 ✓　→　③ 測驗"
-            )
-
-            st.subheader("📝 課程測驗")
-
-            st.info(
-                "請完成以下測驗，確認已了解本課程內容。"
-            )
-
-            st.divider()
-
-            st.markdown("### 第 1 題")
-
-            st.write(
-                "以下哪一項是新人訓練的重要內容？"
-            )
-
-            answer = st.radio(
-                "請選擇答案：",
-                [
-                    "A. 了解工作內容與基本規則",
-                    "B. 只需要記住商品價格",
-                    "C. 不需要了解顧客服務",
-                    "D. 不需要學習系統操作"
-                ],
-                key="training_quiz_answer"
-            )
-
-            st.divider()
-
-            if st.button(
-                "送出答案",
-                key="training_submit_quiz",
-                use_container_width=True
-            ):
-
-                if answer == "A. 了解工作內容與基本規則":
-
-                    st.success(
-                        "🎉 答對了！"
-                    )
-
-                    st.write(
-                        "新人需要了解工作內容、基本規則及顧客服務方式。"
-                    )
-
-                    st.session_state["training_quiz_passed"] = True
-
-                else:
-
-                    st.error(
-                        "再想一下喔！請重新選擇答案。"
-                    )
-
-            if st.session_state.get(
-                "training_quiz_passed",
-                False
-            ):
-
-                st.success(
-                    "✓ 測驗完成，可以結束本課程。"
-                )
-
-                if st.button(
-                    "完成課程",
-                    key="training_finish",
-                    use_container_width=True
-                ):
-                    st.session_state["training_page"] = "home"
-                    st.session_state["training_step"] = "video"
-                    st.session_state["training_quiz_passed"] = False
-                    st.rerun()
     # ========================================================
     # 載入新人訓練資料
     # ========================================================
