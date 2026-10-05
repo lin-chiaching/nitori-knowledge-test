@@ -3793,15 +3793,15 @@ elif page == "🎓 新人訓練中心":
 
                 st.rerun()
 
+    elif st.session_state["training_page"] == "records":
+
     # ========================================================
     # 📊 學習紀錄
     # ========================================================
 
     elif st.session_state["training_page"] == "records":
 
-        st.subheader(
-            "🎓 我的學習進度"
-        )
+        st.subheader("🎓 我的學習進度")
 
         st.caption(
             "查看目前新人訓練課程的學習進度。"
@@ -3884,51 +3884,48 @@ elif page == "🎓 新人訓練中心":
                 for record in training_records_demo
             )
             / total_courses
+            / 100
         )
 
-        # ----------------------------------------------------
-        # 頂部進度卡
-        # ----------------------------------------------------
+        st.markdown("### 整體訓練進度")
 
-        st.markdown(
-            f"""
-            <div style="
-                background:#F8F5F0;
-                border-radius:20px;
-                padding:28px;
-                margin-bottom:30px;
-            ">
+        progress_col1, progress_col2, progress_col3 = st.columns(3)
 
-                <div style="
-                    font-size:16px;
-                    color:#777777;
-                    margin-bottom:8px;
-                ">
-                    🎓 新人訓練整體進度
-                </div>
+        with progress_col1:
 
-                <div style="
-                    font-size:42px;
-                    font-weight:700;
-                    margin-bottom:8px;
-                ">
-                    {overall_progress:.0f}%
-                </div>
+            st.metric(
+                "整體進度",
+                f"{overall_progress:.0%}"
+            )
 
-                <div style="
-                    font-size:15px;
-                    color:#666666;
-                ">
-                    已完成 {completed_courses} / {total_courses} 門課程
-                </div>
+        with progress_col2:
 
-            </div>
-            """,
-            unsafe_allow_html=True
+            st.metric(
+                "已完成課程",
+                f"{completed_courses} / {total_courses}"
+            )
+
+        with progress_col3:
+
+            learning_count = sum(
+                1
+                for record in training_records_demo
+                if 0 < record["progress"] < 100
+            )
+
+            st.metric(
+                "學習中",
+                learning_count
+            )
+
+        st.progress(
+            overall_progress
         )
 
+        st.divider()
+
         # ----------------------------------------------------
-        # DAY 課程卡片
+        # DAY 課程
         # ----------------------------------------------------
 
         for day in [
@@ -3952,89 +3949,43 @@ elif page == "🎓 新人訓練中心":
                 f"### 📅 {day}｜{day_name}"
             )
 
-            card_col1, card_col2 = st.columns(2)
+            course_col1, course_col2 = st.columns(2)
 
             for index, record in enumerate(
                 day_records
             ):
 
                 if index % 2 == 0:
-                    current_col = card_col1
+
+                    current_col = course_col1
+
                 else:
-                    current_col = card_col2
+
+                    current_col = course_col2
 
                 with current_col:
 
-                    if record["progress"] == 100:
-
-                        status_color = "#2E7D32"
-
-                    elif record["progress"] > 0:
-
-                        status_color = "#B7791F"
-
-                    else:
-
-                        status_color = "#888888"
-
                     st.markdown(
-                        f"""
-                        <div style="
-                            border:1px solid #E8E8E8;
-                            border-radius:18px;
-                            padding:24px;
-                            margin-bottom:20px;
-                            background:#FFFFFF;
-                            min-height:190px;
-                        ">
-
-                            <div style="
-                                font-size:17px;
-                                font-weight:600;
-                                margin-bottom:18px;
-                            ">
-                                {record["course"]}
-                            </div>
-
-                            <div style="
-                                font-size:36px;
-                                font-weight:700;
-                                margin-bottom:8px;
-                            ">
-                                {record["progress"]}%
-                            </div>
-
-                            <div style="
-                                height:8px;
-                                background:#EEEEEE;
-                                border-radius:10px;
-                                margin-bottom:14px;
-                            ">
-
-                                <div style="
-                                    width:{record["progress"]}%;
-                                    height:8px;
-                                    background:#B7A58A;
-                                    border-radius:10px;
-                                ">
-                                </div>
-
-                            </div>
-
-                            <div style="
-                                font-size:14px;
-                                color:{status_color};
-                                font-weight:600;
-                            ">
-                                {record["status"]}
-                            </div>
-
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+                        f"#### {record['course']}"
                     )
 
-        st.divider()
+                    st.caption(
+                        record["status"]
+                    )
+
+                    st.progress(
+                        record["progress"] / 100
+                    )
+
+                    st.write(
+                        f"學習進度：{record['progress']}%"
+                    )
+
+                    st.divider()
+
+        # ----------------------------------------------------
+        # 返回首頁
+        # ----------------------------------------------------
 
         if st.button(
             "← 回到新人首頁",
@@ -4047,10 +3998,6 @@ elif page == "🎓 新人訓練中心":
             ] = "home"
 
             st.rerun()
-
-    # ========================================================
-    # 📖 課程頁面
-    # ========================================================
 
     elif st.session_state["training_page"] == "course":
 
