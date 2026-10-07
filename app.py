@@ -5624,7 +5624,12 @@ elif page == "🛠️ 資料維護":
                             value=edit_point_date or "",
                             key="edit_announcement_point_date"
                         )
-
+                    new_status = st.selectbox(
+                        "顯示狀態",
+                        ["是", "否"],
+                        index=0 if edit_row.get("顯示狀態", "是") == "是" else 1,
+                        key="edit_announcement_status"
+                    )
                     editor_name_announcement = st.text_input(
                         "👤 修改人姓名（必填）",
                         placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
