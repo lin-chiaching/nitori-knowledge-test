@@ -4532,8 +4532,64 @@ elif page == "🛠️ 資料維護":
     )
 
     st.caption(
-        "這裡可以直接編輯目前 Excel 中的資料，完成後按下儲存。"
+        "集中管理客服知識、公告、待審核問題與客訴資料。"
     )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # 資料統計
+    # --------------------------------------------------------
+
+    knowledge_df = load_data()
+    announcement_df = load_announcements()
+    pending_df = load_pending_questions()
+    complaint_df = load_complaints()
+
+    knowledge_count = len(knowledge_df)
+    announcement_count = len(announcement_df)
+    pending_count = len(pending_df)
+    complaint_count = len(complaint_df)
+
+    stat1, stat2, stat3, stat4 = st.columns(4)
+
+    with stat1:
+
+        st.metric(
+            "📚 知識庫",
+            f"{knowledge_count:,}",
+            "筆資料"
+        )
+
+    with stat2:
+
+        st.metric(
+            "📢 公告",
+            f"{announcement_count:,}",
+            "筆資料"
+        )
+
+    with stat3:
+
+        st.metric(
+            "📝 待審核",
+            f"{pending_count:,}",
+            "筆資料"
+        )
+
+    with stat4:
+
+        st.metric(
+            "📊 客訴資料",
+            f"{complaint_count:,}",
+            "筆資料"
+        )
+
+    st.divider()
+
+    # --------------------------------------------------------
+    # 資料管理分類
+    # --------------------------------------------------------
 
     tab1, tab2, tab3, tab4 = st.tabs(
         [
