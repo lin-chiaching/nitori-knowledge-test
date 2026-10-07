@@ -5741,6 +5741,456 @@ elif page == "🛠️ 資料維護":
                                 "找不到公告資料工作表。"
                             )
     # ========================================================
+    # 公告
+    # ========================================================
+
+    with tab2:
+
+        df = load_announcements()
+
+        if df.empty:
+
+            st.warning(
+                "找不到公告資料。"
+            )
+
+        else:
+
+            if st.button(
+                "➕ 新增公告",
+                type="primary",
+                use_container_width=True,
+                key="add_announcement"
+            ):
+
+                st.session_state[
+                    "adding_announcement"
+                ] = True
+
+                st.rerun()
+
+            # --------------------------------------------------------
+            # 新增公告
+            # --------------------------------------------------------
+
+            if "adding_announcement" in st.session_state:
+
+                st.divider()
+
+                with st.container(
+                    border=True
+                ):
+
+                    st.markdown(
+                        "### ➕ 新增公告"
+                    )
+
+                    st.caption(
+                        "填寫完成後請輸入建立人姓名，再按「新增公告」。"
+                    )
+
+                    add_title = st.text_input(
+                        "公告標題",
+                        key="add_announcement_title"
+                    )
+
+                    add_content = st.text_area(
+                        "公告內容",
+                        height=180,
+                        key="add_announcement_content"
+                    )
+
+                    date_col1, date_col2, date_col3 = st.columns(3)
+
+                    with date_col1:
+
+                        add_date = st.text_input(
+                            "公告日期",
+                            key="add_announcement_date"
+                        )
+
+                    with date_col2:
+
+                        add_activity_date = st.text_input(
+                            "活動日期",
+                            key="add_announcement_activity_date"
+                        )
+
+                    with date_col3:
+
+                        add_point_date = st.text_input(
+                            "點數期限",
+                            key="add_announcement_point_date"
+                        )
+
+                    add_editor_name = st.text_input(
+                        "👤 建立人姓名（必填）",
+                        placeholder="請輸入實際建立人的姓名，例如：皮皮、66",
+                        key="add_editor_name_announcement"
+                    )
+
+                    add_col1, add_col2 = st.columns(2)
+
+                    with add_col1:
+
+                        save_new = st.button(
+                            "💾 新增公告",
+                            type="primary",
+                            use_container_width=True,
+                            disabled=not add_editor_name.strip(),
+                            key="save_new_announcement"
+                        )
+
+                    with add_col2:
+
+                        cancel_new = st.button(
+                            "取消新增",
+                            use_container_width=True,
+                            key="cancel_new_announcement"
+                        )
+
+                    # --------------------------------------------------------
+                    # 取消新增
+                    # --------------------------------------------------------
+
+                    if cancel_new:
+
+                        del st.session_state[
+                            "adding_announcement"
+                        ]
+
+                        st.rerun()
+
+                    # --------------------------------------------------------
+                    # 儲存新增公告
+                    # --------------------------------------------------------
+
+                    if save_new:
+
+                        new_df = df.copy()
+
+                        if "公告編號" in new_df.columns:
+
+                            numbers = pd.to_numeric(
+                                new_df["公告編號"],
+                                errors="coerce"
+                            )
+
+                            if numbers.notna().any():
+
+                                new_number = int(
+                                    numbers.max()
+                                ) + 1
+
+                            else:
+
+                                new_number = 1
+
+                        else:
+
+                            new_number = 1
+
+                        new_row = {
+                            "公告編號": new_number,
+                            "公告標題": add_title,
+                            "公告內容": add_content,
+                            "公告日期": add_date,
+                            "活動日期": add_activity_date,
+                            "點數期限": add_point_date,
+                            "顯示狀態": "是"
+                        }
+
+                        new_df = pd.concat(
+                            [
+                                new_df,
+                                pd.DataFrame(
+                                    [new_row]
+                                )
+                            ],
+                            ignore_index=True
+                        )
+
+                        sheet = find_sheet(
+                            [
+                                "內部公告",
+                                "公告"
+                            ]
+                        )
+
+                        if sheet:
+
+                            success = save_sheet(
+                                sheet,
+                                new_df,
+                                add_editor_name
+                            )
+
+                            if success:
+
+                                st.success(
+                                    "公告已新增！"
+                                )
+
+                                del st.session_state[
+                                    "adding_announcement"
+                                ]
+
+                                st.rerun()
+
+                            else:
+
+                                st.error(
+                                    "公告新增失敗，請稍後再試。"
+                                )
+
+                        else:
+
+                            st.error(
+                                "找不到公告資料工作表。"
+                            )
+
+            # --------------------------------------------------------
+            # 公告列表
+            # --------------------------------------------------------
+
+            announcement_columns = (
+                get_announcement_columns(
+                    df
+                )
+            )
+
+            for index, row in df.iterrows():
+
+                render_announcement_admin(
+                    row,
+                    announcement_columns,
+                    index
+                )
+
+            # --------------------------------------------------------
+            # 編輯公告
+            # --------------------------------------------------------
+
+            if "editing_announcement" in st.session_state:
+
+                edit_index = st.session_state[
+                    "editing_announcement"
+                ]
+
+                edit_row = df.loc[
+                    edit_index
+                ]
+
+                (
+                    edit_title,
+                    edit_content,
+                    edit_date,
+                    edit_activity_date,
+                    edit_point_date
+                ) = get_announcement_values(
+                    edit_row,
+                    announcement_columns
+                )
+
+                st.divider()
+
+                with st.container(
+                    border=True
+                ):
+
+                    st.markdown(
+                        "### ✏️ 編輯公告"
+                    )
+
+                    st.caption(
+                        "修改完成後請填寫修改人姓名，再按「儲存修改」。"
+                    )
+
+                    new_title = st.text_input(
+                        "公告標題",
+                        value=edit_title or "",
+                        key="edit_announcement_title"
+                    )
+
+                    new_content = st.text_area(
+                        "公告內容",
+                        value=edit_content or "",
+                        height=180,
+                        key="edit_announcement_content"
+                    )
+
+                    date_col1, date_col2, date_col3 = st.columns(3)
+
+                    with date_col1:
+
+                        new_date = st.text_input(
+                            "公告日期",
+                            value=edit_date or "",
+                            key="edit_announcement_date"
+                        )
+
+                    with date_col2:
+
+                        new_activity_date = st.text_input(
+                            "活動日期",
+                            value=edit_activity_date or "",
+                            key="edit_announcement_activity_date"
+                        )
+
+                    with date_col3:
+
+                        new_point_date = st.text_input(
+                            "點數期限",
+                            value=edit_point_date or "",
+                            key="edit_announcement_point_date"
+                        )
+
+                    editor_name_announcement = st.text_input(
+                        "👤 修改人姓名（必填）",
+                        placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
+                        key="edit_editor_name_announcement"
+                    )
+
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+
+                        save_edit = st.button(
+                            "💾 儲存修改",
+                            type="primary",
+                            use_container_width=True,
+                            disabled=not editor_name_announcement.strip(),
+                            key="save_edit_announcement"
+                        )
+
+                    with col2:
+
+                        cancel_edit = st.button(
+                            "取消編輯",
+                            use_container_width=True,
+                            key="cancel_edit_announcement"
+                        )
+
+                    if cancel_edit:
+
+                        del st.session_state[
+                            "editing_announcement"
+                        ]
+
+                        st.rerun()
+
+                    if save_edit:
+
+                        edited_df = df.copy()
+
+                        title_column = announcement_columns.get(
+                            "title"
+                        )
+
+                        content_column = announcement_columns.get(
+                            "content"
+                        )
+
+                        date_column = announcement_columns.get(
+                            "date"
+                        )
+
+                        activity_date_column = announcement_columns.get(
+                            "activity_date"
+                        )
+
+                        point_date_column = announcement_columns.get(
+                            "point_date"
+                        )
+
+                        if title_column:
+
+                            edited_df.at[
+                                edit_index,
+                                title_column
+                            ] = new_title
+
+                        if content_column:
+
+                            edited_df.at[
+                                edit_index,
+                                content_column
+                            ] = new_content
+
+                        if date_column:
+
+                            edited_df.at[
+                                edit_index,
+                                date_column
+                            ] = new_date
+
+                        if activity_date_column:
+
+                            edited_df.at[
+                                edit_index,
+                                activity_date_column
+                            ] = new_activity_date
+
+                        if point_date_column:
+
+                            edited_df.at[
+                                edit_index,
+                                point_date_column
+                            ] = new_point_date
+
+                        sheet = find_sheet(
+                            [
+                                "內部公告",
+                                "公告"
+                            ]
+                        )
+
+                        if sheet:
+
+                            success = save_sheet(
+                                sheet,
+                                edited_df,
+                                editor_name_announcement
+                            )
+
+                            if success:
+
+                                st.success(
+                                    "公告已更新！"
+                                )
+
+                                del st.session_state[
+                                    "editing_announcement"
+                                ]
+
+                                st.rerun()
+
+                            else:
+
+                                st.error(
+                                    "公告儲存失敗，請稍後再試。"
+                                )
+
+                        else:
+
+                            st.error(
+                                "找不到公告資料工作表。"
+                            )
+
+            # --------------------------------------------------------
+            # 公告修改歷程
+            # --------------------------------------------------------
+
+            render_change_history(
+                find_sheet(
+                    [
+                        "內部公告",
+                        "公告"
+                    ]
+                ) or "內部公告",
+                "announcement_history"
+            )
+    # ========================================================
     # 待審核問題
     # ========================================================
 
