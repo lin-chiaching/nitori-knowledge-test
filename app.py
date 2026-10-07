@@ -5345,7 +5345,20 @@ with tab1:
             )
 
         else:
+            if st.button(
+                "➕ 新增公告",
+                type="primary",
+                use_container_width=True,
+                key="add_announcement"
+            ):
 
+                st.session_state[
+                    "adding_announcement"
+                ] = True
+
+                st.rerun()
+
+            
             announcement_columns = (
                 get_announcement_columns(
                     df
