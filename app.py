@@ -4600,33 +4600,150 @@ elif page == "🛠️ 資料維護":
         ]
     )
 
-    # ========================================================
-    # 知識庫
-    # ========================================================
+# ========================================================
+# 知識庫
+# ========================================================
 
-    with tab1:
+with tab1:
 
-        st.subheader(
-            "📚 知識庫管理"
+    st.subheader(
+        "📚 知識庫管理"
+    )
+
+    st.caption(
+        "集中查看、編輯及新增客服標準回答。"
+    )
+
+    df = load_data()
+
+    if df.empty:
+
+        st.warning(
+            "找不到知識庫資料。"
         )
 
-        st.caption(
-            "搜尋、查看及維護客服標準回答。"
+    else:
+
+        # ------------------------------------------------
+        # 知識庫功能切換
+        # ------------------------------------------------
+
+        knowledge_mode = st.radio(
+            "功能",
+            [
+                "📋 總表",
+                "✏️ 編輯知識",
+                "➕ 新增知識"
+            ],
+            horizontal=True,
+            label_visibility="collapsed",
+            key="knowledge_mode"
         )
 
-        df = load_data()
+        st.divider()
 
-        if df.empty:
+        # =================================================
+        # 📋 總表
+        # =================================================
 
-            st.warning(
-                "找不到知識庫資料。"
+        if knowledge_mode == "📋 總表":
+
+            st.markdown(
+                "### 📋 知識庫總覽"
             )
 
-        else:
+            st.caption(
+                "可查看目前所有客服知識資料；如需修改，請至「編輯知識」。"
+            )
 
-            # ------------------------------------------------
-            # 搜尋
-            # ------------------------------------------------
+            search_col, count_col = st.columns(
+                [4, 1]
+            )
+
+            with search_col:
+
+                overview_search = st.text_input(
+                    "🔎 搜尋知識",
+                    placeholder="輸入問題類型、商品編號、問題摘要或關鍵字...",
+                    key="knowledge_overview_search"
+                )
+
+            with count_col:
+
+                st.metric(
+                    "總筆數",
+                    f"{len(df):,}"
+                )
+
+            overview_df = df.copy()
+
+            if overview_search.strip():
+
+                keyword = overview_search.strip()
+
+                search_mask = (
+                    overview_df
+                    .astype(str)
+                    .apply(
+                        lambda column:
+                        column.str.contains(
+                            keyword,
+                            case=False,
+                            na=False
+                        )
+                    )
+                    .any(axis=1)
+                )
+
+                overview_df = overview_df[
+                    search_mask
+                ]
+
+            st.caption(
+                f"目前顯示 {len(overview_df):,} 筆資料"
+            )
+
+            # --------------------------------------------
+            # 總表只讀，不使用 data_editor
+            # --------------------------------------------
+
+            show_columns = [
+                "序號",
+                "問題類型",
+                "商品編號",
+                "問題摘要",
+                "關鍵字",
+                "資料來源",
+                "更新人",
+                "更新日期"
+            ]
+
+            show_columns = [
+                column
+                for column in show_columns
+                if column in overview_df.columns
+            ]
+
+            st.dataframe(
+                overview_df[show_columns],
+                use_container_width=True,
+                hide_index=True,
+                height=550
+            )
+
+        # =================================================
+        # ✏️ 編輯知識
+        # =================================================
+
+        elif knowledge_mode == "✏️ 編輯知識":
+
+            st.markdown(
+                "### ✏️ 編輯客服知識"
+            )
+
+            st.caption(
+                "先搜尋並選擇一筆資料，再進行內容修改。"
+            )
 
             search_col, count_col = st.columns(
                 [4, 1]
@@ -4637,7 +4754,7 @@ elif page == "🛠️ 資料維護":
                 knowledge_search = st.text_input(
                     "🔎 搜尋知識",
                     placeholder="輸入問題、商品編號、關鍵字或問題摘要...",
-                    key="knowledge_search"
+                    key="knowledge_edit_search"
                 )
 
             with count_col:
@@ -4647,11 +4764,11 @@ elif page == "🛠️ 資料維護":
                     f"{len(df):,}"
                 )
 
-            # ------------------------------------------------
-            # 篩選資料
-            # ------------------------------------------------
-
             display_df = df.copy()
+
+            # --------------------------------------------
+            # 搜尋
+            # --------------------------------------------
 
             if knowledge_search.strip():
 
@@ -4668,9 +4785,7 @@ elif page == "🛠️ 資料維護":
                             na=False
                         )
                     )
-                    .any(
-                        axis=1
-                    )
+                    .any(axis=1)
                 )
 
                 display_df = display_df[
@@ -4678,7 +4793,7 @@ elif page == "🛠️ 資料維護":
                 ]
 
             st.caption(
-                f"🔎 符合搜尋條件：{len(display_df)} 筆"
+                f"🔎 找到 {len(display_df):,} 筆符合資料"
             )
 
             if display_df.empty:
@@ -4689,20 +4804,19 @@ elif page == "🛠️ 資料維護":
 
             else:
 
-                # ------------------------------------------------
+                # ----------------------------------------
                 # 建立選擇清單
-                # ------------------------------------------------
+                # ----------------------------------------
 
-                display_df = display_df.reset_index(
-                    drop=True
-                )
+                display_df = display_df.copy()
 
-                display_df["_原始索引"] = (
+                display_df["_original_index"] = (
                     display_df.index
                 )
 
                 display_df["顯示名稱"] = (
                     display_df["問題摘要"]
+                    .fillna("")
                     .astype(str)
                     .str.strip()
                 )
@@ -4711,6 +4825,7 @@ elif page == "🛠️ 資料維護":
 
                     display_df["顯示名稱"] = (
                         display_df["問題類型"]
+                        .fillna("")
                         .astype(str)
                         .str.strip()
                         + "｜"
@@ -4718,7 +4833,7 @@ elif page == "🛠️ 資料維護":
                     )
 
                 selected_display = st.selectbox(
-                    "📌 選擇要查看的知識",
+                    "📌 選擇要編輯的知識",
                     display_df["顯示名稱"].tolist(),
                     key="selected_knowledge"
                 )
@@ -4728,47 +4843,18 @@ elif page == "🛠️ 資料維護":
                     == selected_display
                 ].iloc[0]
 
-                # ------------------------------------------------
-                # 找回原始資料
-                # ------------------------------------------------
+                original_index = selected_row[
+                    "_original_index"
+                ]
 
-                selected_sequence = selected_row.get(
-                    "序號",
-                    ""
-                )
-
-                if (
-                    "序號" in df.columns
-                    and str(selected_sequence).strip()
-                ):
-
-                    original_index = df[
-                        df["序號"].astype(str).str.strip()
-                        == str(selected_sequence).strip()
-                    ].index
-
-                else:
-
-                    original_index = []
-
-                if len(original_index) > 0:
-
-                    original_index = original_index[0]
-
-                else:
-
-                    original_index = selected_row[
-                        "_原始索引"
-                    ]
-
-                # ------------------------------------------------
-                # 詳細內容
-                # ------------------------------------------------
+                # ----------------------------------------
+                # 編輯區
+                # ----------------------------------------
 
                 st.divider()
 
                 st.markdown(
-                    "### ✏️ 編輯知識"
+                    "### 📝 知識內容"
                 )
 
                 left_col, right_col = st.columns(
@@ -4867,9 +4953,9 @@ elif page == "🛠️ 資料維護":
                         key="knowledge_basis"
                     )
 
-                # ------------------------------------------------
+                # ----------------------------------------
                 # 系統紀錄
-                # ------------------------------------------------
+                # ----------------------------------------
 
                 st.markdown(
                     "#### 🕘 系統紀錄"
@@ -4896,10 +4982,6 @@ elif page == "🛠️ 資料維護":
                     st.caption(
                         f"更新人：{df.at[original_index, '更新人']}"
                     )
-
-                # ------------------------------------------------
-                # 儲存
-                # ------------------------------------------------
 
                 st.divider()
 
@@ -4978,10 +5060,6 @@ elif page == "🛠️ 資料維護":
 
                         st.rerun()
 
-                # ------------------------------------------------
-                # 修改歷程
-                # ------------------------------------------------
-
                 st.divider()
 
                 with st.expander(
@@ -4999,6 +5077,169 @@ elif page == "🛠️ 資料維護":
                         ) or "知識庫",
                         "knowledge_history"
                     )
+
+        # =================================================
+        # ➕ 新增知識
+        # =================================================
+
+        elif knowledge_mode == "➕ 新增知識":
+
+            st.markdown(
+                "### ➕ 新增客服知識"
+            )
+
+            st.caption(
+                "建立新的客服標準回答，完成後會新增至知識庫。"
+            )
+
+            left_col, right_col = st.columns(
+                [1, 2]
+            )
+
+            with left_col:
+
+                st.markdown(
+                    "#### 📌 基本資料"
+                )
+
+                new_problem_type = st.text_input(
+                    "問題類型",
+                    placeholder="例如：配送、退換貨、商品資訊",
+                    key="new_problem_type"
+                )
+
+                new_product_no = st.text_input(
+                    "商品編號",
+                    placeholder="沒有商品編號可留空",
+                    key="new_product_no"
+                )
+
+                new_keywords = st.text_input(
+                    "關鍵字",
+                    placeholder="例如：配送、提早、缺貨",
+                    key="new_keywords"
+                )
+
+                new_source = st.text_input(
+                    "資料來源",
+                    placeholder="例如：商品部、物流、官網",
+                    key="new_source"
+                )
+
+            with right_col:
+
+                st.markdown(
+                    "#### 💬 客服內容"
+                )
+
+                new_question_summary = st.text_area(
+                    "問題摘要",
+                    placeholder="整理顧客常見問題...",
+                    height=100,
+                    key="new_question_summary"
+                )
+
+                new_standard_reply = st.text_area(
+                    "標準回覆",
+                    placeholder="輸入客服正式回覆內容...",
+                    height=220,
+                    key="new_standard_reply"
+                )
+
+                new_judgment_basis = st.text_area(
+                    "判斷依據",
+                    placeholder="說明此回答的依據或注意事項...",
+                    height=150,
+                    key="new_judgment_basis"
+                )
+
+            st.divider()
+
+            new_creator = st.text_input(
+                "👤 建立人（必填）",
+                placeholder="例如：皮皮、66",
+                key="new_knowledge_creator"
+            )
+
+            if st.button(
+                "➕ 新增這筆知識",
+                type="primary",
+                use_container_width=True,
+                key="add_knowledge",
+                disabled=not (
+                    new_creator.strip()
+                    and new_question_summary.strip()
+                    and new_standard_reply.strip()
+                )
+            ):
+
+                new_df = df.copy()
+
+                # ----------------------------------------
+                # 自動產生序號
+                # ----------------------------------------
+
+                if "序號" in new_df.columns:
+
+                    numeric_seq = pd.to_numeric(
+                        new_df["序號"],
+                        errors="coerce"
+                    )
+
+                    if numeric_seq.notna().any():
+
+                        new_sequence = int(
+                            numeric_seq.max()
+                        ) + 1
+
+                    else:
+
+                        new_sequence = 1
+
+                else:
+
+                    new_sequence = 1
+
+                today = pd.Timestamp.now().strftime(
+                    "%Y/%m/%d"
+                )
+
+                new_row = {}
+
+                for column in new_df.columns:
+                    new_row[column] = ""
+
+                new_row["序號"] = new_sequence
+                new_row["問題類型"] = new_problem_type
+                new_row["商品編號"] = new_product_no
+                new_row["問題摘要"] = new_question_summary
+                new_row["標準回覆"] = new_standard_reply
+                new_row["判斷依據"] = new_judgment_basis
+                new_row["資料來源"] = new_source
+                new_row["關鍵字"] = new_keywords
+                new_row["建立人"] = new_creator
+                new_row["建立日期"] = today
+                new_row["更新人"] = new_creator
+                new_row["更新日期"] = today
+
+                new_df = pd.concat(
+                    [
+                        new_df,
+                        pd.DataFrame([new_row])
+                    ],
+                    ignore_index=True
+                )
+
+                if save_knowledge_data(
+                    new_df,
+                    new_creator
+                ):
+
+                    st.success(
+                        f"✅ 已新增知識 #{new_sequence}"
+                    )
+
+                    st.rerun()
 
     # ========================================================
     # 公告
