@@ -5567,7 +5567,9 @@ elif page == "🛠️ 資料維護":
                     announcement_columns
                 )
 
-              with st.container(
+                st.divider()
+
+                with st.container(
                     border=True
                 ):
 
