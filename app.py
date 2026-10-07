@@ -5547,7 +5547,12 @@ elif page == "🛠️ 資料維護":
                     edit_row,
                     announcement_columns
                 )
-
+                status = clean_text(
+                    row.get(
+                        "顯示狀態",
+                        ""
+                   )
+               )
                 st.divider()
 
                 with st.container(
