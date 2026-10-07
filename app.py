@@ -5562,19 +5562,19 @@ elif page == "🛠️ 資料維護":
                     edit_date,
                     edit_activity_date,
                     edit_point_date
-                ) = get_announcement_values(
-                    edit_row,
-                    announcement_columns
-                )
-                status = clean_text(
-                    row.get(
-                        "顯示狀態",
-                        ""
-                   )
+               ) = get_announcement_values(
+                   row,
+                   columns
                )
-                st.divider()
 
-                with st.container(
+               status = clean_text(
+                   row.get(
+                       "顯示狀態",
+                       ""
+                  )
+              )
+
+              with st.container(
                     border=True
                 ):
 
