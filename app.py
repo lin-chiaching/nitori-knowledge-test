@@ -5435,7 +5435,7 @@ with col1:
         "💾 儲存修改",
         type="primary",
         use_container_width=True,
-        disabled=not editor_name_announcement.strip(),
+        disabled=False,
         key="save_edit_announcement"
     )
 
