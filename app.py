@@ -4606,7 +4606,13 @@ elif page == "🛠️ 資料維護":
 
     with tab1:
 
-        df = load_data()
+        st.subheader(
+            "📚 知識庫管理"
+        )
+
+        st.caption(
+            "搜尋並維護客服常用問題與標準回答。"
+        )
 
         if df.empty:
 
@@ -4616,50 +4622,192 @@ elif page == "🛠️ 資料維護":
 
         else:
 
+            # ------------------------------------------------
+            # 搜尋區
+            # ------------------------------------------------
+
+            search_col, category_col = st.columns(
+                [3, 1]
+            )
+
+            with search_col:
+
+                knowledge_search = st.text_input(
+                    "🔎 搜尋知識",
+                    placeholder="輸入問題、回答或關鍵字...",
+                    key="knowledge_search"
+                )
+
+            with category_col:
+
+                if "分類" in df.columns:
+
+                    category_options = [
+                        "全部"
+                    ] + sorted(
+                        df["分類"]
+                        .dropna()
+                        .astype(str)
+                        .str.strip()
+                        .replace("", pd.NA)
+                        .dropna()
+                        .unique()
+                        .tolist()
+                    )
+
+                    knowledge_category = st.selectbox(
+                        "📂 分類",
+                        category_options,
+                        key="knowledge_category"
+                    )
+
+                else:
+
+                    knowledge_category = "全部"
+
+            # ------------------------------------------------
+            # 篩選資料
+            # ------------------------------------------------
+
+            display_df = df.copy()
+
+            if knowledge_search.strip():
+
+                keyword = knowledge_search.strip()
+
+                search_mask = (
+                    display_df
+                    .astype(str)
+                    .apply(
+                        lambda column:
+                        column.str.contains(
+                            keyword,
+                            case=False,
+                            na=False
+                        )
+                    )
+                    .any(
+                        axis=1
+                    )
+                )
+
+                display_df = display_df[
+                    search_mask
+                ]
+
+            if (
+                knowledge_category != "全部"
+                and "分類" in display_df.columns
+            ):
+
+                display_df = display_df[
+                    display_df["分類"]
+                    .astype(str)
+                    .str.strip()
+                    == knowledge_category
+                ]
+
+            # ------------------------------------------------
+            # 搜尋結果
+            # ------------------------------------------------
+
+            st.divider()
+
+            result_col1, result_col2 = st.columns(
+                [3, 1]
+            )
+
+            with result_col1:
+
+                st.markdown(
+                    "### 📋 知識資料"
+                )
+
+            with result_col2:
+
+                st.caption(
+                    f"目前顯示 {len(display_df)} 筆"
+                )
+
+            # ------------------------------------------------
+            # 編輯區
+            # ------------------------------------------------
+
             edited = st.data_editor(
-                df,
+                display_df,
                 use_container_width=True,
                 num_rows="dynamic",
-                height=600,
+                height=500,
                 key="knowledge_editor"
+            )
+
+            st.divider()
+
+            # ------------------------------------------------
+            # 儲存區
+            # ------------------------------------------------
+
+            st.markdown(
+                "### 💾 儲存變更"
+            )
+
+            st.caption(
+                "修改、新增或刪除資料後，請填寫修改人姓名再儲存。"
             )
 
             editor_name_knowledge = st.text_input(
                 "👤 修改人姓名（必填）",
-                placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
+                placeholder="例如：皮皮、66",
                 key="editor_name_knowledge",
                 help="儲存知識庫時必須填寫，姓名會記錄在修改歷程中。"
             )
 
-            if st.button(
-                "💾 儲存知識庫",
-                type="primary",
-                key="save_knowledge",
-                disabled=not editor_name_knowledge.strip()
-            ):
+            save_col1, save_col2 = st.columns(
+                [1, 4]
+            )
 
-                if save_knowledge_data(
-                    edited,
-                    editor_name_knowledge
+            with save_col1:
+
+                if st.button(
+                    "💾 儲存知識庫",
+                    type="primary",
+                    use_container_width=True,
+                    key="save_knowledge",
+                    disabled=not editor_name_knowledge.strip()
                 ):
 
-                    st.success(
-                        "知識庫已儲存！"
-                    )
+                    if save_knowledge_data(
+                        edited,
+                        editor_name_knowledge
+                    ):
 
-                    st.rerun()
+                        st.success(
+                            "知識庫已儲存！"
+                        )
 
-            render_change_history(
-                find_sheet(
-                    [
-                        "知識庫",
-                        "問題集",
-                        "Sheet1"
-                    ],
-                    0
-                ) or "知識庫",
-                "knowledge_history"
-            )
+                        st.rerun()
+
+            # ------------------------------------------------
+            # 修改歷程
+            # ------------------------------------------------
+
+            st.divider()
+
+            with st.expander(
+                "🕘 查看知識庫修改歷程"
+            ):
+
+                render_change_history(
+                    find_sheet(
+                        [
+                            "知識庫",
+                            "問題集",
+                            "Sheet1"
+                        ],
+                        0
+                    ) or "知識庫",
+                    "knowledge_history"
+                )
 
     # ========================================================
     # 公告
