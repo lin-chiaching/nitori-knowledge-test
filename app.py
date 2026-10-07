@@ -446,7 +446,20 @@ def render_announcement_admin(
             st.markdown(
                 "### 📌 未命名公告"
             )
+            
+        # 顯示狀態
+        if status == "是":
 
+            st.caption(
+                "🟢 顯示中"
+            )
+
+        elif status == "否":
+
+            st.caption(
+                "⚪ 已隱藏"
+            )
+            
         # 日期資訊
         info = []
 
