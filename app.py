@@ -381,6 +381,12 @@ def render_announcement(row, columns):
         row,
         columns
     )
+    status = clean_text(
+        row.get(
+            "顯示狀態",
+            ""
+        )
+    )
 
     with st.container(border=True):
 
