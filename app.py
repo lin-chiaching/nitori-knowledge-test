@@ -5583,23 +5583,31 @@ elif page == "🛠️ 資料維護":
                         key="edit_announcement_content"
                     )
 
-                    new_date = st.text_input(
-                        "公告日期",
-                        value=edit_date or "",
-                        key="edit_announcement_date"
-                    )
+                    date_col1, date_col2, date_col3 = st.columns(3)
 
-                    new_activity_date = st.text_input(
-                        "活動日期",
-                        value=edit_activity_date or "",
-                        key="edit_announcement_activity_date"
-                    )
+                    with date_col1:
 
-                    new_point_date = st.text_input(
-                        "點數期限",
-                        value=edit_point_date or "",
-                        key="edit_announcement_point_date"
-                    )
+                        new_date = st.text_input(
+                            "公告日期",
+                            value=edit_date or "",
+                            key="edit_announcement_date"
+                        )
+
+                    with date_col2:
+
+                        new_activity_date = st.text_input(
+                            "活動日期",
+                            value=edit_activity_date or "",
+                            key="edit_announcement_activity_date"
+                        )
+
+                    with date_col3:
+
+                        new_point_date = st.text_input(
+                            "點數期限",
+                            value=edit_point_date or "",
+                            key="edit_announcement_point_date"
+                        )
 
                     editor_name_announcement = st.text_input(
                         "👤 修改人姓名（必填）",
