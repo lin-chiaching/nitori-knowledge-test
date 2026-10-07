@@ -4614,6 +4614,8 @@ elif page == "🛠️ 資料維護":
             "搜尋並維護客服常用問題與標準回答。"
         )
 
+        df = load_data()
+        
         if df.empty:
 
             st.warning(
