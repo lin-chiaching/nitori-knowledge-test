@@ -4745,7 +4745,7 @@ elif page == "🛠️ 資料維護":
                 "功能",
                 [
                     "📋 總表",
-                    "➕ 新增知識"
+                    "✏️ 編輯／新增知識"
                 ],
                 horizontal=True,
                 label_visibility="collapsed",
