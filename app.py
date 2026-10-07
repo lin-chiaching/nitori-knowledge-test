@@ -5257,19 +5257,19 @@ with tab1:
 
         else:
 
-            st.dataframe(
-                df.head(0),
-                use_container_width=True,
-                hide_index=True
+            announcement_columns = (
+                get_announcement_columns(
+                    df
+                )
             )
 
-            edited = st.data_editor(
-                df,
-                use_container_width=True,
-                num_rows="dynamic",
-                height=550,
-                key="announcement_editor"
-            )
+            for index, row in df.iterrows():
+
+                render_announcement_admin(
+                    row,
+                    announcement_columns,
+                    index
+                )
 
             editor_name_announcement = st.text_input(
                 "👤 修改人姓名（必填）",
