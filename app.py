@@ -5531,221 +5531,221 @@ with tab1:
                     announcement_columns,
                     index
                 )
-# ========================================================
-# 編輯公告
-# ========================================================
+            # ========================================================
+            # 編輯公告
+            # ========================================================
 
-if "editing_announcement" in st.session_state:
+            if "editing_announcement" in st.session_state:
 
-    edit_index = st.session_state[
-        "editing_announcement"
-    ]
-
-    edit_row = df.loc[
-        edit_index
-    ]
-
-    (
-        edit_title,
-        edit_content,
-        edit_date,
-        edit_activity_date,
-        edit_point_date
-    ) = get_announcement_values(
-        edit_row,
-        announcement_columns
-    )
-
-    st.divider()
-
-    st.subheader(
-        "✏️ 編輯公告"
-    )
-
-    new_title = st.text_input(
-        "公告標題",
-        value=edit_title or "",
-        key="edit_announcement_title"
-    )
-
-    new_content = st.text_area(
-        "公告內容",
-        value=edit_content or "",
-        height=180,
-        key="edit_announcement_content"
-    )
-
-    new_date = st.text_input(
-        "公告日期",
-        value=edit_date or "",
-        key="edit_announcement_date"
-    )
-
-    new_activity_date = st.text_input(
-        "活動日期",
-        value=edit_activity_date or "",
-        key="edit_announcement_activity_date"
-    )
-
-    new_point_date = st.text_input(
-        "點數期限",
-        value=edit_point_date or "",
-        key="edit_announcement_point_date"
-    )
-
-    editor_name_announcement = st.text_input(
-        "👤 修改人姓名（必填）",
-        placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
-        key="edit_editor_name_announcement"
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        save_edit = st.button(
-            "💾 儲存修改",
-            type="primary",
-            use_container_width=True,
-            disabled=not editor_name_announcement.strip(),
-            key="save_edit_announcement"
-        )
-
-    with col2:
-
-        cancel_edit = st.button(
-            "取消編輯",
-            use_container_width=True,
-            key="cancel_edit_announcement"
-        )
-
-    # --------------------------------------------------------
-    # 取消編輯
-    # --------------------------------------------------------
-
-    if cancel_edit:
-
-        del st.session_state[
-            "editing_announcement"
-        ]
-
-        st.rerun()
-
-    # --------------------------------------------------------
-    # 儲存修改
-    # --------------------------------------------------------
-
-    if save_edit:
-
-        edited_df = df.copy()
-
-        # 取得實際欄位名稱
-        title_column = announcement_columns.get(
-            "title"
-        )
-
-        content_column = announcement_columns.get(
-            "content"
-        )
-
-        date_column = announcement_columns.get(
-            "date"
-        )
-
-        activity_date_column = announcement_columns.get(
-            "activity_date"
-        )
-
-        point_date_column = announcement_columns.get(
-            "point_date"
-        )
-
-        if title_column:
-
-            edited_df.at[
-                edit_index,
-                title_column
-            ] = new_title
-
-        if content_column:
-
-            edited_df.at[
-                edit_index,
-                content_column
-            ] = new_content
-
-        if date_column:
-
-            edited_df.at[
-                edit_index,
-                date_column
-            ] = new_date
-
-        if activity_date_column:
-
-            edited_df.at[
-                edit_index,
-                activity_date_column
-            ] = new_activity_date
-
-        if point_date_column:
-
-            edited_df.at[
-                edit_index,
-                point_date_column
-            ] = new_point_date
-
-        sheet = find_sheet(
-            [
-                "內部公告",
-                "公告"
-            ]
-        )
-
-        if sheet:
-
-            success = save_sheet(
-                sheet,
-                edited_df,
-                editor_name_announcement
-            )
-
-            if success:
-
-                st.success(
-                    "公告已更新！"
-                )
-
-                del st.session_state[
+                edit_index = st.session_state[
                     "editing_announcement"
                 ]
 
-                st.rerun()
+                edit_row = df.loc[
+                    edit_index
+                ]
 
-            else:
-
-                st.error(
-                    "公告儲存失敗，請稍後再試。"
+                (
+                    edit_title,
+                    edit_content,
+                    edit_date,
+                    edit_activity_date,
+                    edit_point_date
+                ) = get_announcement_values(
+                    edit_row,
+                    announcement_columns
                 )
 
-        else:
+                st.divider()
 
-            st.error(
-                "找不到公告資料工作表。"
+                st.subheader(
+                    "✏️ 編輯公告"
+                )
+
+                new_title = st.text_input(
+                    "公告標題",
+                    value=edit_title or "",
+                    key="edit_announcement_title"
+                )
+
+                new_content = st.text_area(
+                    "公告內容",
+                    value=edit_content or "",
+                    height=180,
+                    key="edit_announcement_content"
+                )
+
+                new_date = st.text_input(
+                    "公告日期",
+                    value=edit_date or "",
+                    key="edit_announcement_date"
+                )
+
+                new_activity_date = st.text_input(
+                    "活動日期",
+                    value=edit_activity_date or "",
+                    key="edit_announcement_activity_date"
+                )
+
+                new_point_date = st.text_input(
+                    "點數期限",
+                    value=edit_point_date or "",
+                    key="edit_announcement_point_date"
+                )
+
+                editor_name_announcement = st.text_input(
+                    "👤 修改人姓名（必填）",
+                    placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
+                    key="edit_editor_name_announcement"
+                )
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+
+                    save_edit = st.button(
+                        "💾 儲存修改",
+                        type="primary",
+                        use_container_width=True,
+                        disabled=not editor_name_announcement.strip(),
+                        key="save_edit_announcement"
+                    )
+
+                with col2:
+
+                    cancel_edit = st.button(
+                        "取消編輯",
+                        use_container_width=True,
+                        key="cancel_edit_announcement"
+                    )
+
+                # --------------------------------------------------------
+                # 取消編輯
+                # --------------------------------------------------------
+
+                if cancel_edit:
+
+                    del st.session_state[
+                        "editing_announcement"
+                    ]
+
+                    st.rerun()
+
+                # --------------------------------------------------------
+                # 儲存修改
+                # --------------------------------------------------------
+
+                if save_edit:
+
+                    edited_df = df.copy()
+
+                    title_column = announcement_columns.get(
+                        "title"
+                    )
+
+                    content_column = announcement_columns.get(
+                        "content"
+                    )
+
+                    date_column = announcement_columns.get(
+                        "date"
+                    )
+
+                    activity_date_column = announcement_columns.get(
+                        "activity_date"
+                    )
+
+                    point_date_column = announcement_columns.get(
+                        "point_date"
+                    )
+
+                    if title_column:
+
+                        edited_df.at[
+                            edit_index,
+                            title_column
+                        ] = new_title
+
+                    if content_column:
+
+                        edited_df.at[
+                            edit_index,
+                            content_column
+                        ] = new_content
+
+                    if date_column:
+
+                        edited_df.at[
+                            edit_index,
+                            date_column
+                        ] = new_date
+
+                    if activity_date_column:
+
+                        edited_df.at[
+                            edit_index,
+                            activity_date_column
+                        ] = new_activity_date
+
+                    if point_date_column:
+
+                        edited_df.at[
+                            edit_index,
+                            point_date_column
+                        ] = new_point_date
+
+                    sheet = find_sheet(
+                        [
+                            "內部公告",
+                            "公告"
+                        ]
+                    )
+
+                    if sheet:
+
+                        success = save_sheet(
+                            sheet,
+                            edited_df,
+                            editor_name_announcement
+                        )
+
+                        if success:
+
+                            st.success(
+                                "公告已更新！"
+                            )
+
+                            del st.session_state[
+                                "editing_announcement"
+                            ]
+
+                            st.rerun()
+
+                        else:
+
+                            st.error(
+                                "公告儲存失敗，請稍後再試。"
+                            )
+
+                    else:
+
+                        st.error(
+                            "找不到公告資料工作表。"
+                        )
+
+            # --------------------------------------------------------
+            # 公告修改歷程
+            # --------------------------------------------------------
+
+            render_change_history(
+                find_sheet(
+                    [
+                        "內部公告",
+                        "公告"
+                    ]
+                ) or "內部公告",
+                "announcement_history"
             )
-    # --------------------------------------------------------
-    # 公告修改歷程
-    # --------------------------------------------------------
-
-    render_change_history(
-        find_sheet(
-            [
-                "內部公告",
-                "公告"
-            ]
-        ) or "內部公告",
-        "announcement_history"
-   )
     # ========================================================
     # 待審核問題
     # ========================================================
