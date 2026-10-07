@@ -5330,10 +5330,6 @@ elif page == "🛠️ 資料維護":
 
                     st.rerun()
 
-    # ========================================================
-    # 公告
-    # ========================================================
-
             if "adding_announcement" in st.session_state:
 
                 st.divider()
@@ -5409,107 +5405,109 @@ elif page == "🛠️ 資料維護":
                             use_container_width=True,
                             key="cancel_new_announcement"
                         )
-                # --------------------------------------------------------
-                # 取消新增
-                # --------------------------------------------------------
 
-                if cancel_new:
+                    # --------------------------------------------------------
+                    # 取消新增
+                    # --------------------------------------------------------
 
-                    del st.session_state[
-                        "adding_announcement"
-                    ]
+                    if cancel_new:
 
-                    st.rerun()
+                        del st.session_state[
+                            "adding_announcement"
+                        ]
 
+                        st.rerun()
 
-                # --------------------------------------------------------
-                # 儲存新增公告
-                # --------------------------------------------------------
+                    # --------------------------------------------------------
+                    # 儲存新增公告
+                    # --------------------------------------------------------
 
-                if save_new:
+                    if save_new:
 
-                    new_df = df.copy()
+                        new_df = df.copy()
 
-                    # 自動產生公告編號
-                    if "公告編號" in new_df.columns:
+                        # 自動產生公告編號
+                        if "公告編號" in new_df.columns:
 
-                        numbers = pd.to_numeric(
-                            new_df["公告編號"],
-                            errors="coerce"
-                        )
+                            numbers = pd.to_numeric(
+                                new_df["公告編號"],
+                                errors="coerce"
+                            )
 
-                        if numbers.notna().any():
+                            if numbers.notna().any():
 
-                            new_number = int(
-                                numbers.max()
-                            ) + 1
+                                new_number = int(
+                                    numbers.max()
+                                ) + 1
+
+                            else:
+
+                                new_number = 1
 
                         else:
 
                             new_number = 1
 
-                    else:
+                        new_row = {
+                            "公告編號": new_number,
+                            "公告標題": add_title,
+                            "公告內容": add_content,
+                            "公告日期": add_date,
+                            "活動日期": add_activity_date,
+                            "點數期限": add_point_date,
+                            "顯示狀態": "是"
+                        }
 
-                        new_number = 1
-
-                    new_row = {
-                        "公告編號": new_number,
-                        "公告標題": add_title,
-                        "公告內容": add_content,
-                        "公告日期": add_date,
-                        "活動日期": add_activity_date,
-                        "點數期限": add_point_date,
-                        "顯示狀態": "是"
-                    }
-
-                    new_df = pd.concat(
-                        [
-                            new_df,
-                            pd.DataFrame(
-                                [new_row]
-                            )
-                        ],
-                        ignore_index=True
-                    )
-
-                    sheet = find_sheet(
-                        [
-                            "內部公告",
-                            "公告"
-                        ]
-                    )
-
-                    if sheet:
-
-                        success = save_sheet(
-                            sheet,
-                            new_df,
-                            add_editor_name
+                        new_df = pd.concat(
+                            [
+                                new_df,
+                                pd.DataFrame(
+                                    [new_row]
+                                )
+                            ],
+                            ignore_index=True
                         )
 
-                        if success:
+                        sheet = find_sheet(
+                            [
+                                "內部公告",
+                                "公告"
+                            ]
+                        )
 
-                            st.success(
-                                "公告已新增！"
+                        if sheet:
+
+                            success = save_sheet(
+                                sheet,
+                                new_df,
+                                add_editor_name
                             )
 
-                            del st.session_state[
-                                "adding_announcement"
-                            ]
+                            if success:
 
-                            st.rerun()
+                                st.success(
+                                    "公告已新增！"
+                                )
+
+                                del st.session_state[
+                                    "adding_announcement"
+                                ]
+
+                                st.rerun()
+
+                            else:
+
+                                st.error(
+                                    "公告新增失敗，請稍後再試。"
+                                )
 
                         else:
 
                             st.error(
-                                "公告新增失敗，請稍後再試。"
+                                "找不到公告資料工作表。"
                             )
 
-                    else:
 
-                        st.error(
-                            "找不到公告資料工作表。"
-                        )        
             announcement_columns = (
                 get_announcement_columns(
                     df
@@ -5523,6 +5521,8 @@ elif page == "🛠️ 資料維護":
                     announcement_columns,
                     index
                 )
+
+
             # ========================================================
             # 編輯公告
             # ========================================================
