@@ -5201,7 +5201,7 @@ elif page == "🛠️ 資料維護":
             )
 
             st.caption(
-                "建立新的客服標準回答，完成後會新增至知識庫。"
+                "🆕 建立新的客服標準回答，完成後會新增至知識庫。"
             )
 
             left_col, right_col = st.columns(
