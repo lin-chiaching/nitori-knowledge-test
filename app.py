@@ -5454,15 +5454,6 @@ if "editing_announcement" in st.session_state:
         ]
 
         st.rerun()
-            render_change_history(
-                find_sheet(
-                    [
-                        "內部公告",
-                        "公告"
-                    ]
-                ) or "內部公告",
-                "announcement_history"
-            )
 
     # ========================================================
     # 待審核問題
