@@ -5558,10 +5558,17 @@ elif page == "🛠️ 資料維護":
 
                 st.divider()
 
-                st.subheader(
-                    "✏️ 編輯公告"
-                )
+                with st.container(
+                    border=True
+                ):
+                
+                    st.markdown(
+                        "### ✏️ 編輯公告"
+                    )
 
+                    st.caption(
+                        "修改完成後請填寫修改人姓名，再按「儲存修改」。"
+                    )
                 new_title = st.text_input(
                     "公告標題",
                     value=edit_title or "",
