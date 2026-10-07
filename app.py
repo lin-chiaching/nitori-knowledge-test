@@ -5730,7 +5730,12 @@ elif page == "🛠️ 資料維護":
                                 edit_index,
                                 point_date_column
                             ] = new_point_date
+                        if "顯示狀態" in edited_df.columns:
 
+                            edited_df.at[
+                                edit_index,
+                                "顯示狀態"
+                            ] = new_status
                         sheet = find_sheet(
                             [
                                 "內部公告",
