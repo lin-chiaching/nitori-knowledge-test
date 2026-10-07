@@ -407,7 +407,96 @@ def render_announcement(row, columns):
         if content:
             st.write(content)
 
+def render_announcement_admin(
+    row,
+    columns,
+    index
+):
 
+    (
+        title,
+        content,
+        date,
+        activity_date,
+        point_date
+    ) = get_announcement_values(
+        row,
+        columns
+    )
+
+    with st.container(
+        border=True
+    ):
+
+        # 標題
+        if title:
+
+            st.markdown(
+                f"### 📌 {title}"
+            )
+
+        else:
+
+            st.markdown(
+                "### 📌 未命名公告"
+            )
+
+        # 日期資訊
+        info = []
+
+        if date:
+            info.append(
+                f"📅 公告日期：{date}"
+            )
+
+        if activity_date:
+            info.append(
+                f"🎉 活動日期：{activity_date}"
+            )
+
+        if point_date:
+            info.append(
+                f"🎁 點數期限：{point_date}"
+            )
+
+        if info:
+
+            st.caption(
+                "　｜　".join(info)
+            )
+
+        # 內容預覽
+        if content:
+
+            preview = str(
+                content
+            ).replace(
+                "\n",
+                " "
+            )
+
+            if len(preview) > 100:
+
+                preview = (
+                    preview[:100]
+                    + "……"
+                )
+
+            st.write(
+                preview
+            )
+
+        # 編輯按鈕
+        if st.button(
+            "✏️ 編輯",
+            key=f"edit_announcement_{index}"
+        ):
+
+            st.session_state[
+                "editing_announcement"
+            ] = index
+
+            st.rerun()
 # ============================================================
 # Excel 載入
 # ============================================================
