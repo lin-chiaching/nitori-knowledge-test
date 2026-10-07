@@ -429,7 +429,12 @@ def render_announcement_admin(
         row,
         columns
     )
-
+    status = clean_text(
+        row.get(
+            "顯示狀態",
+            ""
+        )
+    )
     with st.container(
         border=True
     ):
