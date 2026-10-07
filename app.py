@@ -5454,42 +5454,6 @@ if "editing_announcement" in st.session_state:
         ]
 
         st.rerun()
-            editor_name_announcement = st.text_input(
-                "👤 修改人姓名（必填）",
-                placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
-                key="editor_name_announcement",
-                help="儲存公告時必須填寫，姓名會記錄在修改歷程中。"
-            )
-
-            if st.button(
-                "💾 儲存公告",
-                type="primary",
-                key="save_announcements",
-                disabled=not editor_name_announcement.strip()
-            ):
-
-                sheet = find_sheet(
-                    [
-                        "內部公告",
-                        "公告"
-                    ]
-                )
-
-                if (
-                    sheet
-                    and save_sheet(
-                        sheet,
-                        edited,
-                        editor_name_announcement
-                    )
-                ):
-
-                    st.success(
-                        "公告已儲存！"
-                    )
-
-                    st.rerun()
-
             render_change_history(
                 find_sheet(
                     [
