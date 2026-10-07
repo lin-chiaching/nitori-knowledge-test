@@ -5359,7 +5359,101 @@ with tab1:
                     announcement_columns,
                     index
                 )
+# ========================================================
+# 編輯公告
+# ========================================================
 
+if "editing_announcement" in st.session_state:
+
+    edit_index = st.session_state[
+        "editing_announcement"
+    ]
+
+    edit_row = df.loc[
+        edit_index
+    ]
+
+    (
+        edit_title,
+        edit_content,
+        edit_date,
+        edit_activity_date,
+        edit_point_date
+    ) = get_announcement_values(
+        edit_row,
+        announcement_columns
+    )
+
+    st.divider()
+
+    st.subheader(
+        "✏️ 編輯公告"
+    )
+
+    new_title = st.text_input(
+        "公告標題",
+        value=edit_title or "",
+        key="edit_announcement_title"
+    )
+
+    new_content = st.text_area(
+        "公告內容",
+        value=edit_content or "",
+        height=180,
+        key="edit_announcement_content"
+    )
+
+    new_date = st.text_input(
+        "公告日期",
+        value=edit_date or "",
+        key="edit_announcement_date"
+    )
+
+    new_activity_date = st.text_input(
+        "活動日期",
+        value=edit_activity_date or "",
+        key="edit_announcement_activity_date"
+    )
+
+    new_point_date = st.text_input(
+        "點數期限",
+        value=edit_point_date or "",
+        key="edit_announcement_point_date"
+    )
+
+    editor_name_announcement = st.text_input(
+        "👤 修改人姓名（必填）",
+        placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
+        key="edit_editor_name_announcement"
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        save_edit = st.button(
+            "💾 儲存修改",
+            type="primary",
+            use_container_width=True,
+            disabled=not editor_name_announcement.strip(),
+            key="save_edit_announcement"
+        )
+
+    with col2:
+
+        cancel_edit = st.button(
+            "取消編輯",
+            use_container_width=True,
+            key="cancel_edit_announcement"
+        )
+
+    if cancel_edit:
+
+        del st.session_state[
+            "editing_announcement"
+        ]
+
+        st.rerun()
             editor_name_announcement = st.text_input(
                 "👤 修改人姓名（必填）",
                 placeholder="請輸入實際修改人的姓名，例如：皮皮、66",
