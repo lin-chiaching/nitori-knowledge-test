@@ -5334,89 +5334,81 @@ elif page == "🛠️ 資料維護":
     # 公告
     # ========================================================
 
-    with tab2:
-
-        df = load_announcements()
-
-        if df.empty:
-
-            st.warning(
-                "找不到公告資料。"
-            )
-
-        else:
-            if st.button(
-                "➕ 新增公告",
-                type="primary",
-                use_container_width=True,
-                key="add_announcement"
-            ):
-
-                st.session_state[
-                    "adding_announcement"
-                ] = True
-
-                st.rerun()
-
             if "adding_announcement" in st.session_state:
 
                 st.divider()
 
-                st.subheader(
-                    "➕ 新增公告"
-                )
+                with st.container(
+                    border=True
+                ):
 
-                add_title = st.text_input(
-                    "公告標題",
-                    key="add_announcement_title"
-                )
-
-                add_content = st.text_area(
-                    "公告內容",
-                    height=180,
-                    key="add_announcement_content"
-                )
-
-                add_date = st.text_input(
-                    "公告日期",
-                    key="add_announcement_date"
-                )
-
-                add_activity_date = st.text_input(
-                    "活動日期",
-                    key="add_announcement_activity_date"
-                )
-
-                add_point_date = st.text_input(
-                    "點數期限",
-                    key="add_announcement_point_date"
-                )
-
-                add_editor_name = st.text_input(
-                    "👤 建立人姓名（必填）",
-                    placeholder="請輸入實際建立人的姓名，例如：皮皮、66",
-                    key="add_editor_name_announcement"
-                )
-
-                add_col1, add_col2 = st.columns(2)
-
-                with add_col1:
-
-                    save_new = st.button(
-                        "💾 新增公告",
-                        type="primary",
-                        use_container_width=True,
-                        disabled=not add_editor_name.strip(),
-                        key="save_new_announcement"
+                    st.markdown(
+                        "### ➕ 新增公告"
                     )
 
-                with add_col2:
-
-                    cancel_new = st.button(
-                        "取消新增",
-                        use_container_width=True,
-                        key="cancel_new_announcement"
+                    st.caption(
+                        "填寫完成後請輸入建立人姓名，再按「新增公告」。"
                     )
+
+                    add_title = st.text_input(
+                        "公告標題",
+                        key="add_announcement_title"
+                    )
+
+                    add_content = st.text_area(
+                        "公告內容",
+                        height=180,
+                        key="add_announcement_content"
+                    )
+
+                    date_col1, date_col2, date_col3 = st.columns(3)
+
+                    with date_col1:
+
+                        add_date = st.text_input(
+                            "公告日期",
+                            key="add_announcement_date"
+                        )
+
+                    with date_col2:
+
+                        add_activity_date = st.text_input(
+                            "活動日期",
+                            key="add_announcement_activity_date"
+                        )
+
+                    with date_col3:
+
+                        add_point_date = st.text_input(
+                            "點數期限",
+                            key="add_announcement_point_date"
+                        )
+
+                    add_editor_name = st.text_input(
+                        "👤 建立人姓名（必填）",
+                        placeholder="請輸入實際建立人的姓名，例如：皮皮、66",
+                        key="add_editor_name_announcement"
+                    )
+
+                    add_col1, add_col2 = st.columns(2)
+
+                    with add_col1:
+
+                        save_new = st.button(
+                            "💾 新增公告",
+                            type="primary",
+                            use_container_width=True,
+                            disabled=not add_editor_name.strip(),
+                            key="save_new_announcement"
+                        )
+
+                    with add_col2:
+
+                        cancel_new = st.button(
+                            "取消新增",
+                            use_container_width=True,
+                            key="cancel_new_announcement"
+                        )
                 # --------------------------------------------------------
                 # 取消新增
                 # --------------------------------------------------------
