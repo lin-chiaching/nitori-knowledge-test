@@ -4868,7 +4868,7 @@ elif page == "🛠️ 資料維護":
             )
             st.divider()
             
-        if knowledge_action == "✏️ 編輯既有知識":
+            if knowledge_action == "✏️ 編輯既有知識":
 
             search_col, count_col = st.columns(
                 [4, 1]
