@@ -4468,7 +4468,17 @@ elif role == "👩‍🏫 小老師":
     st.subheader(
         "👩‍🏫 小老師管理"
     )
+    if st.button(
+        "🚪 登出小老師",
+        key="teacher_logout_button"
+    ):
 
+        st.session_state[
+            "teacher_authenticated"
+        ] = False
+
+        st.rerun()
+        
     st.write(
         "新人訓練管理"
     )
