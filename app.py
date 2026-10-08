@@ -4240,6 +4240,36 @@ elif page == "🎓 新人訓練中心":
                 "status": "○ 尚未開始"
             }
         ]
+    # ----------------------------------------------------
+    # 讀取目前登入新人的學習紀錄
+    # ----------------------------------------------------
+
+    current_employee_id = st.session_state.get(
+        "training_employee_id",
+        ""
+    )
+
+    current_employee_name = st.session_state.get(
+        "training_employee_name",
+        ""
+    )
+
+    if "新人學習紀錄" in excel_data:
+
+        employee_records = excel_data[
+            "新人學習紀錄"
+        ].copy()
+
+        employee_records = employee_records[
+            employee_records["員工編號"]
+            .astype(str)
+            .str.strip()
+            == str(current_employee_id).strip()
+        ]
+
+        st.info(
+            f"👤 目前登入：{current_employee_name}｜員工編號：{current_employee_id}"
+        )
         # ----------------------------------------------------
         # 目前登入新人
         # ----------------------------------------------------
