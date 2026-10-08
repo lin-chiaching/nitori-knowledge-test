@@ -4868,8 +4868,16 @@ elif page == "🛠️ 資料維護":
             )
             st.divider()
             
-        if knowledge_action == "✏️ 編輯既有知識":
-            
+if knowledge_action == "✏️ 編輯既有知識":
+
+            st.markdown(
+                "### ✏️ 編輯客服知識"
+            )
+
+            st.caption(
+                "搜尋知識後，選擇要修改的資料。"
+            )
+
             search_col, count_col = st.columns(
                 [4, 1]
             )
