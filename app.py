@@ -3904,7 +3904,20 @@ elif page == "🎓 新人訓練中心":
     st.caption(
         "新人訓練 Level 1｜共 3 天"
     )
+    
+    if role == "👤 新人" and st.session_state.get(
+        "newcomer_authenticated",
+        False
+    ):
 
+        st.success(
+            f"👋 歡迎 {st.session_state.get('training_employee_name', '')}！"
+        )
+
+        st.caption(
+            f"員工編號：{st.session_state.get('training_employee_id', '')}"
+        )
+        
     st.divider()
 
     # ========================================================
