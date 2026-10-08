@@ -396,27 +396,36 @@ def render_announcement(row, columns):
             )
 
         if date:
-            date = pd.to_datetime(
-                date
-            ).strftime("%Y/%m/%d")
+            try:
+                date = pd.to_datetime(
+                    date
+                ).strftime("%Y/%m/%d")
+            except:
+                date = str(date)
 
             st.caption(
                 "📅 公告日期：" + date
             )
 
         if activity_date:
-            activity_date = pd.to_datetime(
-                activity_date
-            ).strftime("%Y/%m/%d")
+            try:
+                activity_date = pd.to_datetime(
+                    activity_date
+                ).strftime("%Y/%m/%d")
+            except:
+                activity_date = str(activity_date)
 
             st.caption(
                 "🎉 活動日期：" + activity_date
             )
 
         if point_date:
-            point_date = pd.to_datetime(
-                point_date
-            ).strftime("%Y/%m/%d")
+            try:
+                point_date = pd.to_datetime(
+                    point_date
+                ).strftime("%Y/%m/%d")
+            except:
+                point_date = str(point_date)
 
             st.caption(
                 "🎁 點數期限：" + point_date
