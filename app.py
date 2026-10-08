@@ -5097,8 +5097,8 @@ elif page == "🛠️ 資料維護":
                         "#### 🕘 系統紀錄"
                     )
 
-                    info_col1, info_col2, info_col3 = st.columns(
-                        3
+                    info_col1, info_col2, info_col3, info_col4 = st.columns(
+                        4
                     )
 
                     with info_col1:
@@ -5117,6 +5117,12 @@ elif page == "🛠️ 資料維護":
 
                         st.caption(
                             f"更新人：{df.at[original_index, '更新人']}"
+                        )
+
+                    with info_col4:
+
+                        st.caption(
+                            f"更新日期：{df.at[original_index, '更新日期']}"
                         )
 
                     st.divider()
