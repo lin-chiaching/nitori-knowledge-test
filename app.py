@@ -4240,7 +4240,23 @@ elif page == "🎓 新人訓練中心":
                 "status": "○ 尚未開始"
             }
         ]
+        # ----------------------------------------------------
+        # 目前登入新人
+        # ----------------------------------------------------
 
+        current_employee_id = st.session_state.get(
+            "training_employee_id",
+            ""
+        )
+
+        current_employee_name = st.session_state.get(
+            "training_employee_name",
+            ""
+        )
+
+        st.info(
+            f"👤 目前登入：{current_employee_name}｜員工編號：{current_employee_id}"
+        )
         # ----------------------------------------------------
         # 整體進度
         # ----------------------------------------------------
