@@ -5205,6 +5205,8 @@ elif page == "🛠️ 資料維護":
         else:
             st.divider()
             
+        if knowledge_action == "➕ 新增客服知識":   
+       
             st.markdown(
                 "### ➕ 新增客服知識"
             )
