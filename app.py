@@ -489,16 +489,43 @@ def render_announcement_admin(
         info = []
 
         if date:
+
+            try:
+                date = pd.to_datetime(
+                    date
+                ).strftime("%Y/%m/%d")
+            except:
+
+                date = str(date)
+
             info.append(
                 f"📅 公告日期：{date}"
             )
 
         if activity_date:
+
+            try:
+                activity_date = pd.to_datetime(
+                    activity_date
+                ).strftime("%Y/%m/%d")
+            except:
+
+                activity_date = str(activity_date)
+
             info.append(
                 f"🎉 活動日期：{activity_date}"
             )
 
         if point_date:
+
+            try:
+                point_date = pd.to_datetime(
+                    point_date
+                ).strftime("%Y/%m/%d")
+            except:
+
+                point_date = str(point_date)
+
             info.append(
                 f"🎁 點數期限：{point_date}"
             )
