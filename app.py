@@ -5121,8 +5121,23 @@ elif page == "🛠️ 資料維護":
 
                     with info_col4:
 
+                        update_date = df.at[
+                            original_index,
+                            "更新日期"
+                        ]
+
+                        if pd.notna(update_date):
+
+                            update_date = pd.to_datetime(
+                                update_date
+                            ).strftime("%Y/%m/%d")
+
+                        else:
+
+                            update_date = ""
+
                         st.caption(
-                            f"更新日期：{df.at[original_index, '更新日期']}"
+                            f"更新日期：{update_date}"
                         )
 
                     st.divider()
