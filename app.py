@@ -4848,13 +4848,10 @@ elif page == "🛠️ 資料維護":
 
         elif knowledge_mode == "✏️ 編輯／新增知識":
 
-            st.markdown(
-                "### ✏️ 編輯客服知識"
+            st.caption(
+                "先選擇要進行的操作。"
             )
 
-            st.caption(
-                "先搜尋並選擇一筆資料，再進行內容修改。"
-            )
             knowledge_action = st.radio(
                 "操作",
                 [
@@ -4863,9 +4860,9 @@ elif page == "🛠️ 資料維護":
                 ],
                 horizontal=True,
                 key="knowledge_action"
-           )
+            )
 
-           st.divider()
+            st.divider()
             search_col, count_col = st.columns(
                 [4, 1]
             )
