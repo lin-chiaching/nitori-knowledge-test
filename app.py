@@ -4409,6 +4409,10 @@ elif page == "🎓 新人訓練中心":
                     ] = False
 
                     st.rerun()
+# ========================================================
+# 小老師
+# ========================================================
+
 elif role == "👩‍🏫 小老師":
 
     # ========================================================
@@ -4457,131 +4461,129 @@ elif role == "👩‍🏫 小老師":
 
         st.stop()
 
+    # ========================================================
+    # 小老師內容
+    # ========================================================
+
     st.subheader(
         "👩‍🏫 小老師管理"
     )
+
     st.write(
-            "新人訓練管理"
+        "新人訓練管理"
     )
 
     st.markdown(
-            "### 👥 新人名單"
+        "### 👥 新人名單"
     )
 
-        if employee_data.empty:
+    if employee_data.empty:
 
-            st.info(
-                "目前尚未建立員工資料。"
-            )
-
-        else:
-
-            new_staff = employee_data[
-                employee_data["角色"]
-                .astype(str)
-                .str.strip()
-                == "新人"
-            ].copy()
-            if new_staff.empty:
-
-                st.info(
-                    "目前尚未建立新人資料。"
-                )
-
-            else:
-
-                st.markdown(
-                    "### 👤 請選擇你的身分"
-                )
-
-                new_staff["顯示名稱"] = (
-                    new_staff["姓名"]
-                    .astype(str)
-                    .str.strip()
-                    + "｜"
-                    + new_staff["員工編號"]
-                    .astype(str)
-                    .str.strip()
-                )
-
-                selected_employee_display = st.selectbox(
-                    "新人姓名",
-                    new_staff["顯示名稱"].tolist(),
-                    key="selected_training_employee"
-                )
-
-                selected_employee = new_staff[
-                    new_staff["顯示名稱"]
-                    == selected_employee_display
-                ].iloc[0]
-
-                selected_employee_id = str(
-                    selected_employee["員工編號"]
-                ).strip()
-
-                selected_employee_name = str(
-                    selected_employee["姓名"]
-                ).strip()
-
-                st.session_state[
-                    "training_employee_id"
-                ] = selected_employee_id
-
-                st.session_state[
-                    "training_employee_name"
-                ] = selected_employee_name
-
-                st.success(
-                    f"目前登入身分：{selected_employee_name}"
-                )
-            if new_staff.empty:
-
-                st.info(
-                    "目前尚未建立新人資料"
-                )
-
-            else:
-
-                display_columns = [
-                    "員工編號",
-                    "姓名",
-                    "職稱",
-                    "部門",
-                    "到職日"
-                ]
-
-                display_columns = [
-                    column
-                    for column in display_columns
-                    if column in new_staff.columns
-                ]
-
-                st.dataframe(
-                    new_staff[display_columns],
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-        st.divider()
-
-        st.markdown(
-            "### 📚 課程管理"
+        st.info(
+            "目前尚未建立員工資料。"
         )
 
-        if training_overview.empty:
+    else:
+
+        new_staff = employee_data[
+            employee_data["角色"]
+            .astype(str)
+            .str.strip()
+            == "新人"
+        ].copy()
+
+        if new_staff.empty:
 
             st.info(
-                "目前尚未建立課程總表。"
+                "目前尚未建立新人資料。"
             )
 
         else:
 
+            st.markdown(
+                "### 👤 請選擇你的身分"
+            )
+
+            new_staff["顯示名稱"] = (
+                new_staff["姓名"]
+                .astype(str)
+                .str.strip()
+                + "｜"
+                + new_staff["員工編號"]
+                .astype(str)
+                .str.strip()
+            )
+
+            selected_employee_display = st.selectbox(
+                "新人姓名",
+                new_staff["顯示名稱"].tolist(),
+                key="selected_training_employee"
+            )
+
+            selected_employee = new_staff[
+                new_staff["顯示名稱"]
+                == selected_employee_display
+            ].iloc[0]
+
+            selected_employee_id = str(
+                selected_employee["員工編號"]
+            ).strip()
+
+            selected_employee_name = str(
+                selected_employee["姓名"]
+            ).strip()
+
+            st.session_state[
+                "training_employee_id"
+            ] = selected_employee_id
+
+            st.session_state[
+                "training_employee_name"
+            ] = selected_employee_name
+
+            st.success(
+                f"目前登入身分：{selected_employee_name}"
+            )
+
+            display_columns = [
+                "員工編號",
+                "姓名",
+                "職稱",
+                "部門",
+                "到職日"
+            ]
+
+            display_columns = [
+                column
+                for column in display_columns
+                if column in new_staff.columns
+            ]
+
             st.dataframe(
-                training_overview,
+                new_staff[display_columns],
                 use_container_width=True,
                 hide_index=True
             )
 
+    st.divider()
+
+    st.markdown(
+        "### 📚 課程管理"
+    )
+
+    if training_overview.empty:
+
+        st.info(
+            "目前尚未建立課程總表。"
+        )
+
+    else:
+
+        st.dataframe(
+            training_overview,
+            use_container_width=True,
+            hide_index=True
+        )
 
 # ============================================================
 # 公告
