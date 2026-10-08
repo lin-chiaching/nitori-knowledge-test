@@ -5017,7 +5017,7 @@ elif page == "🛠️ 資料維護":
                                 "關鍵字"
                             ]
                         ),
-                        key="knowledge_keywords"
+                        key=f"knowledge_keywords_{original_index}"
                     )
 
                     source = st.text_input(
@@ -5028,7 +5028,7 @@ elif page == "🛠️ 資料維護":
                                 "資料來源"
                             ]
                         ),
-                        key="knowledge_source"
+                        key=f"knowledge_source_{original_index}"
                     )
 
                 with right_col:
@@ -5046,7 +5046,7 @@ elif page == "🛠️ 資料維護":
                             ]
                         ),
                         height=100,
-                        key="knowledge_question"
+                        key=f"knowledge_question_{original_index}"
                     )
 
                     standard_reply = st.text_area(
@@ -5058,7 +5058,7 @@ elif page == "🛠️ 資料維護":
                             ]
                         ),
                         height=220,
-                        key="knowledge_reply"
+                        key=f"knowledge_reply_{original_index}"
                     )
 
                     judgment_basis = st.text_area(
@@ -5070,7 +5070,7 @@ elif page == "🛠️ 資料維護":
                             ]
                         ),
                         height=150,
-                        key="knowledge_basis"
+                        key=f"knowledge_basis_{original_index}"
                     )
 
                 # ----------------------------------------
