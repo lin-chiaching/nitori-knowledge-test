@@ -4409,16 +4409,61 @@ elif page == "🎓 新人訓練中心":
                     ] = False
 
                     st.rerun()
+elif role == "👩‍🏫 小老師":
+
     # ========================================================
-    # 小老師
+    # 小老師密碼鎖
     # ========================================================
 
-    elif role == "👩‍🏫 小老師":
+    TEACHER_PASSWORD = "nitori123"
+
+    if not st.session_state.get(
+        "teacher_authenticated",
+        False
+    ):
 
         st.subheader(
-            "👩‍🏫 小老師管理"
+            "🔒 小老師管理"
         )
 
+        st.write(
+            "此頁面為小老師管理專用，請輸入密碼。"
+        )
+
+        teacher_password = st.text_input(
+            "請輸入密碼",
+            type="password",
+            key="teacher_password_input"
+        )
+
+        if st.button(
+            "🔓 登入",
+            key="teacher_login_button"
+        ):
+
+            if teacher_password == TEACHER_PASSWORD:
+
+                st.session_state[
+                    "teacher_authenticated"
+                ] = True
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    "❌ 密碼錯誤，請重新輸入。"
+                )
+
+        st.stop()
+
+    # ========================================================
+    # 小老師內容
+    # ========================================================
+
+    st.subheader(
+        "👩‍🏫 小老師管理"
+    )
         st.write(
             "新人訓練管理"
         )
