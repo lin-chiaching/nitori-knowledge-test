@@ -3752,7 +3752,84 @@ elif page == "🎓 新人訓練中心":
                     use_container_width=True,
                     hide_index=True
                 )
+    # ========================================================
+    # 新人登入
+    # ========================================================
 
+    if role == "👤 新人":
+
+        if not st.session_state.get(
+            "newcomer_authenticated",
+            False
+        ):
+
+            st.subheader(
+                "👤 新人登入"
+            )
+
+            st.write(
+                "請輸入您的員工編號"
+            )
+
+            employee_id_input = st.text_input(
+                "員工編號",
+                key="newcomer_employee_id"
+            ).strip()
+
+            if st.button(
+                "🔓 登入",
+                key="newcomer_login_button"
+            ):
+
+                employee_match = employee_data[
+                    employee_data["員工編號"]
+                    .astype(str)
+                    .str.strip()
+                    == employee_id_input
+                ]
+
+                if employee_match.empty:
+
+                    st.error(
+                        "❌ 查無此員工編號，請確認後重新輸入。"
+                    )
+
+                else:
+
+                    selected_employee = (
+                        employee_match.iloc[0]
+                    )
+
+                    if str(
+                        selected_employee["角色"]
+                    ).strip() != "新人":
+
+                        st.error(
+                            "此員工編號不是新人身分。"
+                        )
+
+                    else:
+
+                        st.session_state[
+                            "newcomer_authenticated"
+                        ] = True
+
+                        st.session_state[
+                            "training_employee_id"
+                        ] = str(
+                            selected_employee["員工編號"]
+                        ).strip()
+
+                        st.session_state[
+                            "training_employee_name"
+                        ] = str(
+                            selected_employee["姓名"]
+                        ).strip()
+
+                        st.rerun()
+
+            st.stop()
+            
         st.divider()
 
         st.markdown(
