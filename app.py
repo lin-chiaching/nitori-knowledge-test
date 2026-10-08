@@ -4855,7 +4855,17 @@ elif page == "🛠️ 資料維護":
             st.caption(
                 "先搜尋並選擇一筆資料，再進行內容修改。"
             )
+            knowledge_action = st.radio(
+                "操作",
+                [
+                    "✏️ 編輯既有知識",
+                    "➕ 新增客服知識"
+                ],
+                horizontal=True,
+                key="knowledge_action"
+           )
 
+           st.divider()
             search_col, count_col = st.columns(
                 [4, 1]
             )
