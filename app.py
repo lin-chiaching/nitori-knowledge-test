@@ -3830,27 +3830,7 @@ elif page == "🎓 新人訓練中心":
 
             st.stop()
             
-        st.divider()
 
-        st.markdown(
-            "### 📚 課程管理"
-        )
-
-        if training_overview.empty:
-
-            st.info(
-                "目前尚未建立課程總表。"
-            )
-
-        else:
-
-            st.dataframe(
-                training_overview,
-                use_container_width=True,
-                hide_index=True
-            )
-
-        st.stop()
     # --------------------------------------------------------
     # 頁面狀態
     # --------------------------------------------------------
