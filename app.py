@@ -5177,14 +5177,29 @@ elif page == "🛠️ 資料維護":
 
                         if pd.notna(update_date):
 
-                            update_date = pd.to_datetime(
-                                update_date
-                            ).strftime("%Y/%m/%d")
+                            try:
+
+                                update_date = pd.to_datetime(
+                                    update_date
+                                )
+
+                                if pd.isna(update_date):
+
+                                    update_date = ""
+
+                                else:
+
+                                    update_date = update_date.strftime(
+                                        "%Y/%m/%d"
+                                    )
+
+                            except:
+
+                                update_date = ""
 
                         else:
 
                             update_date = ""
-
                         st.caption(
                             f"更新日期：{update_date}"
                         )
