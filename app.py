@@ -4852,6 +4852,10 @@ elif page == "🛠️ 資料維護":
                 "先選擇要進行的操作。"
             )
 
+            st.markdown(
+                "#### 📌 我要做什麼？"
+            )
+
             knowledge_action = st.radio(
                 "操作",
                 [
@@ -4859,6 +4863,7 @@ elif page == "🛠️ 資料維護":
                     "➕ 新增客服知識"
                 ],
                 horizontal=True,
+                label_visibility="collapsed",
                 key="knowledge_action"
             )
             st.divider()
