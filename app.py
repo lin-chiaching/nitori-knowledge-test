@@ -3901,7 +3901,89 @@ elif page == "🎓 新人訓練中心":
                     "DAY3_PRACTICE": "📝 實務練習",
                 }
 
-                for _, employee in new_staff.iterrows():
+                search_name = st.text_input(
+                    "🔍 搜尋新人",
+                    placeholder="輸入姓名或員工編號",
+                    key="training_staff_search"
+                )
+
+                status_filter = st.selectbox(
+                    "📋 訓練狀態",
+                    ["全部", "尚未開始", "訓練中", "已完成訓練"],
+                    key="training_staff_status_filter"
+                )
+
+                filtered_staff = new_staff.copy()
+
+                if search_name.strip():
+                    keyword = search_name.strip()
+                    filtered_staff = filtered_staff[
+                        filtered_staff["姓名"].astype(str).str.contains(
+                            keyword, case=False, na=False
+                        )
+                        | filtered_staff["員工編號"].astype(str).str.contains(
+                            keyword, case=False, na=False
+                        )
+                    ]
+
+                if status_filter != "全部":
+                    matched_employee_ids = []
+
+                    for _, filter_employee in filtered_staff.iterrows():
+                        filter_id = str(filter_employee["員工編號"]).strip()
+
+                        if training_records.empty:
+                            filter_records = pd.DataFrame()
+                        else:
+                            filter_records = training_records[
+                                training_records["員工編號"].astype(str).str.strip()
+                                == filter_id
+                            ]
+
+                        completed = 0
+                        in_progress = 0
+
+                        for course_id in course_names:
+                            course_record = filter_records[
+                                filter_records["課程ID"].astype(str).str.strip()
+                                == course_id
+                            ] if not filter_records.empty else pd.DataFrame()
+
+                            if course_record.empty:
+                                course_status = "尚未開始"
+                            else:
+                                course_status = str(
+                                    course_record.iloc[-1]["學習狀態"]
+                                ).strip()
+
+                            if course_status == "已完成":
+                                completed += 1
+                            elif course_status == "學習中":
+                                in_progress += 1
+
+                        if completed == len(course_names):
+                            overall_status = "已完成訓練"
+                        elif completed > 0 or in_progress > 0:
+                            overall_status = "訓練中"
+                        else:
+                            overall_status = "尚未開始"
+
+                        if overall_status == status_filter:
+                            matched_employee_ids.append(filter_id)
+
+                    filtered_staff = filtered_staff[
+                        filtered_staff["員工編號"].astype(str).str.strip().isin(
+                            matched_employee_ids
+                        )
+                    ]
+
+                st.caption(f"目前顯示 {len(filtered_staff)} 位新人")
+
+                if filtered_staff.empty:
+                    st.info("找不到符合條件的新人，請調整搜尋關鍵字或篩選條件。")
+                else:
+                    for _, employee in filtered_staff.iterrows():
+
 
                     employee_id = str(
                         employee["員工編號"]
