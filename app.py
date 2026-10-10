@@ -3890,11 +3890,6 @@ elif page == "🎓 新人訓練中心":
                     unsafe_allow_html=True,
                 )
 
-
-        st.markdown(
-            "### 👥 新人名單"
-        )
-
         if employee_data.empty:
 
             st.info(
@@ -3935,8 +3930,6 @@ elif page == "🎓 新人訓練中心":
                 # ========================================
                 # ✨ 新人卡片式名單與學習進度
                 # ========================================
-
-                st.markdown("### ✨ 新人學習進度")
 
                 training_records = load_training_records()
 
