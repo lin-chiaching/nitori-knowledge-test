@@ -3884,11 +3884,72 @@ elif page == "🎓 新人訓練中心":
                     if column in new_staff.columns
                 ]
 
-                st.dataframe(
-                    new_staff[display_columns],
-                    use_container_width=True,
-                    hide_index=True
-                )
+                # 新人卡片式名單
+                st.markdown("### ✨ 新人名單")
+
+                for _, employee in new_staff.iterrows():
+
+                    employee_id = str(
+                        employee["員工編號"]
+                    ).strip()
+
+                    employee_name = str(
+                        employee["姓名"]
+                    ).strip()
+
+                    department = str(
+                        employee.get("部門", "未設定")
+                    ).strip()
+
+                    position = str(
+                        employee.get("職稱", "未設定")
+                    ).strip()
+
+                    hire_date = str(
+                        employee.get("到職日", "未設定")
+                    ).strip()
+
+                    if not department or department == "nan":
+                        department = "未設定"
+
+                    if not position or position == "nan":
+                        position = "未設定"
+
+                    if not hire_date or hire_date == "nan":
+                        hire_date = "未設定"
+
+                    st.markdown(
+                        f"""
+                        <div style="
+                            border: 1px solid #E5E5DF;
+                            border-radius: 14px;
+                            padding: 18px 20px;
+                            margin: 10px 0;
+                            background-color: #FAFAF7;
+                        ">
+                            <div style="
+                                font-size: 18px;
+                                font-weight: 600;
+                                color: #374536;
+                                margin-bottom: 8px;
+                            ">
+                                👤 {employee_name}
+                            </div>
+                            <div style="
+                                font-size: 14px;
+                                color: #666B63;
+                                line-height: 1.9;
+                            ">
+                                員工編號：{employee_id}<br>
+                                職稱：{position}<br>
+                                部門：{department}<br>
+                                到職日：{hire_date}
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
         # ========================================
         # 📊 新人學習進度總表
         # ========================================
