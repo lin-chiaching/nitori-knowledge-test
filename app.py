@@ -3825,6 +3825,63 @@ elif page == "🎓 新人訓練中心":
                         ] = str(
                             selected_employee["姓名"]
                         ).strip()
+                        # 自動建立新人的六堂課程紀錄
+                        current_employee_id = str(
+                            st.session_state["training_employee_id"]
+                        ).strip()
+
+                        current_employee_name = str(
+                            st.session_state["training_employee_name"]
+                        ).strip()
+
+                        course_names = {
+                            "DAY1_BASIC": "🏠 宜得利基礎",
+                            "DAY1_SERVICE": "💬 接客基礎",
+                            "DAY2_PRODUCT": "🛋 商品基礎",
+                            "DAY2_SYSTEM": "💻 系統操作",
+                            "DAY3_PHONE": "☎️ 電話應對",
+                            "DAY3_PRACTICE": "📝 實務練習"
+                        }
+
+                        existing_records = load_training_records()
+
+                        for course_id, course_name in course_names.items():
+
+                            already_exists = False
+
+                            if not existing_records.empty:
+                                already_exists = (
+                                    (
+                                        existing_records["員工編號"]
+                                        .astype(str)
+                                        .str.strip()
+                                        == current_employee_id
+                                    )
+                                    &
+                                    (
+                                        existing_records["課程ID"]
+                                        .astype(str)
+                                        .str.strip()
+                                        == course_id
+                                    )
+                                ).any()
+
+                            if not already_exists:
+                                day = course_id[:4]
+
+                                save_training_record(
+                                    employee_id=current_employee_id,
+                                    employee_name=current_employee_name,
+                                    course_id=course_id,
+                                    course_name=course_name,
+                                    day=day,
+                                    start_date="",
+                                    learning_status="尚未開始",
+                                    quiz_status="尚未測驗",
+                                    completed_date=""
+                                )
+
+                                existing_records = load_training_records()
 
                         st.rerun()
 
