@@ -3884,8 +3884,22 @@ elif page == "🎓 新人訓練中心":
                     if column in new_staff.columns
                 ]
 
-                # 新人卡片式名單
-                st.markdown("### ✨ 新人名單")
+                # ========================================
+                # ✨ 新人卡片式名單與學習進度
+                # ========================================
+
+                st.markdown("### ✨ 新人學習進度")
+
+                training_records = load_training_records()
+
+                course_names = {
+                    "DAY1_BASIC": "🏠 宜得利基礎",
+                    "DAY1_SERVICE": "💬 接客基礎",
+                    "DAY2_PRODUCT": "🛋 商品基礎",
+                    "DAY2_SYSTEM": "💻 系統操作",
+                    "DAY3_PHONE": "☎️ 電話應對",
+                    "DAY3_PRACTICE": "📝 實務練習",
+                }
 
                 for _, employee in new_staff.iterrows():
 
@@ -3918,37 +3932,161 @@ elif page == "🎓 新人訓練中心":
                     if not hire_date or hire_date == "nan":
                         hire_date = "未設定"
 
-                    st.markdown(
-                        f"""
-                        <div style="
-                            border: 1px solid #E5E5DF;
-                            border-radius: 14px;
-                            padding: 18px 20px;
-                            margin: 10px 0;
-                            background-color: #FAFAF7;
-                        ">
-                            <div style="
-                                font-size: 18px;
-                                font-weight: 600;
-                                color: #374536;
-                                margin-bottom: 8px;
-                            ">
-                                👤 {employee_name}
-                            </div>
-                            <div style="
-                                font-size: 14px;
-                                color: #666B63;
-                                line-height: 1.9;
-                            ">
-                                員工編號：{employee_id}<br>
-                                職稱：{position}<br>
-                                部門：{department}<br>
-                                到職日：{hire_date}
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+                    # 取得這位新人的學習紀錄
+                    if training_records.empty:
+                        employee_records = pd.DataFrame()
+                    else:
+                        employee_records = training_records[
+                            training_records["員工編號"]
+                            .astype(str)
+                            .str.strip()
+                            .eq(employee_id)
+                        ].copy()
+
+                    course_details = []
+                    completed_count = 0
+                    in_progress_count = 0
+
+                    for course_id, course_name in course_names.items():
+
+                        course_record = employee_records[
+                            employee_records["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            .eq(course_id)
+                        ] if not employee_records.empty else pd.DataFrame()
+
+                        if course_record.empty:
+                            status = "尚未開始"
+                            quiz_status = "尚未測驗"
+                            completed_date = "—"
+                            educator_note = "—"
+                        else:
+                            latest = course_record.iloc[-1]
+
+                            status = str(
+                                latest.get("學習狀態", "尚未開始")
+                            ).strip()
+
+                            quiz_status = str(
+                                latest.get("測驗狀態", "尚未測驗")
+                            ).strip()
+
+                            completed_date = str(
+                                latest.get("完成日期", "")
+                            ).strip()
+
+                            educator_note = str(
+                                latest.get("教育者備註", "")
+                            ).strip()
+
+                            if not quiz_status or quiz_status == "nan":
+                                quiz_status = "尚未測驗"
+
+                            if not completed_date or completed_date == "nan":
+                                completed_date = "—"
+
+                            if not educator_note or educator_note == "nan":
+                                educator_note = "—"
+
+                        if status == "已完成":
+                            completed_count += 1
+                        elif status == "學習中":
+                            in_progress_count += 1
+
+                        course_details.append({
+                            "課程": course_name,
+                            "學習狀態": status,
+                            "測驗狀態": quiz_status,
+                            "完成日期": completed_date,
+                            "教育者備註": educator_note,
+                        })
+
+                    progress = int(
+                        completed_count / len(course_names) * 100
                     )
+
+                    if completed_count == len(course_names):
+                        overall_status = "已完成訓練"
+                    elif completed_count > 0 or in_progress_count > 0:
+                        overall_status = "訓練中"
+                    else:
+                        overall_status = "尚未開始"
+
+                    with st.container(border=True):
+
+                        card_col1, card_col2 = st.columns([4, 1])
+
+                        with card_col1:
+                            st.markdown(f"### 👤 {employee_name}")
+                            st.caption(
+                                f"員工編號：{employee_id}｜"
+                                f"{department}｜{position}"
+                            )
+                            st.caption(f"到職日：{hire_date}")
+
+                        with card_col2:
+                            st.write("")
+                            st.write(overall_status)
+
+                        st.divider()
+
+                        progress_col1, progress_col2 = st.columns([4, 1])
+
+                        with progress_col1:
+                            st.write("整體訓練進度")
+
+                        with progress_col2:
+                            st.markdown(
+                                f"<div style='text-align:right;"
+                                f"font-weight:600;'>{progress}%</div>",
+                                unsafe_allow_html=True
+                            )
+
+                        st.progress(progress)
+
+                        st.caption(
+                            f"已完成 {completed_count} / 6 堂課"
+                        )
+
+                        with st.expander("📚 查看六堂課詳細進度"):
+
+                            for detail in course_details:
+
+                                st.markdown(
+                                    f"**{detail['課程']}**"
+                                )
+
+                                st.caption(
+                                    f"學習狀態：{detail['學習狀態']}"
+                                )
+
+                                course_progress = (
+                                    100 if detail["學習狀態"] == "已完成"
+                                    else 50 if detail["學習狀態"] == "學習中"
+                                    else 0
+                                )
+
+                                st.progress(course_progress)
+
+                                detail_col1, detail_col2 = st.columns(2)
+
+                                with detail_col1:
+                                    st.caption(
+                                        f"測驗：{detail['測驗狀態']}"
+                                    )
+
+                                with detail_col2:
+                                    st.caption(
+                                        f"完成日期：{detail['完成日期']}"
+                                    )
+
+                                if detail["教育者備註"] != "—":
+                                    st.caption(
+                                        f"教育者備註：{detail['教育者備註']}"
+                                    )
+
+                                st.divider()
 
         # ========================================
         # 📊 新人學習進度總表
