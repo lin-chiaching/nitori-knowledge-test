@@ -965,6 +965,7 @@ def load_training_records():
         )
 
         return pd.DataFrame()
+        
 def save_training_record(
     employee_id,
     employee_name,
@@ -976,19 +977,11 @@ def save_training_record(
     quiz_status,
     completed_date
 ):
-
     try:
-
-        sheet = find_sheet(
-            ["新人學習紀錄"]
-        )
+        sheet = find_sheet(["新人學習紀錄"])
 
         if not sheet:
-
-            st.error(
-                "找不到「新人學習紀錄」工作表。"
-            )
-
+            st.error("找不到「新人學習紀錄」工作表。")
             return False
 
         records = pd.read_excel(
@@ -996,53 +989,88 @@ def save_training_record(
             sheet_name=sheet
         )
 
-        new_record = {
-            "員工編號": employee_id,
-            "姓名": employee_name,
-            "課程ID": course_id,
-            "課程名稱": course_name,
-            "DAY": day,
-            "開始日期": start_date,
-            "學習狀態": learning_status,
-            "測驗狀態": quiz_status,
-            "實作": "",
-            "完成日期": completed_date,
-            "教育者備註": ""
-        }
+        # 確保必要欄位存在
+        required_columns = [
+            "員工編號", "姓名", "課程ID", "課程名稱",
+            "DAY", "開始日期", "學習狀態", "測驗狀態",
+            "實作", "完成日期", "教育者備註"
+        ]
 
-        new_record_df = pd.DataFrame(
-            [new_record]
+        for column in required_columns:
+            if column not in records.columns:
+                records[column] = ""
+
+        # 比對同一位員工的同一堂課
+        employee_ids = (
+            records["員工編號"].astype(str).str.strip()
+        )
+        course_ids = (
+            records["課程ID"].astype(str).str.strip()
         )
 
-        records = pd.concat(
-            [
-                records,
-                new_record_df
-            ],
-            ignore_index=True
-        )
+        matched_indices = records.index[
+            (employee_ids == str(employee_id).strip())
+            & (course_ids == str(course_id).strip())
+        ].tolist()
 
+        if matched_indices:
+            # 已有紀錄：更新原本那一列
+            idx = matched_indices[0]
+
+            records.at[idx, "姓名"] = employee_name
+            records.at[idx, "課程名稱"] = course_name
+            records.at[idx, "DAY"] = day
+            records.at[idx, "學習狀態"] = learning_status
+            records.at[idx, "測驗狀態"] = quiz_status
+
+            # 有提供新日期才更新，避免清除原日期
+            if str(start_date).strip():
+                records.at[idx, "開始日期"] = start_date
+
+            if str(completed_date).strip():
+                records.at[idx, "完成日期"] = completed_date
+
+        else:
+            # 沒有紀錄：新增一列
+            new_record = {
+                "員工編號": employee_id,
+                "姓名": employee_name,
+                "課程ID": course_id,
+                "課程名稱": course_name,
+                "DAY": day,
+                "開始日期": start_date,
+                "學習狀態": learning_status,
+                "測驗狀態": quiz_status,
+                "實作": "",
+                "完成日期": completed_date,
+                "教育者備註": ""
+            }
+
+            records = pd.concat(
+                [records, pd.DataFrame([new_record])],
+                ignore_index=True
+            )
+
+        # 寫回 Excel
         with pd.ExcelWriter(
             EXCEL_PATH,
             engine="openpyxl",
             mode="a",
             if_sheet_exists="replace"
         ) as writer:
-
             records.to_excel(
                 writer,
                 sheet_name=sheet,
                 index=False
             )
 
+        # 清除讀取快取，讓下次讀取取得最新紀錄
+        load_training_records.clear()
+
         return True
 
     except Exception as e:
-
-        st.error(
-            f"儲存新人學習紀錄失敗：{e}"
-        )
-
+        st.error(f"儲存新人學習紀錄失敗：{e}")
         return False
 
 def load_training_quiz():
