@@ -4756,18 +4756,10 @@ elif page == "🎓 新人訓練中心":
                             st.rerun()
 
     # ========================================================
-    # 📊 學習紀錄
+    # 📊 學習紀錄｜日系簡約版
     # ========================================================
 
     elif st.session_state["training_page"] == "records":
-
-        st.subheader("🎓 我的學習進度")
-
-        st.caption(
-            "查看目前新人訓練課程的學習進度。"
-        )
-
-        st.divider()
 
         current_employee_id = str(
             st.session_state.get(
@@ -4775,12 +4767,101 @@ elif page == "🎓 新人訓練中心":
             )
         ).strip()
 
-        st.info(
-            f"員工編號：{current_employee_id}"
+        current_employee_name = st.session_state.get(
+            "training_employee_name", ""
         )
 
-        if not training_records.empty:
+        # ----------------------------------------------------
+        # 頁面標題
+        # ----------------------------------------------------
 
+        st.markdown("""
+        <div style="
+            background:#F5F1E9;
+            padding:24px 26px;
+            border-radius:12px;
+            border-left:5px solid #B49A78;
+            margin-bottom:20px;
+        ">
+            <div style="
+                font-size:12px;
+                letter-spacing:2px;
+                color:#81786D;
+                margin-bottom:8px;
+            ">
+                NITORI · MY LEARNING
+            </div>
+            <div style="
+                font-size:25px;
+                font-weight:600;
+                color:#403B34;
+                margin-bottom:8px;
+            ">
+                我的學習進度
+            </div>
+            <div style="
+                font-size:14px;
+                color:#81786D;
+            ">
+                按照課程查看學習狀態，逐步完成三天的新人訓練。
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.caption(
+            f"👤 {current_employee_name}　｜　員工編號：{current_employee_id}"
+        )
+
+        # ----------------------------------------------------
+        # 六堂課程設定
+        # ----------------------------------------------------
+
+        course_list = [
+            {
+                "id": "DAY1_BASIC",
+                "name": "🏠 宜得利基礎",
+                "day": "DAY 1",
+                "day_name": "宜得利與企業基礎"
+            },
+            {
+                "id": "DAY1_SERVICE",
+                "name": "💬 接客基礎",
+                "day": "DAY 1",
+                "day_name": "宜得利與企業基礎"
+            },
+            {
+                "id": "DAY2_PRODUCT",
+                "name": "🛋 商品基礎",
+                "day": "DAY 2",
+                "day_name": "商品與系統操作"
+            },
+            {
+                "id": "DAY2_SYSTEM",
+                "name": "💻 系統操作",
+                "day": "DAY 2",
+                "day_name": "商品與系統操作"
+            },
+            {
+                "id": "DAY3_PHONE",
+                "name": "☎️ 電話應對",
+                "day": "DAY 3",
+                "day_name": "電話與實務訓練"
+            },
+            {
+                "id": "DAY3_PRACTICE",
+                "name": "📝 實務練習",
+                "day": "DAY 3",
+                "day_name": "電話與實務訓練"
+            }
+        ]
+
+        # ----------------------------------------------------
+        # 取得目前登入新人的學習紀錄
+        # ----------------------------------------------------
+
+        employee_records = training_records.iloc[0:0].copy()
+
+        if not training_records.empty:
             employee_records = training_records[
                 training_records["員工編號"]
                 .astype(str)
@@ -4788,214 +4869,136 @@ elif page == "🎓 新人訓練中心":
                 .eq(current_employee_id)
             ].copy()
 
-            course_names = {
-                "DAY1_BASIC": "🏠 宜得利基礎",
-                "DAY1_SERVICE": "💬 接客基礎",
-                "DAY2_PRODUCT": "🛋 商品基礎",
-                "DAY2_SYSTEM": "💻 系統操作",
-                "DAY3_PHONE": "☎️ 電話應對",
-                "DAY3_PRACTICE": "📝 實務練習"
-            }
+        course_progress = []
 
-            if employee_records.empty:
-                st.info("目前尚無學習紀錄，請先開始課程。")
+        for course in course_list:
 
-            else:
-                for course_id, course_name in course_names.items():
+            course_record = employee_records[
+                employee_records["課程ID"]
+                .astype(str)
+                .str.strip()
+                .eq(course["id"])
+            ]
 
-                    course_record = employee_records[
-                        employee_records["課程ID"]
-                        .astype(str)
-                        .str.strip()
-                        .eq(course_id)
-                    ]
+            if course_record.empty:
 
-                    if course_record.empty:
-                        status = "尚未建立紀錄"
-                        progress = 0
-                    else:
-                        learning_status = str(
-                            course_record.iloc[-1]["學習狀態"]
-                        ).strip()
-
-                        if learning_status == "已完成":
-                            status = "✓ 已完成"
-                            progress = 100
-                        elif learning_status == "學習中":
-                            status = "◐ 學習中"
-                            progress = 50
-                        else:
-                            status = "○ 尚未開始"
-                            progress = 0
-
-                    with st.container(border=True):
-                        st.markdown(f"**{course_name}**")
-                        st.caption(f"課程編號：{course_id}")
-                        st.write(f"學習狀態：{status}")
-                        st.progress(progress)
-                        st.caption(f"完成度：{progress}%")
-
-        else:
-            st.warning(
-                "目前讀取不到學習紀錄，請確認 Excel 的「新人學習紀錄」工作表。"
-            )
-
-    # ----------------------------------------------------
-    # 讀取目前登入新人的學習紀錄
-    # ----------------------------------------------------
-
-    current_employee_id = str(
-        st.session_state.get(
-            "training_employee_id",
-            ""
-        )
-    ).strip()
-
-    current_employee_name = st.session_state.get(
-        "training_employee_name",
-        ""
-    )
-
-    training_records_demo = []
-
-    if not training_records.empty:
-
-        employee_records = training_records[
-            training_records["員工編號"]
-            .astype(str)
-            .str.strip()
-            == current_employee_id
-        ].copy()
-
-        for _, record in employee_records.iterrows():
-
-            learning_status = str(
-                record.get("學習狀態", "")
-            ).strip()
-
-            if learning_status == "已完成":
-
-                progress = 100
-                status = "✓ 已完成"
-
-            elif learning_status == "學習中":
-
-                progress = 50
-                status = "◐ 學習中"
-
-            else:
-
+                status = "尚未開始"
                 progress = 0
-                status = "○ 尚未開始"
 
-            training_records_demo.append({
-                "day": str(record.get("DAY", "")),
-                "day_name": "",
-                "course": str(record.get("課程名稱", "")),
-                "progress": progress,
-                "status": status
+            else:
+
+                learning_status = str(
+                    course_record.iloc[-1].get(
+                        "學習狀態", ""
+                    )
+                ).strip()
+
+                if learning_status == "已完成":
+                    status = "✓ 已完成"
+                    progress = 100
+
+                elif learning_status == "學習中":
+                    status = "◐ 學習中"
+                    progress = 50
+
+                else:
+                    status = "○ 尚未開始"
+                    progress = 0
+
+            course_progress.append({
+                "id": course["id"],
+                "name": course["name"],
+                "day": course["day"],
+                "day_name": course["day_name"],
+                "status": status,
+                "progress": progress
             })
 
-    st.info(
-        f"👤 目前登入：{current_employee_name}｜員工編號：{current_employee_id}"
-    )
-
-    if not training_records_demo:
-
-        st.info(
-            "目前尚無學習紀錄，開始課程後就會顯示在這裡。"
-        )
-
         # ----------------------------------------------------
-        # 目前登入新人
+        # 整體學習進度
         # ----------------------------------------------------
 
-        current_employee_id = st.session_state.get(
-            "training_employee_id",
-            ""
-        )
-
-        current_employee_name = st.session_state.get(
-            "training_employee_name",
-            ""
-        )
-
-        st.info(
-            f"👤 目前登入：{current_employee_name}｜員工編號：{current_employee_id}"
-        )
-        # ----------------------------------------------------
-        # 整體進度
-        # ----------------------------------------------------
-
-        total_courses = len(
-            training_records_demo
-        )
+        total_courses = len(course_progress)
 
         completed_courses = sum(
             1
-            for record in training_records_demo
+            for record in course_progress
             if record["progress"] == 100
+        )
+
+        learning_count = sum(
+            1
+            for record in course_progress
+            if record["status"] == "◐ 學習中"
         )
 
         overall_progress = (
             sum(
                 record["progress"]
-                for record in training_records_demo
+                for record in course_progress
             )
-            / total_courses
-            / 100
-        )
+            / (total_courses * 100)
+        ) if total_courses else 0
 
-        st.markdown("### 整體訓練進度")
+        st.markdown("""
+        <div style="
+            font-size:19px;
+            font-weight:600;
+            color:#403B34;
+            margin-top:24px;
+            margin-bottom:12px;
+        ">
+            整體訓練進度
+        </div>
+        """, unsafe_allow_html=True)
 
         progress_col1, progress_col2, progress_col3 = st.columns(3)
 
         with progress_col1:
-
             st.metric(
                 "整體進度",
                 f"{overall_progress:.0%}"
             )
 
         with progress_col2:
-
             st.metric(
                 "已完成課程",
                 f"{completed_courses} / {total_courses}"
             )
 
         with progress_col3:
-
-            learning_count = sum(
-                1
-                for record in training_records_demo
-                if 0 < record["progress"] < 100
-            )
-
             st.metric(
                 "學習中",
                 learning_count
             )
 
-        st.progress(
-            overall_progress
+        st.progress(overall_progress)
+
+        st.caption(
+            "每堂課完成後，系統會依照目前儲存的學習狀態更新進度。"
         )
+
+        if training_records.empty:
+            st.warning(
+                "目前讀取不到學習紀錄，請確認 Excel 的「新人學習紀錄」工作表。"
+            )
+
+        elif employee_records.empty:
+            st.info(
+                "目前尚無學習紀錄，請從新人首頁開始課程。"
+            )
 
         st.divider()
 
         # ----------------------------------------------------
-        # DAY 課程
+        # 依照 DAY 顯示課程卡片
         # ----------------------------------------------------
 
-        for day in [
-            "DAY 1",
-            "DAY 2",
-            "DAY 3"
-        ]:
+        for day in ["DAY 1", "DAY 2", "DAY 3"]:
 
             day_records = [
                 record
-                for record in training_records_demo
+                for record in course_progress
                 if record["day"] == day
             ]
 
@@ -5005,42 +5008,65 @@ elif page == "🎓 新人訓練中心":
             day_name = day_records[0]["day_name"]
 
             st.markdown(
-                f"### 📅 {day}｜{day_name}"
+                f"""
+                <div style="
+                    background:#F5F1E9;
+                    padding:12px 16px;
+                    border-radius:8px;
+                    margin-top:14px;
+                    margin-bottom:12px;
+                ">
+                    <span style="
+                        color:#A58A68;
+                        font-size:12px;
+                        letter-spacing:1px;
+                    ">{day}</span>
+                    <span style="
+                        color:#403B34;
+                        font-size:16px;
+                        font-weight:600;
+                        margin-left:10px;
+                    ">{day_name}</span>
+                </div>
+                """,
+                unsafe_allow_html=True
             )
 
             course_col1, course_col2 = st.columns(2)
 
-            for index, record in enumerate(
-                day_records
-            ):
+            for index, record in enumerate(day_records):
 
-                if index % 2 == 0:
-
-                    current_col = course_col1
-
-                else:
-
-                    current_col = course_col2
+                current_col = (
+                    course_col1
+                    if index % 2 == 0
+                    else course_col2
+                )
 
                 with current_col:
 
-                    st.markdown(
-                        f"#### {record['course']}"
-                    )
+                    with st.container(border=True):
 
-                    st.caption(
-                        record["status"]
-                    )
+                        st.markdown(
+                            f"**{record['name']}**"
+                        )
 
-                    st.progress(
-                        record["progress"] / 100
-                    )
+                        st.caption(
+                            f"課程編號：{record['id']}"
+                        )
 
-                    st.write(
-                        f"學習進度：{record['progress']}%"
-                    )
+                        st.write(
+                            record["status"]
+                        )
 
-                    st.divider()
+                        st.progress(
+                            record["progress"] / 100
+                        )
+
+                        st.caption(
+                            f"完成度：{record['progress']}%"
+                        )
+
+        st.divider()
 
         # ----------------------------------------------------
         # 返回首頁
@@ -5051,12 +5077,9 @@ elif page == "🎓 新人訓練中心":
             key="training_records_back_home",
             use_container_width=True
         ):
-
-            st.session_state[
-                "training_page"
-            ] = "home"
-
+            st.session_state["training_page"] = "home"
             st.rerun()
+
 
     elif st.session_state["training_page"] == "course":
 
