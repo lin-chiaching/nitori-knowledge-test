@@ -4544,278 +4544,216 @@ elif page == "🎓 新人訓練中心":
 
     if st.session_state["training_page"] == "home":
 
-        st.subheader("📚 課程選擇")
+        st.markdown("""
+        <div style="
+            background:#F5F1E9;
+            padding:26px 28px;
+            border-radius:12px;
+            border-left:5px solid #B49A78;
+            margin-bottom:20px;
+        ">
+            <div style="
+                color:#8A7863;
+                font-size:12px;
+                letter-spacing:3px;
+                margin-bottom:8px;
+            ">NITORI · TRAINING</div>
+            <div style="
+                color:#403B34;
+                font-size:27px;
+                font-weight:600;
+                margin-bottom:8px;
+            ">我的新人訓練</div>
+            <div style="
+                color:#777067;
+                font-size:14px;
+            ">循序漸進，完成每一堂課程。</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.info(
-            "請依照訓練進度選擇課程，完成「影片 → 課程內容 → 測驗」三個步驟。"
-        )
+        st.markdown("""
+        <div style="
+            color:#403B34;
+            font-size:21px;
+            font-weight:600;
+            margin:20px 0 6px 0;
+        ">📚 課程選擇</div>
+        <div style="
+            color:#81786D;
+            font-size:13px;
+            margin-bottom:18px;
+        ">依照 DAY 1 至 DAY 3 的順序，完成影片、課程內容與測驗。</div>
+        """, unsafe_allow_html=True)
 
-        st.divider()
+        course_groups = [
+            (
+                "DAY 1",
+                "宜得利基礎",
+                [
+                    (
+                        "DAY1_BASIC",
+                        "🏠 宜得利基礎",
+                        "了解宜得利基本資訊、企業理念與新人需要掌握的基礎知識。"
+                    ),
+                    (
+                        "DAY1_SERVICE",
+                        "💬 接客基礎",
+                        "學習接客基本概念與顧客應對方式。"
+                    ),
+                ],
+            ),
+            (
+                "DAY 2",
+                "商品與系統",
+                [
+                    (
+                        "DAY2_PRODUCT",
+                        "🛋 商品基礎",
+                        "認識家具、家飾及常見商品資訊。"
+                    ),
+                    (
+                        "DAY2_SYSTEM",
+                        "💻 系統操作",
+                        "認識客服工作中常用的系統及基本操作。"
+                    ),
+                ],
+            ),
+            (
+                "DAY 3",
+                "實務訓練",
+                [
+                    (
+                        "DAY3_PHONE",
+                        "☎️ 電話應對",
+                        "學習顧客來電時的基本接聽流程與應對方式。"
+                    ),
+                    (
+                        "DAY3_PRACTICE",
+                        "📝 實務練習",
+                        "透過實際案例進行新人訓練與確認。"
+                    ),
+                ],
+            ),
+        ]
 
-        # ----------------------------------------------------
-        # DAY 1
-        # ----------------------------------------------------
-
-        st.markdown(
-            "### 📅 DAY 1｜宜得利基礎"
-        )
-
-        day1_col1, day1_col2 = st.columns(2)
-
-        with day1_col1:
+        for day_label, day_title, courses in course_groups:
 
             st.markdown(
-                "#### 🏠 宜得利基礎"
+                f"""
+                <div style="
+                    color:#8A7863;
+                    font-size:12px;
+                    letter-spacing:2px;
+                    margin:26px 0 12px 0;
+                ">{day_label}</div>
+                <div style="
+                    color:#403B34;
+                    font-size:18px;
+                    font-weight:600;
+                    margin-bottom:14px;
+                ">{day_title}</div>
+                """,
+                unsafe_allow_html=True
             )
 
-            st.caption(
-                "了解宜得利基本資訊、企業理念與新人需要掌握的基礎知識。"
-            )
+            course_col1, course_col2 = st.columns(2, gap="medium")
 
-            if st.button(
-                "開始課程 →",
-                key="training_day1_basic",
-                use_container_width=True
-            ):
+            for index, course in enumerate(courses):
 
-                st.session_state[
-                    "training_page"
-                ] = "course"
+                course_id, course_name, description = course
 
-                st.session_state[
-                    "training_course_id"
-                ] = "DAY1_BASIC"
-                current_employee_id = str(
-                    st.session_state.get(
-                        "training_employee_id", ""
-                    )
-                ).strip()
-
-                current_employee_name = str(
-                    st.session_state.get(
-                        "training_employee_name", ""
-                    )
-                ).strip()
-
-                save_training_record(
-                    employee_id=current_employee_id,
-                    employee_name=current_employee_name,
-                    course_id="DAY1_BASIC",
-                    course_name="🏠 宜得利基礎",
-                    day="DAY1",
-                    start_date=str(
-                        pd.Timestamp.now().date()
-                    ),
-                    learning_status="學習中",
-                    quiz_status="尚未測驗",
-                    completed_date=""
+                current_col = (
+                    course_col1 if index == 0 else course_col2
                 )
 
-                st.session_state[
-                    "training_step"
-                ] = "video"
+                with current_col:
 
-                st.session_state[
-                    "training_quiz_passed"
-                ] = False
+                    with st.container(border=True):
 
-                st.rerun()
+                        st.markdown(
+                            f"""
+                            <div style="
+                                height:4px;
+                                background:#C5AD8C;
+                                border-radius:4px;
+                                margin-bottom:16px;
+                            "></div>
+                            <div style="
+                                color:#403B34;
+                                font-size:18px;
+                                font-weight:600;
+                                margin-bottom:10px;
+                            ">{course_name}</div>
+                            <div style="
+                                color:#81786D;
+                                font-size:13px;
+                                line-height:1.8;
+                                min-height:72px;
+                                margin-bottom:12px;
+                            ">{description}</div>
+                            <div style="
+                                display:inline-block;
+                                background:#F5F1E9;
+                                color:#8A7863;
+                                padding:5px 10px;
+                                border-radius:16px;
+                                font-size:12px;
+                            ">{day_label} 課程</div>
+                            """,
+                            unsafe_allow_html=True
+                        )
 
-        with day1_col2:
+                        if st.button(
+                            "開始課程 →",
+                            key=f"training_card_{course_id}",
+                            use_container_width=True
+                        ):
 
-            st.markdown(
-                "#### 💬 接客基礎"
-            )
+                            st.session_state[
+                                "training_page"
+                            ] = "course"
 
-            st.caption(
-                "學習接客基本概念與顧客應對方式。"
-            )
+                            st.session_state[
+                                "training_course_id"
+                            ] = course_id
 
-            if st.button(
-                "開始課程 →",
-                key="training_day1_service",
-                use_container_width=True
-            ):
+                            st.session_state[
+                                "training_step"
+                            ] = "video"
 
-                st.session_state[
-                    "training_page"
-                ] = "course"
+                            st.session_state[
+                                "training_quiz_passed"
+                            ] = False
 
-                st.session_state[
-                    "training_course_id"
-                ] = "DAY1_SERVICE"
-                course_id="DAY1_SERVICE",
-                course_name="💬 接客基礎",
-                
-                st.session_state[
-                    "training_step"
-                ] = "video"
+                            if course_id == "DAY1_BASIC":
 
-                st.session_state[
-                    "training_quiz_passed"
-                ] = False
+                                current_employee_id = str(
+                                    st.session_state.get(
+                                        "training_employee_id", ""
+                                    )
+                                ).strip()
 
-                st.rerun()
+                                current_employee_name = str(
+                                    st.session_state.get(
+                                        "training_employee_name", ""
+                                    )
+                                ).strip()
 
-        st.divider()
+                                save_training_record(
+                                    employee_id=current_employee_id,
+                                    employee_name=current_employee_name,
+                                    course_id=course_id,
+                                    course_name=course_name,
+                                    day="DAY1",
+                                    start_date=str(
+                                        pd.Timestamp.now().date()
+                                    ),
+                                    learning_status="學習中",
+                                    quiz_status="尚未測驗",
+                                    completed_date=""
+                                )
 
-        # ----------------------------------------------------
-        # DAY 2
-        # ----------------------------------------------------
-
-        st.markdown(
-            "### 📅 DAY 2｜商品與系統"
-        )
-
-        day2_col1, day2_col2 = st.columns(2)
-
-        with day2_col1:
-
-            st.markdown(
-                "#### 🛋 商品基礎"
-            )
-
-            st.caption(
-                "認識家具、家飾及常見商品資訊。"
-            )
-
-            if st.button(
-                "開始課程 →",
-                key="training_day2_product",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "training_page"
-                ] = "course"
-
-                st.session_state[
-                    "training_course_id"
-                ] = "DAY2_PRODUCT"
-
-                st.session_state[
-                    "training_step"
-                ] = "video"
-
-                st.session_state[
-                    "training_quiz_passed"
-                ] = False
-
-                st.rerun()
-
-        with day2_col2:
-
-            st.markdown(
-                "#### 💻 系統操作"
-            )
-
-            st.caption(
-                "認識客服工作中常用的系統及基本操作。"
-            )
-
-            if st.button(
-                "開始課程 →",
-                key="training_day2_system",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "training_page"
-                ] = "course"
-
-                st.session_state[
-                    "training_course_id"
-                ] = "DAY2_SYSTEM"
-
-                st.session_state[
-                    "training_step"
-                ] = "video"
-
-                st.session_state[
-                    "training_quiz_passed"
-                ] = False
-
-                st.rerun()
-
-        st.divider()
-
-        # ----------------------------------------------------
-        # DAY 3
-        # ----------------------------------------------------
-
-        st.markdown(
-            "### 📅 DAY 3｜實務訓練"
-        )
-
-        day3_col1, day3_col2 = st.columns(2)
-
-        with day3_col1:
-
-            st.markdown(
-                "#### ☎️ 電話應對"
-            )
-
-            st.caption(
-                "學習顧客來電時的基本接聽流程與應對方式。"
-            )
-
-            if st.button(
-                "開始課程 →",
-                key="training_day3_phone",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "training_page"
-                ] = "course"
-
-                st.session_state[
-                    "training_course_id"
-                ] = "DAY3_PHONE"
-
-                st.session_state[
-                    "training_step"
-                ] = "video"
-
-                st.session_state[
-                    "training_quiz_passed"
-                ] = False
-
-                st.rerun()
-
-        with day3_col2:
-
-            st.markdown(
-                "#### 📝 實務練習"
-            )
-
-            st.caption(
-                "透過實際案例進行新人訓練與確認。"
-            )
-
-            if st.button(
-                "開始課程 →",
-                key="training_day3_practice",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "training_page"
-                ] = "course"
-
-                st.session_state[
-                    "training_course_id"
-                ] = "DAY3_PRACTICE"
-
-                st.session_state[
-                    "training_step"
-                ] = "video"
-
-                st.session_state[
-                    "training_quiz_passed"
-                ] = False
-
-                st.rerun()
+                            st.rerun()
 
     # ========================================================
     # 📊 學習紀錄
