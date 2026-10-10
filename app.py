@@ -9,6 +9,35 @@ import re
 import html
 from datetime import datetime
 from difflib import SequenceMatcher
+from supabase import create_client
+
+# ========================================================
+# Supabase 雲端資料庫連線測試（暫時使用）
+# ========================================================
+
+if st.sidebar.button("🔌 測試 Supabase 連線"):
+
+    try:
+        supabase = create_client(
+            st.secrets["SUPABASE_URL"],
+            st.secrets["SUPABASE_KEY"]
+        )
+
+        response = (
+            supabase
+            .table("employees")
+            .select("employee_no")
+            .limit(1)
+            .execute()
+        )
+
+        st.sidebar.success("✅ Supabase 連線成功！")
+
+    except Exception as e:
+
+        st.sidebar.error(
+            f"❌ 連線失敗：{e}"
+        )
 
 
 # ============================================================
