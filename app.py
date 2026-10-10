@@ -56,7 +56,10 @@ EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
 # Supabase 雲端資料庫連線測試
 # ============================================================
 
-if st.sidebar.button("🔌 測試 Supabase 連線"):
+if st.sidebar.button(
+    "🔌 測試 Supabase 連線",
+    key="supabase_connection_test_button"
+):
 
     try:
         supabase = create_client(
