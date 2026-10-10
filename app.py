@@ -3983,9 +3983,7 @@ elif page == "🎓 新人訓練中心":
                     st.info("找不到符合條件的新人，請調整搜尋關鍵字或篩選條件。")
                 else:
                     for _, employee in filtered_staff.iterrows():
-
-
-                    employee_id = str(
+                        employee_id = str(
                         employee["員工編號"]
                     ).strip()
 
