@@ -3948,6 +3948,26 @@ elif page == "🎓 新人訓練中心":
                     "DAY3_PHONE": "☎️ 電話應對",
                     "DAY3_PRACTICE": "📝 實務練習",
                 }
+                st.markdown("""
+                <div style="margin: 26px 0 12px 0;">
+                    <div style="
+                        color: #8A7863;
+                        font-size: 11px;
+                        letter-spacing: 2px;
+                    ">MEMBER DIRECTORY</div>
+                    <div style="
+                        color: #403B34;
+                        font-size: 21px;
+                        font-weight: 600;
+                        margin-top: 4px;
+                    ">新人學習名單</div>
+                    <div style="
+                        color: #888077;
+                        font-size: 13px;
+                        margin-top: 4px;
+                    ">搜尋新人資料，快速掌握目前的訓練狀態。</div>
+                </div>
+                """, unsafe_allow_html=True)
 
                 search_name = st.text_input(
                     "🔍 搜尋新人",
