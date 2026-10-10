@@ -4052,6 +4052,31 @@ elif page == "🎓 新人訓練中心":
                 st.session_state[
                     "training_course_id"
                 ] = "DAY1_BASIC"
+                current_employee_id = str(
+                    st.session_state.get(
+                        "training_employee_id", ""
+                    )
+                ).strip()
+
+                current_employee_name = str(
+                    st.session_state.get(
+                        "training_employee_name", ""
+                    )
+                ).strip()
+
+                save_training_record(
+                    employee_id=current_employee_id,
+                    employee_name=current_employee_name,
+                    course_id="DAY1_BASIC",
+                    course_name="🏠 宜得利基礎",
+                    day="DAY1",
+                    start_date=str(
+                        pd.Timestamp.now().date()
+                    ),
+                    learning_status="學習中",
+                    quiz_status="尚未測驗",
+                    completed_date=""
+                )
 
                 st.session_state[
                     "training_step"
@@ -4086,7 +4111,9 @@ elif page == "🎓 新人訓練中心":
                 st.session_state[
                     "training_course_id"
                 ] = "DAY1_SERVICE"
-
+                course_id="DAY1_SERVICE",
+                course_name="💬 接客基礎",
+                
                 st.session_state[
                     "training_step"
                 ] = "video"
