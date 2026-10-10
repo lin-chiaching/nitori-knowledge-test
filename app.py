@@ -4163,31 +4163,82 @@ elif page == "🎓 新人訓練中心":
 
                     with st.container(border=True):
 
+                        st.markdown(
+                            """
+                            <div style="
+                                height: 4px;
+                                background: #C5AD8C;
+                                border-radius: 4px;
+                                margin-bottom: 16px;
+                            "></div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
                         card_col1, card_col2 = st.columns([4, 1])
 
                         with card_col1:
-                            st.markdown(f"### 👤 {employee_name}")
-                            st.caption(
-                                f"員工編號：{employee_id}｜"
-                                f"{department}｜{position}"
+                            st.markdown(
+                                f"<div style='font-size:22px;"
+                                f"font-weight:600;color:#403B34;'>"
+                                f"👤 {employee_name}</div>",
+                                unsafe_allow_html=True
                             )
-                            st.caption(f"到職日：{hire_date}")
+
+                            st.markdown(
+                                f"<div style='color:#81786D;"
+                                f"font-size:13px;margin-top:8px;'>"
+                                f"員工編號　{employee_id}</div>"
+                                f"<div style='color:#81786D;"
+                                f"font-size:13px;margin-top:5px;'>"
+                                f"{department}　／　{position}</div>"
+                                f"<div style='color:#81786D;"
+                                f"font-size:13px;margin-top:5px;'>"
+                                f"到職日　{hire_date}</div>",
+                                unsafe_allow_html=True
+                            )
 
                         with card_col2:
-                            st.write("")
-                            st.write(overall_status)
+                            if overall_status == "已完成訓練":
+                                status_bg = "#E8EFE5"
+                                status_color = "#607B59"
+                            elif overall_status == "訓練中":
+                                status_bg = "#F5EBDD"
+                                status_color = "#9A7446"
+                            else:
+                                status_bg = "#F0EEEA"
+                                status_color = "#827B72"
 
-                        st.divider()
+                            st.markdown(
+                                f"<div style='background:{status_bg};"
+                                f"color:{status_color};padding:7px 10px;"
+                                f"border-radius:20px;text-align:center;"
+                                f"font-size:12px;font-weight:600;"
+                                f"margin-top:4px;'>"
+                                f"{overall_status}</div>",
+                                unsafe_allow_html=True
+                            )
+
+                        st.markdown(
+                            "<div style='border-top:1px solid #EAE5DD;"
+                            "margin:20px 0 14px 0;'></div>",
+                            unsafe_allow_html=True
+                        )
 
                         progress_col1, progress_col2 = st.columns([4, 1])
 
                         with progress_col1:
-                            st.write("整體訓練進度")
+                            st.markdown(
+                                "<div style='color:#6F675D;"
+                                "font-size:13px;'>整體訓練進度</div>",
+                                unsafe_allow_html=True
+                            )
 
                         with progress_col2:
                             st.markdown(
                                 f"<div style='text-align:right;"
-                                f"font-weight:600;'>{progress}%</div>",
+                                f"font-size:20px;font-weight:600;"
+                                f"color:#8A7863;'>{progress}%</div>",
                                 unsafe_allow_html=True
                             )
 
