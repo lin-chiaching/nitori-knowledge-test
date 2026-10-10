@@ -4243,6 +4243,77 @@ elif page == "🎓 新人訓練中心":
 
         st.divider()
 
+        current_employee_id = str(
+            st.session_state.get(
+                "training_employee_id", ""
+            )
+        ).strip()
+
+        st.info(
+            f"員工編號：{current_employee_id}"
+        )
+
+        if not training_records.empty:
+
+            employee_records = training_records[
+                training_records["員工編號"]
+                .astype(str)
+                .str.strip()
+                .eq(current_employee_id)
+            ].copy()
+
+            course_names = {
+                "DAY1_BASIC": "🏠 宜得利基礎",
+                "DAY1_SERVICE": "💬 接客基礎",
+                "DAY2_PRODUCT": "🛋 商品基礎",
+                "DAY2_SYSTEM": "💻 系統操作",
+                "DAY3_PHONE": "☎️ 電話應對",
+                "DAY3_PRACTICE": "📝 實務練習"
+            }
+
+            if employee_records.empty:
+                st.info("目前尚無學習紀錄，請先開始課程。")
+
+            else:
+                for course_id, course_name in course_names.items():
+
+                    course_record = employee_records[
+                        employee_records["課程ID"]
+                        .astype(str)
+                        .str.strip()
+                        .eq(course_id)
+                    ]
+
+                    if course_record.empty:
+                        status = "尚未建立紀錄"
+                        progress = 0
+                    else:
+                        learning_status = str(
+                            course_record.iloc[-1]["學習狀態"]
+                        ).strip()
+
+                        if learning_status == "已完成":
+                            status = "✓ 已完成"
+                            progress = 100
+                        elif learning_status == "學習中":
+                            status = "◐ 學習中"
+                            progress = 50
+                        else:
+                            status = "○ 尚未開始"
+                            progress = 0
+
+                    with st.container(border=True):
+                        st.markdown(f"**{course_name}**")
+                        st.caption(f"課程編號：{course_id}")
+                        st.write(f"學習狀態：{status}")
+                        st.progress(progress)
+                        st.caption(f"完成度：{progress}%")
+
+        else:
+            st.warning(
+                "目前讀取不到學習紀錄，請確認 Excel 的「新人學習紀錄」工作表。"
+            )
+
     # ----------------------------------------------------
     # 讀取目前登入新人的學習紀錄
     # ----------------------------------------------------
