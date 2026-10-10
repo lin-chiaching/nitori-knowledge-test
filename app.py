@@ -3841,31 +3841,55 @@ elif page == "🎓 新人訓練中心":
             else:
                 not_started_count += 1
 
-        stat1, stat2, stat3, stat4 = st.columns(4)
+        stat1, stat2, stat3, stat4 = st.columns(4, gap="medium")
 
-        with stat1:
-            st.metric(
-                "👥 新人總數",
-                f"{total_staff} 人"
-            )
+        stat_cards = [
+            (stat1, "新人總數", total_staff, "位新人", "#F5F1E9", "#A18A6B"),
+            (stat2, "尚未開始", not_started_count, "位新人", "#F3F0EC", "#9A9186"),
+            (stat3, "訓練中", in_progress_count, "位新人", "#F5EBDD", "#B18A57"),
+            (stat4, "已完成", completed_count, "位新人", "#E9EFE7", "#71866B"),
+        ]
 
-        with stat2:
-            st.metric(
-                "○ 尚未開始",
-                f"{not_started_count} 人"
-            )
+        for column, label, value, unit, bg_color, accent_color in stat_cards:
+            with column:
+                st.markdown(
+                    f"""
+                    <div style="
+                        background: {bg_color};
+                        border-radius: 12px;
+                        padding: 20px 18px;
+                        min-height: 118px;
+                        border: 1px solid #E8E1D7;
+                    ">
+                        <div style="
+                            color: #746D63;
+                            font-size: 13px;
+                            margin-bottom: 14px;
+                        ">{label}</div>
+                        <div style="
+                            color: #403B34;
+                            font-size: 30px;
+                            font-weight: 600;
+                            line-height: 1.2;
+                        ">{value}
+                            <span style="
+                                color: {accent_color};
+                                font-size: 13px;
+                                font-weight: 400;
+                            ">{unit}</span>
+                        </div>
+                        <div style="
+                            background: {accent_color};
+                            width: 28px;
+                            height: 3px;
+                            border-radius: 3px;
+                            margin-top: 14px;
+                        "></div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-        with stat3:
-            st.metric(
-                "◐ 訓練中",
-                f"{in_progress_count} 人"
-            )
-
-        with stat4:
-            st.metric(
-                "✓ 已完成",
-                f"{completed_count} 人"
-            )
 
         st.markdown(
             "### 👥 新人名單"
