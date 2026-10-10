@@ -3715,9 +3715,33 @@ elif page == "🎓 新人訓練中心":
 
             st.stop()
 
-        st.subheader(
-            "👩‍🏫 小老師管理"
-        )
+        st.markdown("""
+        <div style="
+            background: #F5F1E9;
+            padding: 24px 28px;
+            border-radius: 12px;
+            border-left: 5px solid #B49A78;
+            margin-bottom: 20px;
+        ">
+            <div style="
+                color: #8A7863;
+                font-size: 12px;
+                letter-spacing: 3px;
+                margin-bottom: 8px;
+            ">NITORI · TRAINING</div>
+            <div style="
+                color: #403B34;
+                font-size: 27px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            ">新人訓練管理</div>
+            <div style="
+                color: #777067;
+                font-size: 14px;
+            ">掌握學習進度，陪伴每位新人穩定成長。</div>
+        </div>
+        """, unsafe_allow_html=True)
+
 
         if st.button(
             "🚪 登出小老師",
