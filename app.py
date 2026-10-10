@@ -4252,18 +4252,47 @@ elif page == "🎓 新人訓練中心":
 
                             for detail in course_details:
 
-                                st.markdown(
-                                    f"**{detail['課程']}**"
-                                )
-
-                                st.caption(
-                                    f"學習狀態：{detail['學習狀態']}"
-                                )
-
                                 course_progress = (
                                     100 if detail["學習狀態"] == "已完成"
                                     else 50 if detail["學習狀態"] == "學習中"
                                     else 0
+                                )
+
+                                if detail["學習狀態"] == "已完成":
+                                    course_bg = "#E8EFE5"
+                                    course_color = "#607B59"
+                                elif detail["學習狀態"] == "學習中":
+                                    course_bg = "#F5EBDD"
+                                    course_color = "#9A7446"
+                                else:
+                                    course_bg = "#F0EEEA"
+                                    course_color = "#827B72"
+
+                                st.markdown(
+                                    f"""
+                                    <div style="
+                                        background:#F8F6F1;
+                                        border:1px solid #EAE5DD;
+                                        border-radius:10px;
+                                        padding:14px 16px;
+                                        margin:8px 0 10px 0;
+                                    ">
+                                        <div style="
+                                            color:#403B34;
+                                            font-size:15px;
+                                            font-weight:600;
+                                            margin-bottom:10px;
+                                        ">{detail['課程']}</div>
+                                        <span style="
+                                            background:{course_bg};
+                                            color:{course_color};
+                                            padding:5px 10px;
+                                            border-radius:16px;
+                                            font-size:12px;
+                                        ">{detail['學習狀態']}</span>
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
                                 )
 
                                 st.progress(course_progress)
@@ -4272,21 +4301,24 @@ elif page == "🎓 新人訓練中心":
 
                                 with detail_col1:
                                     st.caption(
-                                        f"測驗：{detail['測驗狀態']}"
+                                        f"📝 測驗狀態：{detail['測驗狀態']}"
                                     )
 
                                 with detail_col2:
                                     st.caption(
-                                        f"完成日期：{detail['完成日期']}"
+                                        f"📅 完成日期：{detail['完成日期']}"
                                     )
 
                                 if detail["教育者備註"] != "—":
-                                    st.caption(
-                                        f"教育者備註：{detail['教育者備註']}"
+                                    st.info(
+                                        f"💬 教育者備註：{detail['教育者備註']}"
                                     )
 
-                                st.divider()
-
+                                st.markdown(
+                                    "<div style='border-bottom:1px solid "
+                                    "#EAE5DD;margin:12px 0;'></div>",
+                                    unsafe_allow_html=True
+                                )
         # ========================================
         # 📊 新人學習進度總表
         # ========================================
