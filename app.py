@@ -4190,56 +4190,71 @@ elif page == "🎓 新人訓練中心":
         # 暫時使用的學習資料
         # ----------------------------------------------------
 
-        training_records_demo = [
+    # ----------------------------------------------------
+    # 讀取目前登入新人的學習紀錄
+    # ----------------------------------------------------
 
-            {
-                "day": "DAY 1",
-                "day_name": "基礎訓練",
-                "course": "🏠 宜得利基礎",
-                "progress": 100,
-                "status": "✓ 已完成"
-            },
+    current_employee_id = str(
+        st.session_state.get(
+            "training_employee_id",
+            ""
+        )
+    ).strip()
 
-            {
-                "day": "DAY 1",
-                "day_name": "基礎訓練",
-                "course": "💬 接客基礎",
-                "progress": 60,
-                "status": "◐ 學習中"
-            },
+    current_employee_name = st.session_state.get(
+        "training_employee_name",
+        ""
+    )
 
-            {
-                "day": "DAY 2",
-                "day_name": "商品與系統",
-                "course": "🛋 商品基礎",
-                "progress": 0,
-                "status": "○ 尚未開始"
-            },
+    training_records_demo = []
 
-            {
-                "day": "DAY 2",
-                "day_name": "商品與系統",
-                "course": "💻 系統操作",
-                "progress": 0,
-                "status": "○ 尚未開始"
-            },
+    if not training_records.empty:
 
-            {
-                "day": "DAY 3",
-                "day_name": "實務訓練",
-                "course": "☎️ 電話應對",
-                "progress": 0,
-                "status": "○ 尚未開始"
-            },
+        employee_records = training_records[
+            training_records["員工編號"]
+            .astype(str)
+            .str.strip()
+            == current_employee_id
+        ].copy()
 
-            {
-                "day": "DAY 3",
-                "day_name": "實務訓練",
-                "course": "📝 實務練習",
-                "progress": 0,
-                "status": "○ 尚未開始"
-            }
-        ]
+        for _, record in employee_records.iterrows():
+
+            learning_status = str(
+                record.get("學習狀態", "")
+            ).strip()
+
+            if learning_status == "已完成":
+
+                progress = 100
+                status = "✓ 已完成"
+
+            elif learning_status == "學習中":
+
+                progress = 50
+                status = "◐ 學習中"
+
+            else:
+
+                progress = 0
+                status = "○ 尚未開始"
+
+            training_records_demo.append({
+                "day": str(record.get("DAY", "")),
+                "day_name": "",
+                "course": str(record.get("課程名稱", "")),
+                "progress": progress,
+                "status": status
+            })
+
+    st.info(
+        f"👤 目前登入：{current_employee_name}｜員工編號：{current_employee_id}"
+    )
+
+    if not training_records_demo:
+
+        st.info(
+            "目前尚無學習紀錄，開始課程後就會顯示在這裡。"
+        )
 
         # ----------------------------------------------------
         # 目前登入新人
