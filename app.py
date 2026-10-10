@@ -3733,6 +3733,115 @@ elif page == "🎓 新人訓練中心":
         st.write(
             "新人訓練管理"
         )
+        # ========================================
+        # 📊 訓練總覽統計
+        # ========================================
+
+        st.divider()
+        st.markdown("### 📊 訓練總覽")
+
+        if employee_data.empty:
+            dashboard_staff = employee_data.copy()
+        else:
+            dashboard_staff = employee_data[
+                employee_data["角色"]
+                .astype(str)
+                .str.strip()
+                == "新人"
+            ].copy()
+
+        dashboard_records = load_training_records()
+
+        dashboard_course_ids = [
+            "DAY1_BASIC",
+            "DAY1_SERVICE",
+            "DAY2_PRODUCT",
+            "DAY2_SYSTEM",
+            "DAY3_PHONE",
+            "DAY3_PRACTICE",
+        ]
+
+        total_staff = len(dashboard_staff)
+        not_started_count = 0
+        in_progress_count = 0
+        completed_count = 0
+
+        for _, employee in dashboard_staff.iterrows():
+
+            employee_id = str(
+                employee["員工編號"]
+            ).strip()
+
+            if dashboard_records.empty:
+                employee_records = pd.DataFrame()
+            else:
+                employee_records = dashboard_records[
+                    dashboard_records["員工編號"]
+                    .astype(str)
+                    .str.strip()
+                    == employee_id
+                ]
+
+            statuses = []
+
+            for course_id in dashboard_course_ids:
+
+                course_record = employee_records[
+                    employee_records["課程ID"]
+                    .astype(str)
+                    .str.strip()
+                    == course_id
+                ] if not employee_records.empty else pd.DataFrame()
+
+                if course_record.empty:
+                    status = "尚未開始"
+                else:
+                    status = str(
+                        course_record.iloc[-1]["學習狀態"]
+                    ).strip()
+
+                statuses.append(status)
+
+            if all(
+                status == "已完成"
+                for status in statuses
+            ):
+                completed_count += 1
+
+            elif any(
+                status in ["學習中", "已完成"]
+                for status in statuses
+            ):
+                in_progress_count += 1
+
+            else:
+                not_started_count += 1
+
+        stat1, stat2, stat3, stat4 = st.columns(4)
+
+        with stat1:
+            st.metric(
+                "👥 新人總數",
+                f"{total_staff} 人"
+            )
+
+        with stat2:
+            st.metric(
+                "○ 尚未開始",
+                f"{not_started_count} 人"
+            )
+
+        with stat3:
+            st.metric(
+                "◐ 訓練中",
+                f"{in_progress_count} 人"
+            )
+
+        with stat4:
+            st.metric(
+                "✓ 已完成",
+                f"{completed_count} 人"
+            )
 
         st.markdown(
             "### 👥 新人名單"
