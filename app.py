@@ -8119,7 +8119,21 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                     .table("app_settings")
                                     .upsert(
                                         records,
+                                        on_conflict="setting_key"
+                                    )
                                     .execute()
+                                )
+
+                                st.success(
+                                    f"成功匯入 {len(records)} 筆設定資料！"
+                                )
+
+                            except Exception as e:
+
+                                st.error(
+                                    f"設定資料匯入失敗：{e}"
+                                )
+
                                 )
 
                                 st.success(
