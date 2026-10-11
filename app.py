@@ -8014,6 +8014,104 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 use_container_width=True,
                 hide_index=True
             )
+            # 僅開放員工資料匯入
+            if selected_sheet == "員工資料":
+
+                st.divider()
+                st.markdown("### 📥 匯入員工資料")
+
+                st.warning(
+                    "匯入前請確認員工編號與欄位正確。"
+                    "此功能會將資料新增至 Supabase。"
+                )
+
+                if st.button(
+                    "確認匯入員工資料",
+                    key="import_employees_button"
+                ):
+
+                    required_columns = [
+                        "員工編號",
+                        "姓名",
+                        "職稱",
+                        "部門",
+                        "角色",
+                        "到職日"
+                    ]
+
+                    missing_columns = [
+                        col for col in required_columns
+                        if col not in preview_df.columns
+                    ]
+
+                    if missing_columns:
+                        st.error(
+                            "缺少必要欄位：" +
+                            "、".join(missing_columns)
+                        )
+
+                    elif preview_df["員工編號"].isna().any():
+                        st.error(
+                            "有員工缺少員工編號，請先修正 Excel。"
+                        )
+
+                    else:
+                        try:
+                            supabase = create_client(
+                                st.secrets["SUPABASE_URL"],
+                                st.secrets["SUPABASE_KEY"]
+                            )
+
+                            employee_df = preview_df[
+                                required_columns
+                            ].copy()
+
+                            employee_df = employee_df.rename(
+                                columns={
+                                    "員工編號": "employee_no",
+                                    "姓名": "name",
+                                    "職稱": "job_title",
+                                    "部門": "department",
+                                    "角色": "role",
+                                    "到職日": "hire_date"
+                                }
+                            )
+
+                            employee_df["employee_no"] = (
+                                employee_df["employee_no"]
+                                .astype(str)
+                                .str.strip()
+                            )
+
+                            employee_df = employee_df.where(
+                                pd.notna(employee_df),
+                                None
+                            )
+
+                            employee_rows = (
+                                employee_df.to_dict(
+                                    orient="records"
+                                )
+                            )
+
+                            if not employee_rows:
+                                st.warning("沒有可匯入的員工資料。")
+
+                            else:
+                                response = (
+                                    supabase.table("employees")
+                                    .insert(employee_rows)
+                                    .execute()
+                                )
+
+                                st.success(
+                                    f"成功匯入 {len(employee_rows)} 筆員工資料！"
+                                )
+
+                        except Exception as e:
+                            st.error(
+                                f"匯入失敗：{e}"
+                            )
 
         except Exception as e:
 
