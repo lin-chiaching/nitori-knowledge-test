@@ -8014,30 +8014,34 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 use_container_width=True,
                 hide_index=True
             )
-            # 僅開放課程總表匯入
-            if selected_sheet == "課程總表":
+            # ============================================================
+            # 課程內容匯入
+            # ============================================================
+
+            if selected_sheet == "課程內容":
 
                 st.divider()
-                st.markdown("### 📚 匯入課程總表")
+                st.markdown("### 📚 匯入課程內容")
 
                 st.warning(
-                    "請先確認課程資料正確。"
-                    "此功能會新增課程，不會覆蓋既有資料。"
+                    "請先確認預覽資料正確。"
+                    "此功能會新增資料，不會覆蓋既有內容。"
                 )
 
                 if st.button(
-                    "確認匯入課程總表",
-                    key="import_courses_button"
+                    "確認匯入課程內容",
+                    key="import_course_contents_button"
                 ):
 
                     column_mapping = {
                         "課程ID": "course_id",
-                        "DAY": "day",
-                        "課程大項": "course_name",
-                        "順序": "sort_order",
-                        "Level": "level",
-                        "狀態": "status"
+                        "內容ID": "content_id",
+                        "課程大項": "course_title",
+                        "課程細項": "content_title",
+                        "注意事項": "notes",
+                        "Level": "level"
                     }
+
                     missing_columns = [
                         col for col in column_mapping
                         if col not in preview_df.columns
@@ -8046,26 +8050,26 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     if missing_columns:
 
                         st.error(
-                            "缺少必要欄位：" +
-                            "、".join(missing_columns)
+                            "缺少必要欄位："
+                            + "、".join(missing_columns)
                         )
 
                     else:
 
                         try:
 
-                            course_df = preview_df[
+                            content_df = preview_df[
                                 list(column_mapping.keys())
                             ].copy()
 
-                            course_df = course_df.rename(
+                            content_df = content_df.rename(
                                 columns=column_mapping
                             )
 
                             # 整理空白值，避免 NaN JSON 錯誤
-                            course_df = course_df.astype(object)
+                            content_df = content_df.astype(object)
 
-                            course_df = course_df.apply(
+                            content_df = content_df.apply(
                                 lambda column: column.map(
                                     lambda value: (
                                         None
@@ -8075,69 +8079,60 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 )
                             )
 
-                            # 順序轉成整數或空值
-                            course_df["sort_order"] = (
-                                course_df["sort_order"].map(
-                                    lambda value: (
-                                        int(value)
-                                        if value is not None
-                                        else None
-                                    )
-                                )
-                            )
-
-                            # DAY 保留文字，例如 DAY1、DAY2、DAY3
-                            course_df["day"] = course_df["day"].astype(object)
-
                             # 檢查必要欄位
                             if (
-                                course_df["course_id"].isna().any()
-                                or course_df["course_name"].isna().any()
+                                content_df["course_id"].isna().any()
+                                or content_df["content_id"].isna().any()
                             ):
 
                                 st.error(
-                                    "課程 ID 或課程名稱不可空白，"
+                                    "課程ID與內容ID不可空白，"
                                     "請先修正 Excel。"
                                 )
 
-                            elif course_df["course_id"].duplicated().any():
+                            elif content_df[
+                                ["course_id", "content_id"]
+                            ].duplicated().any():
 
                                 st.error(
-                                    "Excel 中有重複的課程 ID，"
-                                    "請先確認後再匯入。"
+                                    "Excel 中有重複的課程ID與內容ID組合，"
+                                    "請先確認資料。"
                                 )
 
                             else:
 
-                                course_rows = course_df.to_dict(
+                                content_rows = content_df.to_dict(
                                     orient="records"
                                 )
 
-                                supabase = create_client(
-                                    st.secrets["SUPABASE_URL"],
-                                    st.secrets["SUPABASE_KEY"]
-                                )
-
-                                if not course_rows:
+                                if not content_rows:
 
                                     st.warning(
-                                        "沒有可匯入的課程資料。"
+                                        "沒有可匯入的課程內容。"
                                     )
 
                                 else:
 
-                                    supabase.table("courses").insert(
-                                        course_rows
+                                    supabase = create_client(
+                                        st.secrets["SUPABASE_URL"],
+                                        st.secrets["SUPABASE_KEY"]
+                                    )
+
+                                    supabase.table(
+                                        "course_contents"
+                                    ).insert(
+                                        content_rows
                                     ).execute()
 
                                     st.success(
-                                        f"成功匯入 {len(course_rows)} 筆課程資料！"
+                                        f"成功匯入 "
+                                        f"{len(content_rows)} 筆課程內容！"
                                     )
 
                         except Exception as e:
 
                             st.error(
-                                f"課程總表匯入失敗：{e}"
+                                f"課程內容匯入失敗：{e}"
                             )
 
         except Exception as e:
