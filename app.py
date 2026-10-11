@@ -8036,7 +8036,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     column_mapping = {
                         "課程ID": "course_id",
                         "內容ID": "content_id",
-                        "課程大項": "course_title",
+                        "課程大項": "course_name",
                         "課程細項": "content_title",
                         "注意事項": "notes",
                         "Level": "level"
