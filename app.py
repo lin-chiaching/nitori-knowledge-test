@@ -8036,21 +8036,20 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
             # 測驗紀錄匯入
             # ============================================================
 
-            if selected_sheet == "測驗紀錄":
+          if selected_sheet == "錯題記錄":
 
                 column_mapping = {
                     "員工編號": "employee_no",
                     "姓名": "employee_name",
                     "課程ID": "course_id",
-                    "課程名稱": "course_name",
-                    "測驗日期時間": "attempted_at",
-                    "測驗次數": "attempt_number",
-                    "題目總數": "total_questions",
-                    "答對題數": "correct_count",
-                    "測驗分數": "score",
-                    "測驗結果": "result",
-                    "作答內容": "answers",
-                    "錯誤題目數": "wrong_count"
+                    "題目ID": "question_id",
+                    "題目內容": "question_text",
+                    "學員答案": "student_answer",
+                    "正確答案": "correct_answer",
+                    "答錯次數": "wrong_count",
+                    "最近答錯日期": "last_wrong_at",
+                    "是否已訂正": "is_corrected",
+                    "小老師備註": "teacher_notes"
                 }
 
                 import_df = preview_df.copy()
@@ -8073,59 +8072,52 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                         list(column_mapping.keys())
                     ].copy()
 
-                    import_df = import_df.rename(
-                        columns=column_mapping
-                    )
-
-                    import_df = import_df.astype(object)
-
-                    import_df = import_df.apply(
-                        lambda column: column.map(
-                            lambda value: (
-                                None
-                                if pd.isna(value)
-                                else value
-                            )
-                        )
-                    )
-
-                    # 移除整列空白的資料
-                    import_df = import_df.dropna(
-                        how="all"
-                    )
-
-                    # 只保留有完整基本測驗資訊的紀錄
-                    import_df = import_df[
-                        import_df["employee_no"].notna()
-                        & import_df["course_id"].notna()
-                        & import_df["attempted_at"].notna()
-                    ].copy()
+                    # 移除完全空白的列
+                    import_df = import_df.dropna(how="all")
 
                     if import_df.empty:
 
                         st.warning(
-                            "目前沒有可匯入的測驗紀錄。"
-                            "請先建立實際測驗資料，再執行匯入。"
+                            "目前沒有可匯入的錯題記錄。"
+                            "等新人實際測驗產生錯題資料後，再進行匯入即可。"
                         )
 
                     else:
 
-                        numeric_columns = [
-                            "employee_no",
-                            "attempt_number",
-                            "total_questions",
-                            "correct_count",
-                            "score",
-                            "wrong_count"
-                        ]
+                        import_df = import_df.rename(
+                            columns=column_mapping
+                        )
 
-                        for column in numeric_columns:
+                        # 清除 NaN，轉成 Supabase 可接收的資料
+                        import_df = import_df.astype(object)
 
-                            import_df[column] = pd.to_numeric(
-                                import_df[column],
-                                errors="coerce"
+                        import_df = import_df.apply(
+                            lambda column: column.map(
+                                lambda value: (
+                                    None
+                                    if pd.isna(value)
+                                    else value
+                                )
                             )
+                        )
 
+                        # 數字欄位轉換
+                        import_df["employee_no"] = pd.to_numeric(
+                            import_df["employee_no"],
+                            errors="coerce"
+                        )
+
+                        import_df["question_id"] = pd.to_numeric(
+                            import_df["question_id"],
+                            errors="coerce"
+                        )
+
+                        import_df["wrong_count"] = pd.to_numeric(
+                            import_df["wrong_count"],
+                            errors="coerce"
+                        )
+
+                        # 讓資料庫自動產生錯題 ID
                         records = import_df.to_dict(
                             orient="records"
                         )
@@ -8134,19 +8126,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                             response = (
                                 supabase
-                                .table("quiz_records")
+                                .table("wrong_answers")
                                 .insert(records)
                                 .execute()
                             )
 
                             st.success(
-                                f"成功匯入 {len(records)} 筆測驗紀錄！"
+                                f"成功匯入 {len(records)} 筆錯題記錄！"
                             )
 
                         except Exception as e:
 
                             st.error(
-                                f"測驗紀錄匯入失敗：{e}"
+                                f"錯題記錄匯入失敗：{e}"
                             )
 
         except Exception as e:
