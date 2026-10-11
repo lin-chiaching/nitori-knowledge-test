@@ -8083,10 +8083,13 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 .str.strip()
                             )
 
+                            employee_df = employee_df.astype(object)
+
                             employee_df = employee_df.where(
                                 pd.notna(employee_df),
                                 None
                             )
+
 
                             employee_rows = (
                                 employee_df.to_dict(
