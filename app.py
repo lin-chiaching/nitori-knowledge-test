@@ -8121,7 +8121,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             )
 
                             response = (
-                                supabase
+                                supabase_client
                                 .table("quiz_records")
                                 .insert(records)
                                 .execute()
