@@ -8043,7 +8043,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     "姓名": "employee_name",
                     "課程ID": "course_id",
                     "題目ID": "question_id",
-                    "題目內容": "question_text",
+                    "題目內容": "question_content",
                     "學員答案": "student_answer",
                     "正確答案": "correct_answer",
                     "答錯次數": "wrong_count",
