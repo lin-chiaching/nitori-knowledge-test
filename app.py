@@ -8075,18 +8075,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 )
                             )
 
-                            # DAY、排序轉成整數或空值
-                            for number_col in ["day", "sort_order"]:
-
-                                course_df[number_col] = (
-                                    course_df[number_col].map(
-                                        lambda value: (
-                                            int(value)
-                                            if value is not None
-                                            else None
-                                        )
+                            # 順序轉成整數或空值
+                            course_df["sort_order"] = (
+                                course_df["sort_order"].map(
+                                    lambda value: (
+                                        int(value)
+                                        if value is not None
+                                        else None
                                     )
                                 )
+                            )
+
+                            # DAY 保留文字，例如 DAY1、DAY2、DAY3
+                            course_df["day"] = course_df["day"].astype(object)
 
                             # 檢查必要欄位
                             if (
