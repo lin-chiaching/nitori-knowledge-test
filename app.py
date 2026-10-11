@@ -8019,7 +8019,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
             # ============================================================
 
             if selected_sheet == "課程影片":
-
+                st.write("🧪 已進入課程影片匯入區塊")
                 st.divider()
                 st.markdown("### 🎬 匯入課程影片")
 
