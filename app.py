@@ -8129,12 +8129,27 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 orient="records"
                             )
 
+                            st.write("🔍 匯入診斷")
+                            st.write(
+                                "資料筆數：",
+                                len(records)
+                            )
+                            st.write(
+                                "欄位名稱：",
+                                list(import_df.columns)
+                            )
+                            st.write(
+                                "第一筆資料：",
+                                records[0] if records else "沒有資料"
+                            )
+
                             response = (
                                 supabase
                                 .table("quiz_records")
                                 .insert(records)
                                 .execute()
                             )
+
 
                             st.success(
                                 f"成功匯入 {len(records)} 筆測驗紀錄！"
