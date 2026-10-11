@@ -8085,9 +8085,14 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                             employee_df = employee_df.astype(object)
 
-                            employee_df = employee_df.where(
-                                pd.notna(employee_df),
-                                None
+                            employee_df = employee_df.apply(
+                                lambda column: column.map(
+                                    lambda value: (
+                                        None
+                                        if pd.isna(value)
+                                        else value
+                                    )
+                                )
                             )
 
 
