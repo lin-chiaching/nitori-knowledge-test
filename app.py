@@ -8037,7 +8037,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                         "課程ID": "course_id",
                         "影片URL": "video_url",
                         "影片名稱": "video_title",
-                        "影片說明": "description"
+                        "影片說明": "video_description"
                     }
 
                     missing_columns = [
