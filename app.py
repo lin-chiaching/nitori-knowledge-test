@@ -8036,11 +8036,14 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
             # 測驗紀錄匯入
             # ============================================================
 
-            if selected_sheet == "設定":
+            if selected_sheet == "系統索引":
 
                 column_mapping = {
-                    "類型": "setting_key",
-                    "值": "setting_value"
+                    "名稱": "name",
+                    "類型": "category",
+                    "用途": "purpose",
+                    "位置": "location",
+                    "備註": "notes"
                 }
 
                 import_df = preview_df.copy()
@@ -8063,7 +8066,6 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                         list(column_mapping.keys())
                     ].copy()
 
-                    # 移除完全空白的列
                     import_df = import_df.dropna(
                         how="all"
                     )
@@ -8071,7 +8073,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     if import_df.empty:
 
                         st.warning(
-                            "目前沒有可匯入的設定資料。"
+                            "目前沒有可匯入的系統索引資料。"
                         )
 
                     else:
@@ -8080,7 +8082,6 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             columns=column_mapping
                         )
 
-                        # 清除 NaN
                         import_df = import_df.astype(object)
 
                         import_df = import_df.apply(
@@ -8093,21 +8094,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             )
                         )
 
-                        # 移除設定名稱或設定值為空白的資料
+                        # 名稱不可為空白
                         import_df = import_df[
-                            import_df["setting_key"].notna()
-                            & import_df["setting_value"].notna()
+                            import_df["name"].notna()
                         ].copy()
 
                         if import_df.empty:
 
                             st.warning(
-                                "目前沒有完整的設定資料，"
-                                "請確認類型和值都有填寫。"
+                                "找不到有效的系統名稱，"
+                                "請確認 Excel 的名稱欄位。"
                             )
 
                         else:
-                            # 同一個設定名稱只保留最後一筆
 
                             records = import_df.to_dict(
                                 orient="records"
@@ -8117,29 +8116,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                                 response = (
                                     supabase
-                                    .table("app_settings")
+                                    .table("system_index")
                                     .insert(records)
                                     .execute()
                                 )
 
                                 st.success(
-                                    f"成功匯入 {len(records)} 筆設定資料！"
+                                    f"成功匯入 {len(records)} 筆系統索引！"
                                 )
 
                             except Exception as e:
 
                                 st.error(
-                                    f"設定資料匯入失敗：{e}"
-                                )
-
-                                st.success(
-                                    f"成功匯入 {len(records)} 筆設定資料！"
-                                )
-
-                            except Exception as e:
-
-                                st.error(
-                                    f"設定資料匯入失敗：{e}"
+                                    f"系統索引匯入失敗：{e}"
                                 )
 
         except Exception as e:
