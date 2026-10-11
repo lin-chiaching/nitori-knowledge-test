@@ -8015,31 +8015,29 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 hide_index=True
             )
             # ============================================================
-            # 課程內容匯入
+            # 課程影片匯入
             # ============================================================
 
-            if selected_sheet == "課程內容":
+            if selected_sheet == "課程影片":
 
                 st.divider()
-                st.markdown("### 📚 匯入課程內容")
+                st.markdown("### 🎬 匯入課程影片")
 
                 st.warning(
-                    "請先確認預覽資料正確。"
-                    "此功能會新增資料，不會覆蓋既有內容。"
+                    "請先確認影片資料正確。"
+                    "此功能會新增資料，不會覆蓋既有資料。"
                 )
 
                 if st.button(
-                    "確認匯入課程內容",
-                    key="import_course_contents_button"
+                    "確認匯入課程影片",
+                    key="import_course_videos_button"
                 ):
 
                     column_mapping = {
                         "課程ID": "course_id",
-                        "內容ID": "content_id",
-                        "課程大項": "course_name",
-                        "課程細項": "content_title",
-                        "注意事項": "notes",
-                        "Level": "level"
+                        "影片URL": "video_url",
+                        "影片名稱": "video_title",
+                        "影片說明": "description"
                     }
 
                     missing_columns = [
@@ -8058,18 +8056,18 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                         try:
 
-                            content_df = preview_df[
+                            video_df = preview_df[
                                 list(column_mapping.keys())
                             ].copy()
 
-                            content_df = content_df.rename(
+                            video_df = video_df.rename(
                                 columns=column_mapping
                             )
 
                             # 整理空白值，避免 NaN JSON 錯誤
-                            content_df = content_df.astype(object)
+                            video_df = video_df.astype(object)
 
-                            content_df = content_df.apply(
+                            video_df = video_df.apply(
                                 lambda column: column.map(
                                     lambda value: (
                                         None
@@ -8081,34 +8079,25 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                             # 檢查必要欄位
                             if (
-                                content_df["course_id"].isna().any()
-                                or content_df["content_id"].isna().any()
+                                video_df["course_id"].isna().any()
+                                or video_df["video_url"].isna().any()
                             ):
 
                                 st.error(
-                                    "課程ID與內容ID不可空白，"
+                                    "課程ID與影片URL不可空白，"
                                     "請先修正 Excel。"
-                                )
-
-                            elif content_df[
-                                ["course_id", "content_id"]
-                            ].duplicated().any():
-
-                                st.error(
-                                    "Excel 中有重複的課程ID與內容ID組合，"
-                                    "請先確認資料。"
                                 )
 
                             else:
 
-                                content_rows = content_df.to_dict(
+                                video_rows = video_df.to_dict(
                                     orient="records"
                                 )
 
-                                if not content_rows:
+                                if not video_rows:
 
                                     st.warning(
-                                        "沒有可匯入的課程內容。"
+                                        "沒有可匯入的課程影片資料。"
                                     )
 
                                 else:
@@ -8119,21 +8108,22 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                     )
 
                                     supabase.table(
-                                        "course_contents"
+                                        "course_videos"
                                     ).insert(
-                                        content_rows
+                                        video_rows
                                     ).execute()
 
                                     st.success(
                                         f"成功匯入 "
-                                        f"{len(content_rows)} 筆課程內容！"
+                                        f"{len(video_rows)} 筆課程影片！"
                                     )
 
                         except Exception as e:
 
                             st.error(
-                                f"課程內容匯入失敗：{e}"
+                                f"課程影片匯入失敗：{e}"
                             )
+
 
         except Exception as e:
 
