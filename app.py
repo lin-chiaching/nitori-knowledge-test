@@ -11,6 +11,15 @@ from datetime import datetime
 from difflib import SequenceMatcher
 from supabase import create_client
 
+# ============================================================
+# Supabase 資料庫連線
+# ============================================================
+
+supabase = create_client(
+    st.secrets["SUPABASE_URL"],
+    st.secrets["SUPABASE_KEY"]
+)
+
 # ========================================================
 # Supabase 雲端資料庫連線測試（暫時使用）
 # ========================================================
