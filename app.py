@@ -8036,20 +8036,11 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
             # 測驗紀錄匯入
             # ============================================================
 
-            if selected_sheet == "測驗題庫":
+            if selected_sheet == "設定":
 
                 column_mapping = {
-                    "題目ID": "question_id",
-                    "課程ID": "course_id",
-                    "題型": "question_type",
-                    "題目": "question",
-                    "選項A": "option_a",
-                    "選項B": "option_b",
-                    "選項C": "option_c",
-                    "選項D": "option_d",
-                    "正確答案": "correct_answer",
-                    "解說": "explanation",
-                    "Level": "level"
+                    "類型": "setting_key",
+                    "值": "setting_value"
                 }
 
                 import_df = preview_df.copy()
@@ -8073,13 +8064,14 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     ].copy()
 
                     # 移除完全空白的列
-                    import_df = import_df.dropna(how="all")
+                    import_df = import_df.dropna(
+                        how="all"
+                    )
 
                     if import_df.empty:
 
                         st.warning(
-                            "目前沒有可匯入的測驗題目，"
-                            "請先在 Excel 填寫題目資料。"
+                            "目前沒有可匯入的設定資料。"
                         )
 
                     else:
@@ -8101,22 +8093,21 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             )
                         )
 
-                        # 移除題目 ID 為空的資料
+                        # 移除設定名稱或設定值為空白的資料
                         import_df = import_df[
-                            import_df["question_id"].notna()
+                            import_df["setting_key"].notna()
+                            & import_df["setting_value"].notna()
                         ].copy()
 
                         if import_df.empty:
 
                             st.warning(
-                                "找不到有效的題目 ID，"
-                                "請確認 Excel 的題目ID欄位。"
+                                "目前沒有完整的設定資料，"
+                                "請確認類型和值都有填寫。"
                             )
 
                         else:
 
-                            # 題目 ID 與課程 ID 轉為整數以外的型別前，
-                            # 先保留原始格式，避免課程 ID 格式遭改變
                             records = import_df.to_dict(
                                 orient="records"
                             )
@@ -8125,19 +8116,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                                 response = (
                                     supabase
-                                    .table("quiz_questions")
+                                    .table("app_settings")
                                     .insert(records)
                                     .execute()
                                 )
 
                                 st.success(
-                                    f"成功匯入 {len(records)} 道測驗題目！"
+                                    f"成功匯入 {len(records)} 筆設定資料！"
                                 )
 
                             except Exception as e:
 
                                 st.error(
-                                    f"測驗題庫匯入失敗：{e}"
+                                    f"設定資料匯入失敗：{e}"
                                 )
 
         except Exception as e:
