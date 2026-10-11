@@ -8134,8 +8134,6 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                     f"設定資料匯入失敗：{e}"
                                 )
 
-                                )
-
                                 st.success(
                                     f"成功匯入 {len(records)} 筆設定資料！"
                                 )
