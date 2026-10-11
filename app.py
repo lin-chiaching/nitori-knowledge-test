@@ -8142,9 +8142,16 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                     except Exception as e:
 
+                        import traceback
+
                         st.error(
                             f"測驗紀錄匯入失敗：{e}"
                         )
+
+                        st.code(
+                            traceback.format_exc()
+                        )
+
 
         except Exception as e:
 
