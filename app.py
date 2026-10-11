@@ -8014,34 +8014,29 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 use_container_width=True,
                 hide_index=True
             )
-            # 僅開放新人學習紀錄匯入
-            if selected_sheet == "新人學習紀錄":
+            # 僅開放課程總表匯入
+            if selected_sheet == "課程總表":
 
                 st.divider()
-                st.markdown("### 📚 匯入新人學習紀錄")
+                st.markdown("### 📚 匯入課程總表")
 
                 st.warning(
-                    "匯入前請確認資料正確。"
-                    "本功能會新增紀錄，不會覆蓋既有紀錄。"
+                    "請先確認課程資料正確。"
+                    "此功能會新增課程，不會覆蓋既有資料。"
                 )
 
                 if st.button(
-                    "確認匯入新人學習紀錄",
-                    key="import_learning_records_button"
+                    "確認匯入課程總表",
+                    key="import_courses_button"
                 ):
 
                     column_mapping = {
-                        "員工編號": "employee_no",
-                        "姓名": "employee_name",
                         "課程ID": "course_id",
-                        "課程名稱": "course_name",
                         "DAY": "day",
-                        "開始日期": "start_date",
-                        "學習狀態": "learning_status",
-                        "測驗狀態": "quiz_status",
-                        "實作": "practice",
-                        "完成日期": "completion_date",
-                        "教育者備註": "educator_notes"
+                        "課程名稱": "course_name",
+                        "排序": "sort_order",
+                        "Level": "level",
+                        "狀態": "status"
                     }
 
                     missing_columns = [
@@ -8060,31 +8055,18 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                         try:
 
-                            learning_df = preview_df[
+                            course_df = preview_df[
                                 list(column_mapping.keys())
                             ].copy()
 
-                            learning_df = learning_df.rename(
+                            course_df = course_df.rename(
                                 columns=column_mapping
                             )
 
-                            # 日期欄位轉換
-                            for date_col in [
-                                "start_date",
-                                "completion_date"
-                            ]:
+                            # 整理空白值，避免 NaN JSON 錯誤
+                            course_df = course_df.astype(object)
 
-                                learning_df[date_col] = (
-                                    pd.to_datetime(
-                                        learning_df[date_col],
-                                        errors="coerce"
-                                    ).dt.strftime("%Y-%m-%d")
-                                )
-
-                            # 將空值轉成 None，避免 JSON NaN 錯誤
-                            learning_df = learning_df.astype(object)
-
-                            learning_df = learning_df.apply(
+                            course_df = course_df.apply(
                                 lambda column: column.map(
                                     lambda value: (
                                         None
@@ -8094,30 +8076,41 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 )
                             )
 
-                            # DAY 欄位轉為整數或空值
-                            learning_df["day"] = (
-                                learning_df["day"].map(
-                                    lambda value: (
-                                        int(value)
-                                        if value is not None
-                                        else None
+                            # DAY、排序轉成整數或空值
+                            for number_col in ["day", "sort_order"]:
+
+                                course_df[number_col] = (
+                                    course_df[number_col].map(
+                                        lambda value: (
+                                            int(value)
+                                            if value is not None
+                                            else None
+                                        )
                                     )
                                 )
-                            )
 
                             # 檢查必要欄位
-                            if learning_df["employee_no"].isna().any():
+                            if (
+                                course_df["course_id"].isna().any()
+                                or course_df["course_name"].isna().any()
+                            ):
 
                                 st.error(
-                                    "有紀錄缺少員工編號，請先修正 Excel。"
+                                    "課程 ID 或課程名稱不可空白，"
+                                    "請先修正 Excel。"
+                                )
+
+                            elif course_df["course_id"].duplicated().any():
+
+                                st.error(
+                                    "Excel 中有重複的課程 ID，"
+                                    "請先確認後再匯入。"
                                 )
 
                             else:
 
-                                learning_rows = (
-                                    learning_df.to_dict(
-                                        orient="records"
-                                    )
+                                course_rows = course_df.to_dict(
+                                    orient="records"
                                 )
 
                                 supabase = create_client(
@@ -8125,28 +8118,26 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                     st.secrets["SUPABASE_KEY"]
                                 )
 
-                                if not learning_rows:
+                                if not course_rows:
 
                                     st.warning(
-                                        "沒有可匯入的學習紀錄。"
+                                        "沒有可匯入的課程資料。"
                                     )
 
                                 else:
 
-                                    response = (
-                                        supabase.table("learning_records")
-                                        .insert(learning_rows)
-                                        .execute()
-                                    )
+                                    supabase.table("courses").insert(
+                                        course_rows
+                                    ).execute()
 
                                     st.success(
-                                        f"成功匯入 {len(learning_rows)} 筆新人學習紀錄！"
+                                        f"成功匯入 {len(course_rows)} 筆課程資料！"
                                     )
 
                         except Exception as e:
 
                             st.error(
-                                f"新人學習紀錄匯入失敗：{e}"
+                                f"課程總表匯入失敗：{e}"
                             )
 
         except Exception as e:
