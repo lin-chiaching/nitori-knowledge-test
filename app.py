@@ -8023,6 +8023,15 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 use_container_width=True,
                 hide_index=True
             )
+            st.write("🔍 Excel 原始欄位名稱")
+            st.write(list(preview_df.columns))
+
+            st.write("🔍 Excel 原始資料前 3 筆")
+            st.dataframe(
+                preview_df.head(3),
+                use_container_width=True,
+                hide_index=True
+            )
             # ============================================================
             # 測驗紀錄匯入
             # ============================================================
