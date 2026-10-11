@@ -8038,105 +8038,99 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
             if selected_sheet == "測驗紀錄":
 
-                st.divider()
-                st.markdown("### 📝 匯入測驗紀錄")
+                column_mapping = {
+                    "員工編號": "employee_no",
+                    "姓名": "employee_name",
+                    "課程ID": "course_id",
+                    "課程名稱": "course_name",
+                    "測驗日期時間": "attempted_at",
+                    "測驗次數": "attempt_number",
+                    "題目總數": "total_questions",
+                    "答對題數": "correct_count",
+                    "測驗分數": "score",
+                    "測驗結果": "result",
+                    "作答內容": "answers",
+                    "錯誤題目數": "wrong_count"
+                }
 
-                st.warning(
-                    "請先確認測驗紀錄資料正確。"
-                    "此功能會新增資料，不會覆蓋既有資料。"
-                )
+                import_df = preview_df.copy()
 
-                if st.button(
-                    "確認匯入測驗紀錄",
-                    key="import_quiz_records_button"
-                ):
+                missing_columns = [
+                    column
+                    for column in column_mapping
+                    if column not in import_df.columns
+                ]
 
-                    column_mapping = {
-                        "測驗紀錄ID": "id",
-                        "員工編號": "employee_no",
-                        "姓名": "employee_name",
-                        "課程ID": "course_id",
-                        "課程名稱": "course_name",
-                        "測驗日期時間": "attempted_at",
-                        "測驗次數": "attempt_number",
-                        "題目總數": "total_questions",
-                        "答對題數": "correct_count",
-                        "測驗分數": "score",
-                        "測驗結果": "result",
-                        "作答內容": "answers",
-                        "錯誤題目數": "wrong_count"
-                    }
+                if missing_columns:
 
-                    try:
+                    st.error(
+                        f"Excel 缺少必要欄位：{missing_columns}"
+                    )
 
-                        import_df = preview_df.rename(
-                            columns=column_mapping
-                        ).copy()
+                else:
 
-                        required_columns = list(
-                            column_mapping.values()
+                    import_df = import_df[
+                        list(column_mapping.keys())
+                    ].copy()
+
+                    import_df = import_df.rename(
+                        columns=column_mapping
+                    )
+
+                    import_df = import_df.astype(object)
+
+                    import_df = import_df.apply(
+                        lambda column: column.map(
+                            lambda value: (
+                                None
+                                if pd.isna(value)
+                                else value
+                            )
+                        )
+                    )
+
+                    # 移除整列空白的資料
+                    import_df = import_df.dropna(
+                        how="all"
+                    )
+
+                    # 只保留有完整基本測驗資訊的紀錄
+                    import_df = import_df[
+                        import_df["employee_no"].notna()
+                        & import_df["course_id"].notna()
+                        & import_df["attempted_at"].notna()
+                    ].copy()
+
+                    if import_df.empty:
+
+                        st.warning(
+                            "目前沒有可匯入的測驗紀錄。"
+                            "請先建立實際測驗資料，再執行匯入。"
                         )
 
-                        missing_columns = [
-                            column
-                            for column in required_columns
-                            if column not in import_df.columns
+                    else:
+
+                        numeric_columns = [
+                            "employee_no",
+                            "attempt_number",
+                            "total_questions",
+                            "correct_count",
+                            "score",
+                            "wrong_count"
                         ]
 
-                        if missing_columns:
+                        for column in numeric_columns:
 
-                            st.error(
-                                f"缺少必要欄位：{missing_columns}"
+                            import_df[column] = pd.to_numeric(
+                                import_df[column],
+                                errors="coerce"
                             )
 
-                        else:
+                        records = import_df.to_dict(
+                            orient="records"
+                        )
 
-                            import_df = import_df[
-                                required_columns
-                            ]
-
-                            import_df = import_df.astype(object)
-
-                            import_df = import_df.apply(
-                                lambda column: column.map(
-                                    lambda value: (
-                                        None
-                                        if pd.isna(value)
-                                        else value
-                                    )
-                                )
-                            )
-
-                            numeric_columns = [
-                                "attempt_number",
-                                "total_questions",
-                                "correct_count",
-                                "score",
-                                "wrong_count"
-                            ]
-
-                            for column in numeric_columns:
-
-                                import_df[column] = pd.to_numeric(
-                                    import_df[column],
-                                    errors="coerce"
-                                )
-
-                            import_df = import_df.astype(object)
-
-                            import_df = import_df.apply(
-                                lambda column: column.map(
-                                    lambda value: (
-                                        None
-                                        if pd.isna(value)
-                                        else value
-                                    )
-                                )
-                            )
-
-                            records = import_df.to_dict(
-                                orient="records"
-                            )
+                        try:
 
                             response = (
                                 supabase
@@ -8145,23 +8139,15 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 .execute()
                             )
 
-
                             st.success(
                                 f"成功匯入 {len(records)} 筆測驗紀錄！"
                             )
 
-                    except Exception as e:
+                        except Exception as e:
 
-                        import traceback
-
-                        st.error(
-                            f"測驗紀錄匯入失敗：{e}"
-                        )
-
-                        st.code(
-                            traceback.format_exc()
-                        )
-
+                            st.error(
+                                f"測驗紀錄匯入失敗：{e}"
+                            )
 
         except Exception as e:
 
