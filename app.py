@@ -8117,7 +8117,8 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 response = (
                                     supabase
                                     .table("app_settings")
-                                    .insert(records)
+                                    .upsert(
+                                        records,
                                     .execute()
                                 )
 
