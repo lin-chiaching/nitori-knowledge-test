@@ -8130,7 +8130,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             )
 
                             response = (
-                                supabase_client
+                                supabase
                                 .table("quiz_records")
                                 .insert(records)
                                 .execute()
