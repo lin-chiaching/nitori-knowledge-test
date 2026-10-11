@@ -1,4 +1,4 @@
-import streamlit as st
+ streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -7969,6 +7969,8 @@ with st.popover("🐱"):
 # ============================================================
 # Excel 資料匯入工具（第一階段：畫面與預覽）
 # ============================================================
+
+st.write("🧪 Excel 匯入工具程式已執行")
 
 with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
