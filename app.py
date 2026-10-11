@@ -60,6 +60,7 @@ if st.sidebar.button(
     "🔌 測試 Supabase 連線",
     key="supabase_connection_test_button"
 ):
+    st.sidebar.info("🔄 已按下按鈕，正在測試連線……")
 
     try:
         supabase = create_client(
@@ -78,10 +79,7 @@ if st.sidebar.button(
         st.sidebar.success("✅ Supabase 連線成功！")
 
     except Exception as e:
-
-        st.sidebar.error(
-            f"❌ 連線失敗：{e}"
-        )
+        st.sidebar.error(f"❌ 連線失敗：{e}")
 
 
 # ============================================================
