@@ -8014,78 +8014,77 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 use_container_width=True,
                 hide_index=True
             )
-            # 僅開放員工資料匯入
-            if selected_sheet == "員工資料":
+            # 僅開放新人學習紀錄匯入
+            if selected_sheet == "新人學習紀錄":
 
                 st.divider()
-                st.markdown("### 📥 匯入員工資料")
+                st.markdown("### 📚 匯入新人學習紀錄")
 
                 st.warning(
-                    "匯入前請確認員工編號與欄位正確。"
-                    "此功能會將資料新增至 Supabase。"
+                    "匯入前請確認資料正確。"
+                    "本功能會新增紀錄，不會覆蓋既有紀錄。"
                 )
 
                 if st.button(
-                    "確認匯入員工資料",
-                    key="import_employees_button"
+                    "確認匯入新人學習紀錄",
+                    key="import_learning_records_button"
                 ):
 
-                    required_columns = [
-                        "員工編號",
-                        "姓名",
-                        "職稱",
-                        "部門",
-                        "角色",
-                        "到職日"
-                    ]
+                    column_mapping = {
+                        "員工編號": "employee_no",
+                        "姓名": "employee_name",
+                        "課程ID": "course_id",
+                        "課程名稱": "course_name",
+                        "DAY": "day",
+                        "開始日期": "start_date",
+                        "學習狀態": "learning_status",
+                        "測驗狀態": "quiz_status",
+                        "實作": "practice",
+                        "完成日期": "completion_date",
+                        "教育者備註": "educator_notes"
+                    }
 
                     missing_columns = [
-                        col for col in required_columns
+                        col for col in column_mapping
                         if col not in preview_df.columns
                     ]
 
                     if missing_columns:
+
                         st.error(
                             "缺少必要欄位：" +
                             "、".join(missing_columns)
                         )
 
-                    elif preview_df["員工編號"].isna().any():
-                        st.error(
-                            "有員工缺少員工編號，請先修正 Excel。"
-                        )
-
                     else:
-                        try:
-                            supabase = create_client(
-                                st.secrets["SUPABASE_URL"],
-                                st.secrets["SUPABASE_KEY"]
-                            )
 
-                            employee_df = preview_df[
-                                required_columns
+                        try:
+
+                            learning_df = preview_df[
+                                list(column_mapping.keys())
                             ].copy()
 
-                            employee_df = employee_df.rename(
-                                columns={
-                                    "員工編號": "employee_no",
-                                    "姓名": "name",
-                                    "職稱": "job_title",
-                                    "部門": "department",
-                                    "角色": "role",
-                                    "到職日": "hire_date"
-                                }
+                            learning_df = learning_df.rename(
+                                columns=column_mapping
                             )
 
-                            employee_df["employee_no"] = (
-                                employee_df["employee_no"]
-                                .astype(str)
-                                .str.strip()
-                            )
+                            # 日期欄位轉換
+                            for date_col in [
+                                "start_date",
+                                "completion_date"
+                            ]:
 
-                            employee_df = employee_df.astype(object)
+                                learning_df[date_col] = (
+                                    pd.to_datetime(
+                                        learning_df[date_col],
+                                        errors="coerce"
+                                    ).dt.strftime("%Y-%m-%d")
+                                )
 
-                            employee_df = employee_df.apply(
+                            # 將空值轉成 None，避免 JSON NaN 錯誤
+                            learning_df = learning_df.astype(object)
+
+                            learning_df = learning_df.apply(
                                 lambda column: column.map(
                                     lambda value: (
                                         None
@@ -8095,30 +8094,59 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 )
                             )
 
-
-                            employee_rows = (
-                                employee_df.to_dict(
-                                    orient="records"
+                            # DAY 欄位轉為整數或空值
+                            learning_df["day"] = (
+                                learning_df["day"].map(
+                                    lambda value: (
+                                        int(value)
+                                        if value is not None
+                                        else None
+                                    )
                                 )
                             )
 
-                            if not employee_rows:
-                                st.warning("沒有可匯入的員工資料。")
+                            # 檢查必要欄位
+                            if learning_df["employee_no"].isna().any():
+
+                                st.error(
+                                    "有紀錄缺少員工編號，請先修正 Excel。"
+                                )
 
                             else:
-                                response = (
-                                    supabase.table("employees")
-                                    .insert(employee_rows)
-                                    .execute()
+
+                                learning_rows = (
+                                    learning_df.to_dict(
+                                        orient="records"
+                                    )
                                 )
 
-                                st.success(
-                                    f"成功匯入 {len(employee_rows)} 筆員工資料！"
+                                supabase = create_client(
+                                    st.secrets["SUPABASE_URL"],
+                                    st.secrets["SUPABASE_KEY"]
                                 )
+
+                                if not learning_rows:
+
+                                    st.warning(
+                                        "沒有可匯入的學習紀錄。"
+                                    )
+
+                                else:
+
+                                    response = (
+                                        supabase.table("learning_records")
+                                        .insert(learning_rows)
+                                        .execute()
+                                    )
+
+                                    st.success(
+                                        f"成功匯入 {len(learning_rows)} 筆新人學習紀錄！"
+                                    )
 
                         except Exception as e:
+
                             st.error(
-                                f"匯入失敗：{e}"
+                                f"新人學習紀錄匯入失敗：{e}"
                             )
 
         except Exception as e:
