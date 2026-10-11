@@ -8033,12 +8033,11 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     column_mapping = {
                         "課程ID": "course_id",
                         "DAY": "day",
-                        "課程名稱": "course_name",
-                        "排序": "sort_order",
+                        "課程大項": "course_name",
+                        "順序": "sort_order",
                         "Level": "level",
                         "狀態": "status"
                     }
-
                     missing_columns = [
                         col for col in column_mapping
                         if col not in preview_df.columns
