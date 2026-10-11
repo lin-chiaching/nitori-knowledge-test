@@ -8015,59 +8015,71 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 hide_index=True
             )
             # ============================================================
-            # 課程影片匯入
+            # 測驗紀錄匯入
             # ============================================================
 
-            if selected_sheet == "課程影片":
-                st.write("🧪 已進入課程影片匯入區塊")
+            if selected_sheet == "測驗紀錄":
+
                 st.divider()
-                st.markdown("### 🎬 匯入課程影片")
+                st.markdown("### 📝 匯入測驗紀錄")
 
                 st.warning(
-                    "請先確認影片資料正確。"
+                    "請先確認測驗紀錄資料正確。"
                     "此功能會新增資料，不會覆蓋既有資料。"
                 )
 
                 if st.button(
-                    "確認匯入課程影片",
-                    key="import_course_videos_button"
+                    "確認匯入測驗紀錄",
+                    key="import_quiz_records_button"
                 ):
 
                     column_mapping = {
+                        "測驗紀錄ID": "id",
+                        "員工編號": "employee_no",
+                        "姓名": "employee_name",
                         "課程ID": "course_id",
-                        "影片URL": "video_url",
-                        "影片名稱": "video_title",
-                        "影片說明": "video_description"
+                        "課程名稱": "course_name",
+                        "測驗日期時間": "attempted_at",
+                        "測驗次數": "attempt_number",
+                        "題目總數": "total_questions",
+                        "答對題數": "correct_count",
+                        "測驗分數": "score",
+                        "測驗結果": "result",
+                        "作答內容": "answers",
+                        "錯誤題目數": "wrong_count"
                     }
 
-                    missing_columns = [
-                        col for col in column_mapping
-                        if col not in preview_df.columns
-                    ]
+                    try:
 
-                    if missing_columns:
+                        import_df = preview_df.rename(
+                            columns=column_mapping
+                        ).copy()
 
-                        st.error(
-                            "缺少必要欄位："
-                            + "、".join(missing_columns)
+                        required_columns = list(
+                            column_mapping.values()
                         )
 
-                    else:
+                        missing_columns = [
+                            column
+                            for column in required_columns
+                            if column not in import_df.columns
+                        ]
 
-                        try:
+                        if missing_columns:
 
-                            video_df = preview_df[
-                                list(column_mapping.keys())
-                            ].copy()
-
-                            video_df = video_df.rename(
-                                columns=column_mapping
+                            st.error(
+                                f"缺少必要欄位：{missing_columns}"
                             )
 
-                            # 整理空白值，避免 NaN JSON 錯誤
-                            video_df = video_df.astype(object)
+                        else:
 
-                            video_df = video_df.apply(
+                            import_df = import_df[
+                                required_columns
+                            ]
+
+                            import_df = import_df.astype(object)
+
+                            import_df = import_df.apply(
                                 lambda column: column.map(
                                     lambda value: (
                                         None
@@ -8077,53 +8089,53 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 )
                             )
 
-                            # 檢查必要欄位
-                            if (
-                                video_df["course_id"].isna().any()
-                                or video_df["video_url"].isna().any()
-                            ):
+                            numeric_columns = [
+                                "attempt_number",
+                                "total_questions",
+                                "correct_count",
+                                "score",
+                                "wrong_count"
+                            ]
 
-                                st.error(
-                                    "課程ID與影片URL不可空白，"
-                                    "請先修正 Excel。"
+                            for column in numeric_columns:
+
+                                import_df[column] = pd.to_numeric(
+                                    import_df[column],
+                                    errors="coerce"
                                 )
 
-                            else:
+                            import_df = import_df.astype(object)
 
-                                video_rows = video_df.to_dict(
-                                    orient="records"
+                            import_df = import_df.apply(
+                                lambda column: column.map(
+                                    lambda value: (
+                                        None
+                                        if pd.isna(value)
+                                        else value
+                                    )
                                 )
-
-                                if not video_rows:
-
-                                    st.warning(
-                                        "沒有可匯入的課程影片資料。"
-                                    )
-
-                                else:
-
-                                    supabase = create_client(
-                                        st.secrets["SUPABASE_URL"],
-                                        st.secrets["SUPABASE_KEY"]
-                                    )
-
-                                    supabase.table(
-                                        "course_videos"
-                                    ).insert(
-                                        video_rows
-                                    ).execute()
-
-                                    st.success(
-                                        f"成功匯入 "
-                                        f"{len(video_rows)} 筆課程影片！"
-                                    )
-
-                        except Exception as e:
-
-                            st.error(
-                                f"課程影片匯入失敗：{e}"
                             )
 
+                            records = import_df.to_dict(
+                                orient="records"
+                            )
+
+                            response = (
+                                supabase
+                                .table("quiz_records")
+                                .insert(records)
+                                .execute()
+                            )
+
+                            st.success(
+                                f"成功匯入 {len(records)} 筆測驗紀錄！"
+                            )
+
+                    except Exception as e:
+
+                        st.error(
+                            f"測驗紀錄匯入失敗：{e}"
+                        )
 
         except Exception as e:
 
