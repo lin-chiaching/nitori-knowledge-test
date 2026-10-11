@@ -8036,20 +8036,20 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
             # 測驗紀錄匯入
             # ============================================================
 
-          if selected_sheet == "錯題記錄":
+            if selected_sheet == "測驗題庫":
 
                 column_mapping = {
-                    "員工編號": "employee_no",
-                    "姓名": "employee_name",
-                    "課程ID": "course_id",
                     "題目ID": "question_id",
-                    "題目內容": "question_content",
-                    "學員答案": "student_answer",
+                    "課程ID": "course_id",
+                    "題型": "question_type",
+                    "題目": "question",
+                    "選項A": "option_a",
+                    "選項B": "option_b",
+                    "選項C": "option_c",
+                    "選項D": "option_d",
                     "正確答案": "correct_answer",
-                    "答錯次數": "wrong_count",
-                    "最近答錯日期": "last_wrong_at",
-                    "是否已訂正": "is_corrected",
-                    "小老師備註": "teacher_notes"
+                    "解說": "explanation",
+                    "Level": "level"
                 }
 
                 import_df = preview_df.copy()
@@ -8078,8 +8078,8 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     if import_df.empty:
 
                         st.warning(
-                            "目前沒有可匯入的錯題記錄。"
-                            "等新人實際測驗產生錯題資料後，再進行匯入即可。"
+                            "目前沒有可匯入的測驗題目，"
+                            "請先在 Excel 填寫題目資料。"
                         )
 
                     else:
@@ -8088,7 +8088,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             columns=column_mapping
                         )
 
-                        # 清除 NaN，轉成 Supabase 可接收的資料
+                        # 清除 NaN
                         import_df = import_df.astype(object)
 
                         import_df = import_df.apply(
@@ -8101,45 +8101,44 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                             )
                         )
 
-                        # 數字欄位轉換
-                        import_df["employee_no"] = pd.to_numeric(
-                            import_df["employee_no"],
-                            errors="coerce"
-                        )
+                        # 移除題目 ID 為空的資料
+                        import_df = import_df[
+                            import_df["question_id"].notna()
+                        ].copy()
 
-                        import_df["question_id"] = pd.to_numeric(
-                            import_df["question_id"],
-                            errors="coerce"
-                        )
+                        if import_df.empty:
 
-                        import_df["wrong_count"] = pd.to_numeric(
-                            import_df["wrong_count"],
-                            errors="coerce"
-                        )
-
-                        # 讓資料庫自動產生錯題 ID
-                        records = import_df.to_dict(
-                            orient="records"
-                        )
-
-                        try:
-
-                            response = (
-                                supabase
-                                .table("wrong_answers")
-                                .insert(records)
-                                .execute()
+                            st.warning(
+                                "找不到有效的題目 ID，"
+                                "請確認 Excel 的題目ID欄位。"
                             )
 
-                            st.success(
-                                f"成功匯入 {len(records)} 筆錯題記錄！"
+                        else:
+
+                            # 題目 ID 與課程 ID 轉為整數以外的型別前，
+                            # 先保留原始格式，避免課程 ID 格式遭改變
+                            records = import_df.to_dict(
+                                orient="records"
                             )
 
-                        except Exception as e:
+                            try:
 
-                            st.error(
-                                f"錯題記錄匯入失敗：{e}"
-                            )
+                                response = (
+                                    supabase
+                                    .table("quiz_questions")
+                                    .insert(records)
+                                    .execute()
+                                )
+
+                                st.success(
+                                    f"成功匯入 {len(records)} 道測驗題目！"
+                                )
+
+                            except Exception as e:
+
+                                st.error(
+                                    f"測驗題庫匯入失敗：{e}"
+                                )
 
         except Exception as e:
 
