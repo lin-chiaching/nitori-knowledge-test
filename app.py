@@ -8108,10 +8108,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                         else:
                             # 同一個設定名稱只保留最後一筆
-                            import_df = import_df.drop_duplicates(
-                                subset=["setting_key"],
-                                keep="last"
-                            )
+
                             records = import_df.to_dict(
                                 orient="records"
                             )
@@ -8121,10 +8118,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 response = (
                                     supabase
                                     .table("app_settings")
-                                    .upsert(
-                                        records,
-                                        on_conflict="setting_key"
-                                    )
+                                    .insert(records)
                                     .execute()
                                 )
 
