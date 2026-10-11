@@ -7966,3 +7966,55 @@ with st.popover("🐱"):
                             st.warning(
                                 "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
                             )
+# ============================================================
+# Excel 資料匯入工具（第一階段：畫面與預覽）
+# ============================================================
+
+with st.expander("📥 Excel 資料匯入工具", expanded=False):
+
+    st.write(
+        "上傳 Excel 檔案，先預覽工作表與資料內容。"
+        "目前只提供預覽，不會寫入或修改 Supabase 資料。"
+    )
+
+    uploaded_excel = st.file_uploader(
+        "請選擇 Excel 檔案",
+        type=["xlsx"],
+        key="supabase_excel_import_file"
+    )
+
+    if uploaded_excel is not None:
+
+        try:
+            excel_file = pd.ExcelFile(uploaded_excel)
+
+            st.success("✅ Excel 檔案讀取成功！")
+
+            st.write("### 📑 工作表清單")
+
+            st.write(excel_file.sheet_names)
+
+            selected_sheet = st.selectbox(
+                "請選擇要預覽的工作表",
+                options=excel_file.sheet_names,
+                key="supabase_excel_import_sheet"
+            )
+
+            preview_df = pd.read_excel(
+                excel_file,
+                sheet_name=selected_sheet
+            )
+
+            st.write(f"資料筆數：{len(preview_df)} 筆")
+
+            st.dataframe(
+                preview_df.head(10),
+                use_container_width=True,
+                hide_index=True
+            )
+
+        except Exception as e:
+
+            st.error(
+                f"Excel 讀取失敗，請確認檔案格式是否正確：{e}"
+            )
