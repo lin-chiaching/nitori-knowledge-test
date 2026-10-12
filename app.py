@@ -2774,7 +2774,6 @@ with st.sidebar:
         "📊 客訴資料統計",
         "🗺️ 門市地圖",
         "🎓 新人訓練中心",
-        "💻 系統索引",
         "📢 公告",
         "🛠️ 資料維護"
     ]
@@ -4537,8 +4536,8 @@ elif page == "🎓 新人訓練中心":
     # 標題＋右上角快捷鍵
     # --------------------------------------------------------
 
-    title_col, home_col, record_col, keypoint_col = st.columns(
-        [5, 1.2, 1.2, 1.2]
+    title_col, home_col, record_col, keypoint_col, systems_col = st.columns(
+        [4, 1.2, 1.2, 1.2, 1.2]
     )
 
     with title_col:
@@ -4584,6 +4583,21 @@ elif page == "🎓 新人訓練中心":
         ):
 
             st.session_state["training_page"] = "keypoints"
+    with systems_col:
+
+        if st.button(
+            "💻 系統索引",
+            use_container_width=True,
+            key="training_top_systems"
+        ):
+
+            st.session_state["training_page"] = "systems"
+
+            st.session_state["training_step"] = "video"
+
+            st.session_state["training_course_id"] = ""
+
+            st.session_state["training_quiz_passed"] = False
 
             st.rerun()
 
@@ -5148,6 +5162,99 @@ elif page == "🎓 新人訓練中心":
             st.session_state["training_page"] = "home"
             st.rerun()
 
+    elif st.session_state["training_page"] == "systems":
+
+        st.subheader("💻 系統索引")
+
+        st.caption(
+            "不知道要用哪個系統？先找你要完成的工作。"
+        )
+
+        system_keyword = st.text_input(
+            "搜尋功能、工作內容或系統名稱",
+            placeholder="例如：庫存、商品資訊、訂單、配送",
+            key="training_system_index_search"
+        )
+
+        system_index_demo = [
+            {
+                "分類": "📦 商品相關",
+                "工作": "商品資訊查詢",
+                "系統": "2-F1",
+                "說明": "查詢商品基本資料、商品資訊等內容。",
+                "關鍵字": "商品、商品資訊、品番、規格"
+            },
+            {
+                "分類": "📦 商品相關",
+                "工作": "庫存查詢",
+                "系統": "2-F5",
+                "說明": "查詢門市及商品庫存相關資訊。",
+                "關鍵字": "庫存、門市庫存、存貨"
+            },
+            {
+                "分類": "🧾 訂單相關",
+                "工作": "訂單查詢",
+                "系統": "待建立",
+                "說明": "查詢顧客訂單及訂單處理狀態。",
+                "關鍵字": "訂單、訂單編號、購買"
+            },
+            {
+                "分類": "🚚 配送相關",
+                "工作": "配送資訊查詢",
+                "系統": "待建立",
+                "說明": "查詢配送相關資訊及配送狀態。",
+                "關鍵字": "配送、送貨、配送日期"
+            }
+        ]
+
+        keyword = system_keyword.strip().lower()
+
+        filtered_systems = [
+            item
+            for item in system_index_demo
+            if not keyword
+            or keyword in item["工作"].lower()
+            or keyword in item["系統"].lower()
+            or keyword in item["說明"].lower()
+            or keyword in item["關鍵字"].lower()
+        ]
+
+        if not filtered_systems:
+
+            st.info(
+                "找不到符合的系統或功能，請換其他關鍵字搜尋。"
+            )
+
+        else:
+
+            for item in filtered_systems:
+
+                with st.container(border=True):
+
+                    st.markdown(
+                        f"### {item['分類']}｜{item['工作']}"
+                    )
+
+                    st.write(
+                        f"**使用系統：{item['系統']}**"
+                    )
+
+                    st.write(item["說明"])
+
+                    st.caption(
+                        f"關鍵字：{item['關鍵字']}"
+                    )
+
+        st.divider()
+
+        if st.button(
+            "← 回到新人首頁",
+            key="training_systems_back_home",
+            use_container_width=True
+        ):
+
+            st.session_state["training_page"] = "home"
+            st.rerun()
 
     elif st.session_state["training_page"] == "course":
 
