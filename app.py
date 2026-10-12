@@ -8041,17 +8041,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                 hide_index=True
             )
             # ============================================================
-            # 測驗紀錄匯入
+            # 公告匯入
             # ============================================================
 
-            if selected_sheet == "系統索引":
+            if selected_sheet in ["內部公告", "公告"]:
 
                 column_mapping = {
-                    "名稱": "name",
-                    "類型": "category",
-                    "用途": "purpose",
-                    "位置": "location",
-                    "備註": "notes"
+                    "公告編號": "announcement_id",
+                    "公告標題": "title",
+                    "公告內容": "content",
+                    "公告日期": "announcement_date",
+                    "活動日期": "event_date",
+                    "點數期限": "points_deadline",
+                    "顯示狀態": "display_status"
                 }
 
                 import_df = preview_df.copy()
@@ -8081,7 +8083,7 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                     if import_df.empty:
 
                         st.warning(
-                            "目前沒有可匯入的系統索引資料。"
+                            "目前沒有可匯入的公告資料。"
                         )
 
                     else:
@@ -8097,21 +8099,21 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 lambda value: (
                                     None
                                     if pd.isna(value)
-                                    else value
+                                    else str(value).strip()
                                 )
                             )
                         )
 
-                        # 名稱不可為空白
                         import_df = import_df[
-                            import_df["name"].notna()
+                            import_df["title"].notna()
+                            & (import_df["title"] != "")
                         ].copy()
 
                         if import_df.empty:
 
                             st.warning(
-                                "找不到有效的系統名稱，"
-                                "請確認 Excel 的名稱欄位。"
+                                "找不到有效的公告標題，"
+                                "請確認 Excel 的公告標題欄位。"
                             )
 
                         else:
@@ -8124,13 +8126,19 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                                 response = (
                                     supabase
-                                    .table("system_index")
+                                    .table("announcements")
                                     .insert(records)
                                     .execute()
                                 )
 
                                 st.success(
-                                    f"成功匯入 {len(records)} 筆系統索引！"
+                                    f"成功匯入 {len(records)} 筆公告！"
+                                )
+
+                            except Exception as e:
+
+                                st.error(
+                                    f"公告匯入失敗：{e}"
                                 )
 
                             except Exception as e:
