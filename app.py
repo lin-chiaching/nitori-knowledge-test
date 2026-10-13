@@ -8088,42 +8088,9 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                     else:
 
-                        # 日期欄位轉換：只保留有效的單一日期
-                        date_columns = [
-                            "announcement_date",
-                            "event_date",
-                            "points_deadline"
-                        ]
-
-                        for col in date_columns:
-
-                            if col in import_df.columns:
-
-                                import_df[col] = import_df[col].map(
-                                    lambda value: (
-                                        None
-                                        if pd.isna(value)
-                                        or str(value).strip() == ""
-                                        else (
-                                            pd.to_datetime(
-                                                str(value).strip(),
-                                                errors="coerce"
-                                            ).strftime("%Y-%m-%d")
-                                            if pd.to_datetime(
-                                                str(value).strip(),
-                                                errors="coerce"
-                                            ) is not pd.NaT
-                                            and not pd.isna(
-                                                pd.to_datetime(
-                                                    str(value).strip(),
-                                                    errors="coerce"
-                                                )
-                                            )
-                                            else None
-                                        )
-                                    )
-                                )
-
+                        import_df = import_df.rename(
+                            columns=column_mapping
+                        )
 
                         import_df = import_df.astype(object)
 
@@ -8132,11 +8099,13 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 lambda value: (
                                     None
                                     if pd.isna(value)
+                                    or str(value).strip() == ""
                                     else str(value).strip()
                                 )
                             )
                         )
 
+                        # 公告標題不可為空白
                         import_df = import_df[
                             import_df["title"].notna()
                             & (import_df["title"] != "")
@@ -8167,10 +8136,11 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 st.success(
                                     f"成功匯入 {len(records)} 筆公告！"
                                 )
+
                             except Exception as e:
 
                                 st.error(
-                                    f"系統索引匯入失敗：{e}"
+                                    f"公告匯入失敗：{e}"
                                 )
 
         except Exception as e:
