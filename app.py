@@ -708,39 +708,78 @@ def load_synonyms():
 @st.cache_data(ttl=60)
 def load_announcements():
 
-    sheet = find_sheet(
-        ["內部公告", "公告"]
-    )
+    try:
 
-    if not sheet:
-        return pd.DataFrame()
+        # 從 Supabase 讀取公告資料
+        response = (
+            supabase
+            .table("announcements")
+            .select("*")
+            .execute()
+        )
 
-    df = pd.read_excel(
-        EXCEL_PATH,
-        sheet_name=sheet,
-        dtype=str
-    ).fillna("")
+        df = pd.DataFrame(
+            response.data or []
+        )
 
-    for col in df.columns:
+        # 將 Supabase 英文欄位名稱轉回原本的中文欄位
+        column_mapping = {
+            "announcement_id": "公告編號",
+            "title": "公告標題",
+            "content": "公告內容",
+            "announcement_date": "公告日期",
+            "event_date": "活動日期",
+            "points_deadline": "點數期限",
+            "display_status": "顯示狀態"
+        }
 
-        if any(
-            x in str(col)
-            for x in ["內容", "說明", "公告"]
-        ):
+        if df.empty:
 
-            df[col] = df[col].map(
-                clean_announcement_content
+            return pd.DataFrame(
+                columns=list(column_mapping.values())
             )
 
-    for col in df.columns:
+        df = df.rename(
+            columns=column_mapping
+        )
 
-        if "標題" in str(col):
+        # 確保必要欄位存在
+        for column in column_mapping.values():
 
-            df[col] = df[col].map(
-                clean_announcement_title
-            )
+            if column not in df.columns:
+                df[column] = ""
 
-    return df
+        df = df.fillna("")
+
+        # 清理公告內容
+        df["公告內容"] = df["公告內容"].map(
+            clean_announcement_content
+        )
+
+        # 清理公告標題
+        df["公告標題"] = df["公告標題"].map(
+            clean_announcement_title
+        )
+
+        return df
+
+    except Exception as e:
+
+        st.warning(
+            f"無法讀取 Supabase 公告資料：{e}"
+        )
+
+        return pd.DataFrame(
+            columns=[
+                "公告編號",
+                "公告標題",
+                "公告內容",
+                "公告日期",
+                "活動日期",
+                "點數期限",
+                "顯示狀態"
+            ]
+        )
 
 # =========================================================
 # 新人訓練中心
