@@ -8088,9 +8088,42 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
 
                     else:
 
-                        import_df = import_df.rename(
-                            columns=column_mapping
-                        )
+                        # 日期欄位轉換：只保留有效的單一日期
+                        date_columns = [
+                            "announcement_date",
+                            "event_date",
+                            "points_deadline"
+                        ]
+
+                        for col in date_columns:
+
+                            if col in import_df.columns:
+
+                                import_df[col] = import_df[col].map(
+                                    lambda value: (
+                                        None
+                                        if pd.isna(value)
+                                        or str(value).strip() == ""
+                                        else (
+                                            pd.to_datetime(
+                                                str(value).strip(),
+                                                errors="coerce"
+                                            ).strftime("%Y-%m-%d")
+                                            if pd.to_datetime(
+                                                str(value).strip(),
+                                                errors="coerce"
+                                            ) is not pd.NaT
+                                            and not pd.isna(
+                                                pd.to_datetime(
+                                                    str(value).strip(),
+                                                    errors="coerce"
+                                                )
+                                            )
+                                            else None
+                                        )
+                                    )
+                                )
+
 
                         import_df = import_df.astype(object)
 
