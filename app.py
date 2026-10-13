@@ -8167,13 +8167,6 @@ with st.expander("📥 Excel 資料匯入工具", expanded=False):
                                 st.success(
                                     f"成功匯入 {len(records)} 筆公告！"
                                 )
-
-                            except Exception as e:
-
-                                st.error(
-                                    f"公告匯入失敗：{e}"
-                                )
-
                             except Exception as e:
 
                                 st.error(
