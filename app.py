@@ -6660,14 +6660,11 @@ elif page == "🛠️ 資料維護":
                         ]
 
                         st.rerun()
-
                     # --------------------------------------------------------
-                    # 儲存修改
+                    # 儲存修改：更新 Supabase
                     # --------------------------------------------------------
 
                     if save_edit:
-
-                        edited_df = df.copy()
 
                         title_column = announcement_columns.get(
                             "title"
@@ -6689,84 +6686,67 @@ elif page == "🛠️ 資料維護":
                             "point_date"
                         )
 
-                        if title_column:
+                        # 取得目前正在編輯的公告編號
+                        announcement_id = str(
+                            df.at[edit_index, "公告編號"]
+                        ).strip() if "公告編號" in df.columns else ""
 
-                            edited_df.at[
-                                edit_index,
-                                title_column
-                            ] = new_title
+                        if not announcement_id:
 
-                        if content_column:
-
-                            edited_df.at[
-                                edit_index,
-                                content_column
-                            ] = new_content
-
-                        if date_column:
-
-                            edited_df.at[
-                                edit_index,
-                                date_column
-                            ] = new_date
-
-                        if activity_date_column:
-
-                            edited_df.at[
-                                edit_index,
-                                activity_date_column
-                            ] = new_activity_date
-
-                        if point_date_column:
-
-                            edited_df.at[
-                                edit_index,
-                                point_date_column
-                            ] = new_point_date
-                        if "顯示狀態" in edited_df.columns:
-
-                            edited_df.at[
-                                edit_index,
-                                "顯示狀態"
-                            ] = new_status
-                        sheet = find_sheet(
-                            [
-                                "內部公告",
-                                "公告"
-                            ]
-                        )
-
-                        if sheet:
-
-                            success = save_sheet(
-                                sheet,
-                                edited_df,
-                                editor_name_announcement
+                            st.error(
+                                "找不到公告編號，無法更新資料。"
                             )
-
-                            if success:
-
-                                st.success(
-                                    "公告已更新！"
-                                )
-
-                                del st.session_state[
-                                    "editing_announcement"
-                                ]
-
-                                st.rerun()
-
-                            else:
-
-                                st.error(
-                                    "公告儲存失敗，請稍後再試。"
-                                )
 
                         else:
 
-                            st.error(
-                                "找不到公告資料工作表。"
-                            )
+                            update_data = {
+                                "title": new_title,
+                                "content": new_content,
+                                "announcement_date": new_date,
+                                "event_date": new_activity_date,
+                                "points_deadline": new_point_date,
+                                "display_status": new_status
+                            }
+
+                            try:
+
+                                response = (
+                                    supabase
+                                    .table("announcements")
+                                    .update(update_data)
+                                    .eq(
+                                        "announcement_id",
+                                        announcement_id
+                                    )
+                                    .execute()
+                                )
+
+                                if response.data:
+
+                                    load_announcements.clear()
+
+                                    st.success(
+                                        "公告已更新！"
+                                    )
+
+                                    del st.session_state[
+                                        "editing_announcement"
+                                    ]
+
+                                    st.rerun()
+
+                                else:
+
+                                    st.error(
+                                        "沒有更新任何資料，請確認公告編號是否正確。"
+                                    )
+
+                            except Exception as e:
+
+                                st.error(
+                                    f"公告更新失敗：{e}"
+                                )
+
     # ========================================================
     # 公告
     # ========================================================
