@@ -5361,30 +5361,95 @@ elif page == "🎓 新人訓練中心":
                 "請閱讀以下課程內容，完成後即可進入測驗。"
             )
 
-            st.markdown(
-                "#### 本課程學習重點"
+            # 將新人首頁的課程編號對應到 Supabase 課程ID
+            content_course_id_map = {
+                "DAY1_BASIC": "D1-01",
+            }
+
+            content_course_id = content_course_id_map.get(
+                course_id,
+                ""
             )
 
-            st.markdown(
-                """
-                **1. 課程介紹**
+            if training_content.empty:
 
-                了解本課程的學習目的，以及新人需要掌握的基本內容。
+                st.warning(
+                    "目前讀取不到課程細項，請確認 Supabase 課程資料。"
+                )
 
-                **2. 基礎知識**
+            elif not content_course_id:
 
-                認識工作中會接觸到的基本資訊與注意事項。
+                st.info(
+                    "此課程的細項尚未設定，會再逐步補上課程內容。"
+                )
 
-                **3. 實務應用**
+            else:
 
-                將課程內容應用於日常工作與顧客應對。
-                """
-            )
+                # 依照目前選取的課程ID，篩選對應的課程細項
+                course_content_rows = training_content[
+                    training_content["課程ID"]
+                    .astype(str)
+                    .str.strip()
+                    .eq(content_course_id)
+                ].copy()
+
+                if course_content_rows.empty:
+
+                    st.warning(
+                        f"找不到課程編號 {content_course_id} 的細項資料。"
+                    )
+
+                else:
+
+                    st.markdown(
+                        "#### 本課程學習重點"
+                    )
+
+                    st.caption(
+                        f"共 {len(course_content_rows)} 個學習細項"
+                    )
+
+                    for index, content_row in enumerate(
+                        course_content_rows.itertuples(index=False),
+                        start=1
+                    ):
+
+                        content_title = str(
+                            getattr(
+                                content_row,
+                                "課程細項",
+                                ""
+                            )
+                        ).strip()
+
+                        content_notes = str(
+                            getattr(
+                                content_row,
+                                "注意事項",
+                                ""
+                            )
+                        ).strip()
+
+                        if content_title and content_title != "nan":
+
+                            with st.container(border=True):
+
+                                st.markdown(
+                                    f"**{index}. {content_title}**"
+                                )
+
+                                if (
+                                    content_notes
+                                    and content_notes != "nan"
+                                ):
+                                    st.write(
+                                        content_notes
+                                    )
 
             st.divider()
 
             st.success(
-                "✓ 已完成課程內容閱讀"
+                "✓ 閱讀完課程細項後，即可進入測驗。"
             )
 
             if st.button(
