@@ -924,7 +924,10 @@ def load_training_content():
             .astype(str)
             .str.strip()
         )
-
+        
+        st.write("課程細項讀取筆數：", len(df))
+        st.dataframe(df, use_container_width=True)
+        
         return df
 
     except Exception as e:
