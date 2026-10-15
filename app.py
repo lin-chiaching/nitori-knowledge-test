@@ -7942,9 +7942,3 @@ with st.popover("🐱"):
                             st.warning(
                                 "請查看上方顯示的錯誤訊息，確認 Excel 是否正在開啟。"
                             )
-
-        except Exception as e:
-
-            st.error(
-                f"Excel 讀取失敗，請確認檔案格式是否正確：{e}"
-            )
