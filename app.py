@@ -809,107 +809,84 @@ def load_training_content():
 
     try:
 
-        sheet = find_sheet(
-            ["課程內容"]
+        # 從 Supabase 讀取課程細項
+        response = (
+            supabase
+            .table("course_contents")
+            .select("*")
+            .execute()
         )
 
-        if not sheet:
-
-            return pd.DataFrame(
-                columns=TRAINING_CONTENT_COLUMNS
-            )
-
-        df = pd.read_excel(
-            EXCEL_PATH,
-            sheet_name=sheet
+        # 將 Supabase 資料轉成 DataFrame
+        df = pd.DataFrame(
+            response.data or []
         )
 
+        # Supabase 欄位對應原本程式使用的中文欄位
+        column_mapping = {
+            "course_id": "課程ID",
+            "content_id": "內容ID",
+            "course_name": "課程大項",
+            "content_title": "課程細項",
+            "notes": "注意事項",
+            "level": "Level"
+        }
+
+        # 沒有資料時，回傳原本需要的欄位
         if df.empty:
-
             return pd.DataFrame(
                 columns=TRAINING_CONTENT_COLUMNS
             )
 
+        # 轉換欄位名稱
+        df = df.rename(
+            columns=column_mapping
+        )
+
+        # 補齊原本程式需要的欄位
         for col in TRAINING_CONTENT_COLUMNS:
 
             if col not in df.columns:
                 df[col] = ""
 
+        # 保留原本欄位順序
         df = df[
             TRAINING_CONTENT_COLUMNS
         ].copy()
 
+        # 清理 Level 欄位
         df["Level"] = (
             df["Level"]
+            .fillna("")
             .astype(str)
             .str.strip()
         )
 
+        # 保留原本 Level 1 的篩選規則
         df = df[
-            df["Level"].isin(
-                ["", "1"]
-            )
+            df["Level"].isin(["", "1"])
         ].copy()
+
+        # 統一課程 ID 格式，避免比對時出現空白
+        df["課程ID"] = (
+            df["課程ID"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+        )
 
         return df
 
     except Exception as e:
 
         st.warning(
-            f"無法讀取課程內容：{e}"
+            f"無法讀取 Supabase 課程內容：{e}"
         )
 
         return pd.DataFrame(
             columns=TRAINING_CONTENT_COLUMNS
         )
 
-
-@st.cache_data(ttl=60)
-def load_training_videos():
-
-    try:
-
-        sheet = find_sheet(
-            ["課程影片"]
-        )
-
-        if not sheet:
-
-            return pd.DataFrame(
-                columns=TRAINING_VIDEO_COLUMNS
-            )
-
-        df = pd.read_excel(
-            EXCEL_PATH,
-            sheet_name=sheet
-        )
-
-        if df.empty:
-
-            return pd.DataFrame(
-                columns=TRAINING_VIDEO_COLUMNS
-            )
-
-        for col in TRAINING_VIDEO_COLUMNS:
-
-            if col not in df.columns:
-                df[col] = ""
-
-        df = df[
-            TRAINING_VIDEO_COLUMNS
-        ].copy()
-
-        return df
-
-    except Exception as e:
-
-        st.warning(
-            f"無法讀取課程影片：{e}"
-        )
-
-        return pd.DataFrame(
-            columns=TRAINING_VIDEO_COLUMNS
-        )
 
 
 @st.cache_data(ttl=60)
