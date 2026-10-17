@@ -4538,6 +4538,9 @@ elif page == "🎓 新人訓練中心":
     if "training_course_id" not in st.session_state:
         st.session_state["training_course_id"] = ""
 
+    if "training_content_id" not in st.session_state:
+    st.session_state["training_content_id"] = ""
+
     if "training_quiz_passed" not in st.session_state:
         st.session_state["training_quiz_passed"] = False
 
