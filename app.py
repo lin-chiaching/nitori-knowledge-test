@@ -5455,18 +5455,22 @@ elif page == "🎓 新人訓練中心":
                 st.rerun()
 
         # ====================================================
-        # ② 單一細項學習頁面
+        # ② 單一細項學習流程
+        # 影片 → 重點整理 → 測驗
         # ====================================================
 
-        elif training_step == "detail":
+        elif training_step in [
+            "detail",
+            "video",
+            "summary",
+            "quiz"
+        ]:
 
             selected_content_id = str(
                 st.session_state.get(
                     "training_content_id", ""
                 )
             ).strip()
-
-            st.markdown("### 📖 細項學習")
 
             if training_content.empty:
 
@@ -5494,9 +5498,21 @@ elif page == "🎓 新人訓練中心":
                         "找不到這個細項，請返回清單重新選擇。"
                     )
 
+                    if st.button(
+                        "⬅️ 返回細項清單",
+                        key=f"missing_detail_back_{course_id}"
+                    ):
+                        st.session_state[
+                            "training_step"
+                        ] = "subtopics"
+
+                        st.rerun()
+
                 else:
 
                     detail = selected_detail.iloc[0]
+
+                    st.markdown("### 📖 細項學習")
 
                     st.markdown(
                         f"#### {detail['課程細項']}"
@@ -5506,74 +5522,127 @@ elif page == "🎓 新人訓練中心":
                         f"細項編號：{selected_content_id}"
                     )
 
-                    st.divider()
-
-                    st.markdown("**🎬 專屬訓練影片**")
-
-                    st.info(
-                        "影片功能待補上。完成影片資料整理後，"
-                        "再串接各細項的專屬影片。"
+                    st.progress(
+                        {
+                            "detail": 0,
+                            "video": 0,
+                            "summary": 0.33,
+                            "quiz": 0.66
+                        }.get(training_step, 0)
                     )
-
-                    notes = str(
-                        detail.get("注意事項", "")
-                    ).strip()
-
-                    if notes and notes.lower() != "nan":
-
-                        st.markdown("**📝 補充內容**")
-                        st.write(notes)
 
                     st.divider()
 
-                    completed_key = (
-                        f"completed_{course_id}"
-                    )
+                    # ------------------------------------------------
+                    # 影片階段
+                    # ------------------------------------------------
 
-                    if completed_key not in st.session_state:
-                        st.session_state[completed_key] = []
+                    if training_step in ["detail", "video"]:
 
-                    if selected_content_id in st.session_state[
-                        completed_key
-                    ]:
+                        st.markdown("### ① 🎬 訓練影片")
 
-                        st.success("這個細項已完成。")
+                        st.info(
+                            "此處預留目前細項的專屬影片播放區，"
+                            "待影片資料整理完成後再串接。"
+                        )
+
+                        if st.button(
+                            "下一步：重點整理 ➡️",
+                            key=(
+                                f"video_next_{course_id}_"
+                                f"{selected_content_id}"
+                            ),
+                            use_container_width=True
+                        ):
+
+                            st.session_state[
+                                "training_step"
+                            ] = "summary"
+
+                            st.rerun()
+
+                    # ------------------------------------------------
+                    # 重點整理階段
+                    # ------------------------------------------------
+
+                    elif training_step == "summary":
+
+                        st.markdown("### ② 📝 重點整理")
+
+                        notes = str(
+                            detail.get("注意事項", "")
+                        ).strip()
+
+                        if notes and notes.lower() != "nan":
+
+                            st.write(notes)
+
+                        else:
+
+                            st.info(
+                                "此細項的重點整理尚待建立。"
+                            )
+
+                        if st.button(
+                            "下一步：進入測驗 ➡️",
+                            key=(
+                                f"summary_next_{course_id}_"
+                                f"{selected_content_id}"
+                            ),
+                            use_container_width=True
+                        ):
+
+                            st.session_state[
+                                "training_step"
+                            ] = "quiz"
+
+                            st.session_state[
+                                "training_quiz_passed"
+                            ] = False
+
+                            st.rerun()
+
+                    # ------------------------------------------------
+                    # 測驗階段
+                    # ------------------------------------------------
+
+                    elif training_step == "quiz":
+
+                        st.markdown("### ③ 🧠 課程測驗")
+
+                        st.warning(
+                            "目前先建立測驗流程。"
+                            "正式題目與答題判分功能接回後，"
+                            "必須確認測驗通過才能完成此細項。"
+                        )
+
+                        st.caption(
+                            "目前尚未接入正式測驗，"
+                            "因此不會將此細項標記為完成。"
+                        )
+
+                    st.divider()
+
+                    # ------------------------------------------------
+                    # 返回細項清單
+                    # ------------------------------------------------
+                    # 只允許離開，不會直接標記完成。
+                    # 正式測驗通過後，才會自動返回清單。
 
                     if st.button(
-                        "✅ 完成本細項並返回清單",
+                        "⬅️ 返回細項清單",
                         key=(
-                            f"complete_{course_id}_"
+                            f"learning_back_{course_id}_"
                             f"{selected_content_id}"
                         ),
                         use_container_width=True
                     ):
-
-                        if selected_content_id not in st.session_state[
-                            completed_key
-                        ]:
-
-                            st.session_state[
-                                completed_key
-                            ].append(selected_content_id)
 
                         st.session_state[
                             "training_step"
                         ] = "subtopics"
 
                         st.rerun()
-
-            if st.button(
-                "⬅️ 返回細項清單",
-                key=f"detail_back_{course_id}",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "training_step"
-                ] = "subtopics"
-
-                st.rerun()
-
         # ====================================================
         # ③ 大項重點整理
         # ====================================================
