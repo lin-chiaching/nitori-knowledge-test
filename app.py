@@ -4810,15 +4810,21 @@ elif page == "🎓 新人訓練中心":
                             st.session_state[
                                 "training_course_id"
                             ] = course_id
-
+                            
+                            # 點擊大項後，先顯示該大項的細項清單
                             st.session_state[
                                 "training_step"
-                            ] = "video"
+                           ] = "subtopics"
 
                             st.session_state[
                                 "training_quiz_passed"
                             ] = False
 
+                            # 清除前一次選取的細項，避免沿用舊內容
+                            st.session_state[
+                                "training_content_id"
+                            ] = ""
+                            
                             if course_id == "DAY1_BASIC":
 
                                 current_employee_id = str(
