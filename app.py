@@ -7748,7 +7748,9 @@ elif page == "🛠️ 資料維護":
                                         "announcement_date": new_date.strip(),
                                         "event_date": new_activity_date.strip(),
                                         "points_deadline": new_point_date.strip(),
-                                        "display_status": new_status
+                                        "display_status": new_status,
+                                        "updated_by": editor_name_announcement.strip(),
+                                        "updated_at": datetime.now().isoformat()
                                     }
 
                                     response = (
@@ -7776,17 +7778,23 @@ elif page == "🛠️ 資料維護":
                                         )
 
                                         if history_saved:
-                                            st.success("公告已更新，歷史紀錄已保存！")
+                                            st.success(
+                                                "公告已更新，歷史紀錄已保存！"
+                                            )
                                         else:
                                             st.warning(
                                                 "公告已更新，但歷史紀錄寫入失敗，請確認 Excel 檔案是否可寫入。"
                                             )
 
                                         st.rerun()
+
                                     else:
                                         st.error(
                                             "沒有更新任何資料，請確認公告編號是否正確。"
                                         )
+
+                            except Exception as e:
+                                st.error(f"公告更新失敗：{e}")
 
         # --------------------------------------------------------
         # 公告修改歷程：保留原有功能
