@@ -2102,7 +2102,15 @@ def save_sheet(
             ):
 
                 st.warning(
-                    "⚠️ 資料已儲存，但修改歷程寫入失敗。"
+                    "⚠️ 資料已儲存，但 Excel 修改歷程寫入失敗。"
+                )
+
+            if not save_data_change_history(
+                history_df
+            ):
+
+                st.warning(
+                    "⚠️ 資料已儲存，但 Supabase 修改歷程寫入失敗。"
                 )
 
         st.cache_data.clear()
