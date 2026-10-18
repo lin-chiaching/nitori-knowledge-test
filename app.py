@@ -960,13 +960,6 @@ def load_data():
         dtype=str
     ).fillna("")
 
-def check_knowledge_columns():
-
-    df = load_data()
-
-    st.write("目前讀取的知識庫欄位：")
-    st.write(df.columns.tolist())
-    
 @st.cache_data(ttl=60)
 def load_synonyms():
 
@@ -6593,7 +6586,7 @@ elif page == "🛠️ 資料維護":
         )
 
         df = load_data()
-
+        st.write("知識庫欄位檢查：", df.columns.tolist())
         if df.empty:
 
             st.warning(
@@ -6623,7 +6616,6 @@ elif page == "🛠️ 資料維護":
         # =================================================
 
         if knowledge_mode == "📋 總表":
-            check_knowledge_columns()
             st.markdown(
                 "### 📋 知識庫總覽"
             )
@@ -6861,6 +6853,9 @@ elif page == "🛠️ 資料維護":
                         == selected_display
                     ].iloc[0]
 
+                    original_index = selected_row[
+                        "_original_index"
+                    ]
                     original_index = selected_row[
                         "_original_index"
                     ]
