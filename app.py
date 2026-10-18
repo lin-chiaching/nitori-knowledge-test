@@ -3367,6 +3367,67 @@ def render_change_history(
             st.error(
                 f"讀取「{data_area}」修改歷程失敗：{e}"
             )
+def render_announcement_history():
+    """從 Supabase 讀取公告修改歷程。"""
+
+    st.markdown("### 📝 公告修改歷程")
+
+    try:
+        response = (
+            supabase
+            .table("announcement_history")
+            .select("*")
+            .order("changed_at", desc=True)
+            .execute()
+        )
+
+        records = response.data or []
+
+        if not records:
+            st.info("目前尚無公告修改紀錄。")
+            return
+
+        history_df = pd.DataFrame(records)
+
+        column_mapping = {
+            "changed_at": "修改時間",
+            "editor_name": "修改人",
+            "action": "動作",
+            "announcement_id": "公告編號",
+            "announcement_title": "公告標題",
+            "field_name": "欄位名稱",
+            "old_value": "修改前",
+            "new_value": "修改後"
+        }
+
+        history_df = history_df.rename(
+            columns=column_mapping
+        )
+
+        display_columns = [
+            "修改時間",
+            "修改人",
+            "動作",
+            "公告編號",
+            "公告標題",
+            "欄位名稱",
+            "修改前",
+            "修改後"
+        ]
+
+        display_columns = [
+            col for col in display_columns
+            if col in history_df.columns
+        ]
+
+        st.dataframe(
+            history_df[display_columns],
+            use_container_width=True,
+            hide_index=True
+        )
+
+    except Exception as e:
+        st.error(f"讀取公告修改歷程失敗：{e}")
 
 
 # ============================================================
@@ -7743,15 +7804,15 @@ elif page == "🛠️ 資料維護":
                         else:
                             try:
                                 announcement_id = edit_row.get("公告編號")
-                                old_history_data = {
-                                    "title": str(edit_row.get("公告標題", "") or ""),
-                                    "content": str(edit_row.get("公告內容", "") or ""),
-                                    "announcement_date": str(edit_row.get("公告日期", "") or ""),
-                                    "event_date": str(edit_row.get("活動日期", "") or ""),
-                                    "points_deadline": str(edit_row.get("點數期限", "") or ""),
-                                    "display_status": str(edit_row.get("顯示狀態", "") or "")
-                                }
 
+                                old_history_data = {
+                                    "title": str(edit_title or ""),
+                                    "content": str(edit_content or ""),
+                                    "announcement_date": str(edit_date or ""),
+                                    "event_date": str(edit_activity_date or ""),
+                                    "points_deadline": str(edit_point_date or ""),
+                                    "display_status": current_status
+                                }
                                 if pd.isna(announcement_id) or str(
                                     announcement_id
                                 ).strip() == "":
@@ -7825,12 +7886,9 @@ elif page == "🛠️ 資料維護":
                                 st.error(f"公告更新失敗：{e}")
 
         # --------------------------------------------------------
-        # 公告修改歷程：保留原有功能
+        # 公告修改歷程：讀取 Supabase
         # --------------------------------------------------------
-        render_change_history(
-            find_sheet(["內部公告", "公告"]) or "內部公告",
-            "announcement_history"
-        )
+        render_announcement_history()
 
     # ========================================================
     # 待審核問題
