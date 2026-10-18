@@ -6798,12 +6798,29 @@ elif page == "🛠️ 資料維護":
                         display_df.index
                     )
 
-                    display_df["顯示名稱"] = (
-                        display_df["問題摘要"]
-                        .fillna("")
-                        .astype(str)
-                        .str.strip()
-                    )
+                    if "問題摘要" in display_df.columns:
+                        display_df["顯示名稱"] = (
+                            display_df["問題摘要"]
+                            .fillna("")
+                            .astype(str)
+                            .str.strip()
+                        )
+                    elif "問題" in display_df.columns:
+                        display_df["顯示名稱"] = (
+                            display_df["問題"]
+                            .fillna("")
+                            .astype(str)
+                            .str.strip()
+                        )
+                    else:
+                        display_df["顯示名稱"] = (
+                            "未命名資料 "
+                            + (
+                                display_df["_original_index"]
+                                .astype(str)
+                            )
+                        )
+
 
                     if "商品編號" in display_df.columns:
 
