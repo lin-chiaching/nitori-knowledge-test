@@ -1753,56 +1753,66 @@ def save_announcement_history(
     old_data=None,
     new_data=None
 ):
-    """將 Supabase 公告的新增或修改紀錄寫入既有 Excel 歷程。"""
+    """將公告新增或修改紀錄寫入 Supabase。"""
 
-    now = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     history = []
+
+    base_data = {
+        "announcement_id": str(announcement_id),
+        "announcement_title": str(title or ""),
+        "action": action,
+        "editor_name": str(editor_name or "").strip()
+    }
 
     if action == "新增":
         history.append({
-            "修改時間": now,
-            "修改人": clean_text(editor_name),
-            "資料區域": "內部公告",
-            "動作": "新增",
-            "資料識別": f"{announcement_id} - {title}",
-            "欄位名稱": "整筆資料",
-            "修改前": "",
-            "修改後": "新增公告"
+            **base_data,
+            "field_name": "整筆資料",
+            "old_value": "",
+            "new_value": "新增公告"
         })
 
     elif action == "修改":
         old_data = old_data or {}
         new_data = new_data or {}
 
-        for field in [
-            "title",
-            "content",
-            "announcement_date",
-            "event_date",
-            "points_deadline",
-            "display_status"
-        ]:
-            old_value = clean_text(old_data.get(field, ""))
-            new_value = clean_text(new_data.get(field, ""))
+        fields = [
+            ("title", "公告標題"),
+            ("content", "公告內容"),
+            ("announcement_date", "公告日期"),
+            ("event_date", "活動日期"),
+            ("points_deadline", "點數期限"),
+            ("display_status", "顯示狀態")
+        ]
+
+        for field, field_label in fields:
+            old_value = str(old_data.get(field, "") or "").strip()
+            new_value = str(new_data.get(field, "") or "").strip()
 
             if old_value != new_value:
                 history.append({
-                    "修改時間": now,
-                    "修改人": clean_text(editor_name),
-                    "資料區域": "內部公告",
-                    "動作": "修改",
-                    "資料識別": f"{announcement_id} - {title}",
-                    "欄位名稱": field,
-                    "修改前": old_value,
-                    "修改後": new_value
+                    **base_data,
+                    "field_name": field_label,
+                    "old_value": old_value,
+                    "new_value": new_value
                 })
 
     if not history:
         return True
 
-    return save_change_history(
-        pd.DataFrame(history, columns=HISTORY_COLUMNS)
-    )
+    try:
+        response = (
+            supabase
+            .table("announcement_history")
+            .insert(history)
+            .execute()
+        )
+
+        return bool(response.data)
+
+    except Exception as e:
+        print(f"公告歷程寫入失敗：{e}")
+        return False
 
 
 # ============================================================
