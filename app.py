@@ -6165,15 +6165,49 @@ elif page == "📢 公告":
 
 elif page == "🛠️ 資料維護":
 
-    st.title(
-        "🛠️ 資料維護"
+    # --------------------------------------------------------
+    # 資料維護頁面標題區
+    # --------------------------------------------------------
+    st.markdown(
+        """
+        <div style="
+            background: linear-gradient(120deg, #FFFDF9 0%, #F0E4D7 100%);
+            border: 1px solid #E4D9CB;
+            border-radius: 18px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px rgba(90,70,50,0.04);
+        ">
+            <div style="
+                font-size: 12px;
+                color: #9A8F84;
+                letter-spacing: 2px;
+                margin-bottom: 8px;
+            ">
+                DATA MANAGEMENT
+            </div>
+            <div style="
+                font-size: 26px;
+                font-weight: 700;
+                color: #514C45;
+                line-height: 1.5;
+            ">
+                🛠️ 資料維護中心
+            </div>
+            <div style="
+                color: #898176;
+                font-size: 14px;
+                line-height: 1.8;
+                margin-top: 8px;
+            ">
+                集中管理客服知識、公告、待審核問題與客訴資料。
+                <br>
+                讓每一筆資料都清楚、完整，方便後續查詢與維護。 🐾
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-
-    st.caption(
-        "集中管理客服知識、公告、待審核問題與客訴資料。"
-    )
-
-    st.divider()
 
     # --------------------------------------------------------
     # 資料統計
