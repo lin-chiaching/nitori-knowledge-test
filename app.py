@@ -1753,7 +1753,7 @@ def save_announcement_history(
     old_data=None,
     new_data=None
 ):
-    """將公告新增或修改紀錄寫入 Supabase。"""
+    """將公告新增、修改、刪除紀錄寫入 Supabase。"""
 
     history = []
 
@@ -1772,7 +1772,7 @@ def save_announcement_history(
             "new_value": "新增公告"
         })
 
-    elif action == "修改":
+    elif action in ("修改", "刪除"):
         old_data = old_data or {}
         new_data = new_data or {}
 
@@ -1787,15 +1787,28 @@ def save_announcement_history(
 
         for field, field_label in fields:
             old_value = str(old_data.get(field, "") or "").strip()
-            new_value = str(new_data.get(field, "") or "").strip()
 
-            if old_value != new_value:
-                history.append({
-                    **base_data,
-                    "field_name": field_label,
-                    "old_value": old_value,
-                    "new_value": new_value
-                })
+            if action == "刪除":
+                if old_value:
+                    history.append({
+                        **base_data,
+                        "field_name": field_label,
+                        "old_value": old_value,
+                        "new_value": ""
+                    })
+
+            else:
+                new_value = str(
+                    new_data.get(field, "") or ""
+                ).strip()
+
+                if old_value != new_value:
+                    history.append({
+                        **base_data,
+                        "field_name": field_label,
+                        "old_value": old_value,
+                        "new_value": new_value
+                    })
 
     if not history:
         return True
@@ -1813,6 +1826,7 @@ def save_announcement_history(
     except Exception as e:
         print(f"公告歷程寫入失敗：{e}")
         return False
+
 
 
 # ============================================================
