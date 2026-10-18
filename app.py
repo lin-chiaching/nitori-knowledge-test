@@ -7371,16 +7371,16 @@ elif page == "🛠️ 資料維護":
 
                         else:
 
-                                    update_data = {
-                                        "title": new_title.strip(),
-                                        "content": new_content.strip(),
-                                        "announcement_date": new_date.strip(),
-                                        "event_date": new_activity_date.strip(),
-                                        "points_deadline": new_point_date.strip(),
-                                        "display_status": new_status,
-                                        "updated_by": editor_name_announcement.strip(),
-                                        "updated_at": datetime.now().isoformat()
-                                    }
+                            update_data = {
+                                "title": new_title.strip(),
+                                "content": new_content.strip(),
+                                "announcement_date": new_date.strip(),
+                                "event_date": new_activity_date.strip(),
+                                "points_deadline": new_point_date.strip(),
+                                "display_status": new_status,
+                                "updated_by": editor_name_announcement.strip(),
+                                "updated_at": datetime.now().isoformat()
+                            }
 
                             try:
 
