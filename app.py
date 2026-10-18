@@ -7484,6 +7484,9 @@ elif page == "🛠️ 資料維護":
                                 "event_date": add_activity_date.strip(),
                                 "points_deadline": add_point_date.strip(),
                                 "display_status": "是"
+                                "created_by": add_editor_name.strip(),
+                                "updated_by": add_editor_name.strip(),
+                                "updated_at": datetime.now().isoformat()
                             }
 
                             response = (
