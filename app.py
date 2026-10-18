@@ -960,7 +960,13 @@ def load_data():
         dtype=str
     ).fillna("")
 
+def check_knowledge_columns():
 
+    df = load_data()
+
+    st.write("目前讀取的知識庫欄位：")
+    st.write(df.columns.tolist())
+    
 @st.cache_data(ttl=60)
 def load_synonyms():
 
@@ -6858,17 +6864,6 @@ elif page == "🛠️ 資料維護":
                     original_index = selected_row[
                         "_original_index"
                     ]
-                    df = df.copy()
-
-                    for col in [
-                        "問題摘要",
-                        "問題類型",
-                        "商品編號",
-                        "關鍵字",
-                        "資料來源"
-                    ]:
-                        if col not in df.columns:
-                            df[col] = ""
                     # ----------------------------------------
                     # 編輯區
                     # ----------------------------------------
