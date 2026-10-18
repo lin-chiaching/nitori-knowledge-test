@@ -2971,162 +2971,149 @@ def ask_customer_assistant(
 
 with st.sidebar:
 
+    # --------------------------------------------------------
+    # 品牌標題
+    # --------------------------------------------------------
     st.markdown(
         """
         <div style="
-            text-align:center;
-            padding:8px 0 18px 0;
+            padding: 12px 8px 22px 8px;
+            text-align: center;
         ">
-            <div style="font-size:42px;">🐱</div>
+            <div style="font-size: 42px; margin-bottom: 5px;">
+                🐱
+            </div>
             <div style="
-                font-size:20px;
-                font-weight:700;
-                color:#5F554C;
-                letter-spacing:1px;
+                color: #514C45;
+                font-size: 21px;
+                font-weight: 700;
+                letter-spacing: 1px;
             ">
                 客服作業系統
             </div>
             <div style="
-                font-size:11px;
-                color:#9A8F84;
-                margin-top:4px;
-                letter-spacing:1px;
+                color: #9A8F84;
+                font-size: 11px;
+                margin-top: 7px;
+                letter-spacing: 1px;
             ">
-                NITORI CUSTOMER SERVICE
+                NITORI · CUSTOMER SUPPORT
+            </div>
+            <div style="
+                width: 42px;
+                height: 3px;
+                background: #B9785E;
+                border-radius: 5px;
+                margin: 15px auto 0 auto;
+            "></div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div style="
+            color: #9A8F84;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            padding: 0 8px 8px 8px;
+        ">
+            MENU / 功能選單
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # --------------------------------------------------------
+    # 功能選單
+    # --------------------------------------------------------
+    menu_items = [
+        "🏠 首頁",
+        "🔍 知識搜尋",
+        "📊 客訴資料統計",
+        "🗺️ 門市地圖",
+        "🎓 新人訓練中心",
+        "📢 公告",
+        "🛠️ 資料維護"
+    ]
+
+    if "current_page" not in st.session_state:
+        st.session_state["current_page"] = "🏠 首頁"
+
+    for item in menu_items:
+
+        is_current = (
+            st.session_state["current_page"] == item
+        )
+
+        if is_current:
+
+            st.markdown(
+                f"""
+                <div style="
+                    background: linear-gradient(
+                        100deg, #EAD6C9 0%, #F5EAE1 100%
+                    );
+                    border: 1px solid #D9B6A3;
+                    border-left: 4px solid #B9785E;
+                    border-radius: 12px;
+                    padding: 12px;
+                    margin: 5px 0;
+                    color: #754D3D;
+                    font-weight: 700;
+                    font-size: 14px;
+                    box-shadow: 0 2px 5px rgba(90,70,50,0.04);
+                ">
+                    {item}
+                    <span style="
+                        float: right;
+                        color: #B9785E;
+                        font-size: 12px;
+                    ">●</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        else:
+
+            if st.button(
+                item,
+                key=f"menu_{item}",
+                use_container_width=True
+            ):
+                st.session_state["current_page"] = item
+                st.rerun()
+
+    # --------------------------------------------------------
+    # 側邊欄頁尾
+    # --------------------------------------------------------
+    st.markdown(
+        """
+        <div style="
+            margin-top: 22px;
+            border-top: 1px solid #D8CFC2;
+            padding-top: 15px;
+            text-align: center;
+            color: #93877B;
+            font-size: 12px;
+            line-height: 1.9;
+        ">
+            <div style="font-size: 20px;">🐾</div>
+            讓小貓陪你一起找資料
+            <div style="font-size: 10px; color: #AAA094;">
+                A LITTLE HELP, EVERY DAY
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.divider()
-
-menu_items = [
-    "🏠 首頁",
-    "🔍 知識搜尋",
-    "📊 客訴資料統計",
-    "🗺️ 門市地圖",
-    "🎓 新人訓練中心",
-    "📢 公告",
-    "🛠️ 資料維護"
-]
-
-if "current_page" not in st.session_state:
-    st.session_state["current_page"] = "🏠 首頁"
-
-# 側邊欄品牌區
-st.markdown(
-    """
-    <div style="
-        padding: 12px 8px 22px 8px;
-        text-align: center;
-    ">
-        <div style="font-size: 38px; margin-bottom: 5px;">
-            🐱
-        </div>
-        <div style="
-            color: #514C45;
-            font-size: 21px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        ">
-            客服作業系統
-        </div>
-        <div style="
-            color: #9A8F84;
-            font-size: 12px;
-            margin-top: 7px;
-            letter-spacing: 1px;
-        ">
-            NITORI · CUSTOMER SUPPORT
-        </div>
-        <div style="
-            width: 42px;
-            height: 3px;
-            background: #B9785E;
-            border-radius: 5px;
-            margin: 15px auto 0 auto;
-        "></div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-    <div style="
-        color: #9A8F84;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 2px;
-        padding: 0 8px 8px 8px;
-    ">
-        MENU / 功能選單
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-for item in menu_items:
-    is_current = st.session_state["current_page"] == item
-
-    if is_current:
-        st.markdown(
-            f"""
-            <div style="
-                background: linear-gradient(
-                    100deg, #EAD6C9 0%, #F5EAE1 100%
-                );
-                border: 1px solid #D9B6A3;
-                border-left: 4px solid #B9785E;
-                border-radius: 12px;
-                padding: 12px 12px;
-                margin: 5px 0;
-                color: #754D3D;
-                font-weight: 700;
-                font-size: 14px;
-                box-shadow: 0 2px 5px rgba(90,70,50,0.04);
-            ">
-                {item}
-                <span style="
-                    float: right;
-                    color: #B9785E;
-                    font-size: 12px;
-                ">●</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        if st.button(
-            item,
-            key=f"menu_{item}",
-            use_container_width=True
-        ):
-            st.session_state["current_page"] = item
-            st.rerun()
-
-st.markdown(
-    """
-    <div style="
-        margin-top: 22px;
-        border-top: 1px solid #D8CFC2;
-        padding-top: 15px;
-        text-align: center;
-        color: #93877B;
-        font-size: 12px;
-        line-height: 1.9;
-    ">
-        <div style="font-size: 20px;">🐾</div>
-        讓小貓陪你一起找資料
-        <div style="font-size: 10px; color: #AAA094;">
-            A LITTLE HELP, EVERY DAY
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
+# ------------------------------------------------------------
+# 目前頁面
+# ------------------------------------------------------------
 page = st.session_state["current_page"]
 
 # ============================================================
