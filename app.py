@@ -7733,6 +7733,14 @@ elif page == "🛠️ 資料維護":
                         else:
                             try:
                                 announcement_id = edit_row.get("公告編號")
+                                old_history_data = {
+                                    "title": str(edit_row.get("公告標題", "") or ""),
+                                    "content": str(edit_row.get("公告內容", "") or ""),
+                                    "announcement_date": str(edit_row.get("公告日期", "") or ""),
+                                    "event_date": str(edit_row.get("活動日期", "") or ""),
+                                    "points_deadline": str(edit_row.get("點數期限", "") or ""),
+                                    "display_status": str(edit_row.get("顯示狀態", "") or "")
+                                }
 
                                 if pd.isna(announcement_id) or str(
                                     announcement_id
@@ -7765,13 +7773,23 @@ elif page == "🛠️ 資料維護":
                                     )
 
                                     if response.data:
+                                        new_history_data = {
+                                            "title": new_title.strip(),
+                                            "content": new_content.strip(),
+                                            "announcement_date": new_date.strip(),
+                                            "event_date": new_activity_date.strip(),
+                                            "points_deadline": new_point_date.strip(),
+                                            "display_status": new_status
+                                        }
+
                                         history_saved = save_announcement_history(
                                             action="修改",
                                             announcement_id=announcement_id,
                                             title=new_title.strip(),
-                                            editor_name=editor_name_announcement.strip()
+                                            editor_name=editor_name_announcement.strip(),
+                                            old_data=old_history_data,
+                                            new_data=new_history_data
                                         )
-
                                         load_announcements.clear()
                                         st.session_state.pop(
                                             "editing_announcement", None
