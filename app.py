@@ -7746,21 +7746,31 @@ elif page == "🛠️ 資料維護":
                                         .execute()
                                     )
 
-                                    if response.data:
-                                        load_announcements.clear()
-                                        st.session_state.pop(
-                                            "editing_announcement", None
-                                        )
-                                        st.success("公告已更新！")
-                                        st.rerun()
-                                    else:
-                                        st.error(
-                                            "沒有更新任何資料，請確認公告編號是否正確。"
-                                        )
+                            if response.data:
+                                history_saved = save_announcement_history(
+                                    action="新增",
+                                    announcement_id=new_number,
+                                    title=add_title.strip(),
+                                    editor_name=add_editor_name.strip()
+                                )
 
-                            except Exception as e:
-                                st.error(f"公告更新失敗：{e}")
+                                load_announcements.clear()
+                                st.session_state.pop(
+                                    "adding_announcement", None
+                                )
 
+                                if history_saved:
+                                    st.success("公告已新增，歷史紀錄已保存！")
+                                else:
+                                    st.warning(
+                                        "公告已新增，但歷史紀錄寫入失敗，請確認 Excel 檔案是否可寫入。"
+                                    )
+
+                                st.rerun()
+                            else:
+                                st.error(
+                                    "未收到新增結果，請重新確認公告資料。"
+                                )
         # --------------------------------------------------------
         # 公告修改歷程：保留原有功能
         # --------------------------------------------------------
