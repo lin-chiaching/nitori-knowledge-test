@@ -6623,7 +6623,7 @@ elif page == "🛠️ 資料維護":
         # =================================================
 
         if knowledge_mode == "📋 總表":
-
+            check_knowledge_columns()
             st.markdown(
                 "### 📋 知識庫總覽"
             )
