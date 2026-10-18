@@ -6858,7 +6858,16 @@ elif page == "🛠️ 資料維護":
                     original_index = selected_row[
                         "_original_index"
                     ]
+                    df = df.copy()
 
+                    for col in [
+                        "問題類型",
+                        "商品編號",
+                        "關鍵字",
+                        "資料來源"
+                    ]:
+                        if col not in df.columns:
+                            df[col] = ""
                     # ----------------------------------------
                     # 編輯區
                     # ----------------------------------------
