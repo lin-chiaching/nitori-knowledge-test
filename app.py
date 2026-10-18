@@ -32,128 +32,352 @@ st.set_page_config(
 EXCEL_PATH = Path("DATA/知識庫實驗品.xlsx")
 
 # ============================================================
-# 日系貓咪 UI
+# 日系貓咪 UI｜全站統一樣式
+# 僅調整外觀，不更動資料處理與功能邏輯
 # ============================================================
 
-try:
-    st.html("""
-    <style>
-    .stApp {
-        background: #F7F4EE;
-        color: #5F5A53;
-    }
+st.html("""
+<style>
+/* ---------- 1. 全站基礎色彩與背景 ---------- */
+:root {
+    --cat-bg: #F7F4EE;
+    --cat-panel: #FFFDF9;
+    --cat-sidebar: #EEE8DD;
+    --cat-border: #E4D9CB;
+    --cat-border-strong: #D8C9B8;
+    --cat-brown: #8A7863;
+    --cat-terracotta: #B9785E;
+    --cat-text: #514C45;
+    --cat-muted: #898176;
+    --cat-shadow: 0 3px 14px rgba(90, 70, 50, 0.055);
+    --cat-radius: 16px;
+}
 
-    [data-testid="stHeader"] {
-        background: transparent !important;
-    }
+.stApp {
+    background: var(--cat-bg);
+    color: var(--cat-text);
+}
 
+[data-testid="stHeader"] {
+    background: rgba(247, 244, 238, 0.88) !important;
+}
+
+[data-testid="stToolbar"] {
+    right: 1rem;
+}
+
+.block-container {
+    max-width: 1450px;
+    padding-top: 2.6rem;
+    padding-bottom: 3.5rem;
+}
+
+/* ---------- 2. 標題與文字層級 ---------- */
+h1, h2, h3, h4 {
+    color: var(--cat-text) !important;
+    letter-spacing: 0.02em;
+}
+
+h1 {
+    font-weight: 750 !important;
+    letter-spacing: 0.035em;
+}
+
+h2 {
+    font-weight: 700 !important;
+}
+
+h3, h4 {
+    font-weight: 650 !important;
+}
+
+p, label, .stMarkdown {
+    color: var(--cat-text);
+}
+
+small, [data-testid="stCaptionContainer"] {
+    color: var(--cat-muted) !important;
+}
+
+hr {
+    border-color: var(--cat-border) !important;
+    opacity: 0.85;
+}
+
+/* ---------- 3. 低調貓掌裝飾 ---------- */
+[data-testid="stAppViewContainer"] {
+    position: relative;
+}
+
+[data-testid="stAppViewContainer"]::after {
+    content: "🐾";
+    position: fixed;
+    right: 24px;
+    top: 82px;
+    font-size: 25px;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---------- 4. 側邊欄 ---------- */
+[data-testid="stSidebar"] {
+    background: var(--cat-sidebar);
+    border-right: 1px solid var(--cat-border);
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1.2rem;
+}
+
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: #554F48 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    line-height: 1.65;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label,
+[data-testid="stSidebar"] [data-testid="stCheckbox"] label {
+    border-radius: 10px;
+}
+
+/* ---------- 5. 一般按鈕 ---------- */
+.stButton > button,
+.stDownloadButton > button,
+[data-testid="stFormSubmitButton"] > button {
+    min-height: 42px;
+    padding: 0.48rem 1.05rem;
+    border-radius: 11px;
+    border: 1px solid var(--cat-border-strong);
+    background: var(--cat-panel);
+    color: var(--cat-text);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(90, 70, 50, 0.035);
+    transition: background 0.18s ease,
+                border-color 0.18s ease,
+                transform 0.18s ease,
+                box-shadow 0.18s ease;
+}
+
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+[data-testid="stFormSubmitButton"] > button:hover {
+    background: #F6EDE3;
+    border-color: var(--cat-terracotta);
+    color: #85553F;
+    box-shadow: 0 3px 9px rgba(90, 70, 50, 0.08);
+}
+
+.stButton > button:active {
+    transform: translateY(1px);
+}
+
+.stButton > button:focus:not(:active),
+.stDownloadButton > button:focus:not(:active) {
+    border-color: var(--cat-terracotta) !important;
+    box-shadow: 0 0 0 3px rgba(185, 120, 94, 0.14) !important;
+}
+
+/* ---------- 6. 文字輸入框 ---------- */
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input,
+[data-testid="stTextArea"] textarea {
+    border: 1px solid var(--cat-border-strong) !important;
+    border-radius: 11px !important;
+    background: var(--cat-panel) !important;
+    color: var(--cat-text) !important;
+    transition: border-color 0.18s ease,
+                box-shadow 0.18s ease;
+}
+
+[data-testid="stTextInput"] input,
+[data-testid="stNumberInput"] input {
+    min-height: 43px;
+    padding: 0 13px !important;
+}
+
+[data-testid="stTextArea"] textarea {
+    padding: 12px 13px !important;
+    line-height: 1.65;
+}
+
+[data-testid="stTextInput"] input:focus,
+[data-testid="stNumberInput"] input:focus,
+[data-testid="stTextArea"] textarea:focus {
+    border-color: var(--cat-terracotta) !important;
+    box-shadow: 0 0 0 3px rgba(185, 120, 94, 0.11) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #AAA196 !important;
+}
+
+/* ---------- 7. 下拉選單與日期選擇器 ---------- */
+[data-baseweb="select"] > div {
+    border-color: var(--cat-border-strong) !important;
+    border-radius: 11px !important;
+    background: var(--cat-panel) !important;
+}
+
+[data-testid="stDateInput"] input,
+[data-testid="stTimeInput"] input {
+    border-radius: 11px !important;
+    border-color: var(--cat-border-strong) !important;
+    background: var(--cat-panel) !important;
+}
+
+/* ---------- 8. 頁籤 ---------- */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    gap: 7px;
+    border-bottom: 1px solid var(--cat-border);
+}
+
+[data-testid="stTabs"] button[data-baseweb="tab"] {
+    min-height: 43px;
+    padding: 0.6rem 1rem;
+    border-radius: 10px 10px 0 0;
+    color: var(--cat-muted);
+    font-weight: 600;
+}
+
+[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+    background: rgba(255, 253, 249, 0.7);
+    color: var(--cat-terracotta);
+}
+
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+    color: #895A45 !important;
+    border-bottom: 3px solid var(--cat-terracotta) !important;
+    background: rgba(255, 253, 249, 0.7);
+}
+
+/* ---------- 9. 容器卡片 ---------- */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border-color: var(--cat-border) !important;
+    border-radius: var(--cat-radius) !important;
+    background: rgba(255, 253, 249, 0.72);
+    box-shadow: var(--cat-shadow);
+}
+
+/* ---------- 10. 資料表格 ---------- */
+[data-testid="stDataFrame"],
+[data-testid="stTable"] {
+    border: 1px solid var(--cat-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--cat-panel);
+}
+
+/* ---------- 11. 提示訊息 ---------- */
+[data-testid="stAlert"] {
+    border-radius: 12px;
+    border: 1px solid var(--cat-border);
+}
+
+/* ---------- 12. 展開區塊 ---------- */
+[data-testid="stExpander"] {
+    border: 1px solid var(--cat-border) !important;
+    border-radius: 13px !important;
+    background: rgba(255, 253, 249, 0.72);
+    overflow: hidden;
+}
+
+[data-testid="stExpander"] summary {
+    font-weight: 600;
+}
+
+/* ---------- 13. 表單 ---------- */
+[data-testid="stForm"] {
+    border: 1px solid var(--cat-border);
+    border-radius: 15px;
+    padding: 1.2rem;
+    background: rgba(255, 253, 249, 0.72);
+}
+
+/* ---------- 14. 勾選框與單選按鈕 ---------- */
+[data-testid="stCheckbox"] label,
+[data-testid="stRadio"] label {
+    color: var(--cat-text);
+}
+
+/* ---------- 15. 分隔線與載入狀態 ---------- */
+[data-testid="stProgress"] > div > div {
+    background-color: var(--cat-terracotta) !important;
+}
+
+[data-testid="stSpinner"] {
+    color: var(--cat-brown);
+}
+
+/* ---------- 16. 右下角貓咪小幫手 ---------- */
+[data-testid="stPopover"] {
+    position: fixed !important;
+    right: 22px !important;
+    bottom: 22px !important;
+    z-index: 999999 !important;
+    width: 58px !important;
+    height: 58px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+[data-testid="stPopover"] > button {
+    width: 58px !important;
+    height: 58px !important;
+    min-width: 58px !important;
+    min-height: 58px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: var(--cat-panel) !important;
+    border: 1px solid var(--cat-border-strong) !important;
+    box-shadow: 0 4px 15px rgba(90, 70, 50, 0.18) !important;
+    font-size: 27px !important;
+    transition: transform 0.18s ease,
+                box-shadow 0.18s ease;
+}
+
+[data-testid="stPopover"] > button:hover {
+    transform: scale(1.07);
+    border-color: var(--cat-terracotta) !important;
+    box-shadow: 0 6px 18px rgba(90, 70, 50, 0.2) !important;
+}
+
+[data-testid="stPopover"] > button:focus {
+    outline: none !important;
+}
+
+/* ---------- 17. 手機與窄螢幕 ---------- */
+@media (max-width: 768px) {
     .block-container {
-        padding-top: 3.5rem;
-        padding-bottom: 3rem;
-        max-width: 1400px;
+        padding-top: 1.5rem;
+        padding-bottom: 2rem;
     }
 
-    [data-testid="stTextInput"] input {
-        height: 52px !important;
-        font-size: 17px !important;
-        padding: 0 18px !important;
-        border: 2px solid #D8C9B8 !important;
-        border-radius: 14px !important;
-        background: #FFFDF9 !important;
+    [data-testid="stAppViewContainer"]::after {
+        right: 12px;
+        top: 65px;
+        font-size: 20px;
     }
 
-    [data-testid="stTextInput"] input:focus {
-        border-color: #B9785E !important;
-        box-shadow: 0 0 0 3px rgba(185,120,94,.12) !important;
+    [data-testid="stTabs"] [data-baseweb="tab-list"] {
+        gap: 2px;
     }
 
-    [data-testid="stTextInput"] input::placeholder {
-        color: #A9A096 !important;
+    [data-testid="stTabs"] button[data-baseweb="tab"] {
+        padding: 0.45rem 0.6rem;
     }
-
-    h1, h2, h3, h4 {
-        color: #514C45 !important;
-    }
-
-    p, label {
-        color: #706A62;
-    }
-
-    [data-testid="stSidebar"] {
-        background: #EEE8DD;
-        border-right: 1px solid #DED4C5;
-    }
-
-    [data-testid="stSidebar"] > div:first-child {
-        padding-top: 1.4rem;
-    }
-
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3 {
-        color: #554F48 !important;
-    }
-
-    .stButton > button {
-        border-radius: 12px;
-        border: 1px solid #D8C9B8;
-        background: #FFFDF9;
-        color: #5F5A53;
-    }
-
-    .stButton > button:hover {
-        border-color: #B9785E;
-        color: #8A5E4C;
-    }
-
-    input,
-    textarea,
-    [data-baseweb="select"] > div {
-        border-radius: 10px !important;
-    }
-
-    [data-testid="stPopover"] {
-        position: fixed !important;
-        right: 22px !important;
-        bottom: 22px !important;
-        z-index: 999999 !important;
-        width: 58px !important;
-        height: 58px !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    [data-testid="stPopover"] > button {
-        width: 58px !important;
-        height: 58px !important;
-        min-width: 58px !important;
-        min-height: 58px !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border-radius: 50% !important;
-        background: #FFFDF9 !important;
-        border: 1px solid #D8C9B8 !important;
-        box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
-        font-size: 27px !important;
-    }
-
-    [data-testid="stPopover"] > button:hover {
-        transform: scale(1.08);
-        border-color: #B9785E !important;
-    }
-
-    [data-testid="stPopover"] > button:focus {
-        outline: none !important;
-        box-shadow: 0 4px 15px rgba(90,70,50,.18) !important;
-    }
-    </style>
-    """)
-except Exception:
-    pass
-
+}
+</style>
+""")
 
 # ============================================================
 # 共用工具
