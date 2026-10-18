@@ -670,7 +670,6 @@ def render_announcement_admin(
     columns,
     index
 ):
-
     (
         title,
         content,
@@ -681,125 +680,235 @@ def render_announcement_admin(
         row,
         columns
     )
+
     status = clean_text(
-        row.get(
-            "顯示狀態",
-            ""
-        )
+        row.get("顯示狀態", "")
     )
-    with st.container(
-        border=True
-    ):
+
+    announcement_id = clean_text(
+        row.get("公告編號", "")
+    )
+
+    with st.container(border=True):
 
         # 標題
         if title:
-
-            st.markdown(
-                f"### 📌 {title}"
-            )
-
+            st.markdown(f"### 📌 {title}")
         else:
+            st.markdown("### 📌 未命名公告")
 
-            st.markdown(
-                "### 📌 未命名公告"
-            )
-            
         # 顯示狀態
         if status == "是":
-
-            st.caption(
-                "🟢 顯示中"
-            )
-
+            st.caption("🟢 顯示中")
         elif status == "否":
+            st.caption("⚪ 已隱藏")
 
-            st.caption(
-                "⚪ 已隱藏"
-            )
-            
         # 日期資訊
         info = []
 
         if date:
-
             try:
-                date = pd.to_datetime(
-                    date
-                ).strftime("%Y/%m/%d")
-            except:
-
+                date = pd.to_datetime(date).strftime("%Y/%m/%d")
+            except Exception:
                 date = str(date)
 
-            info.append(
-                f"📅 公告日期：{date}"
-            )
+            info.append(f"📅 公告日期：{date}")
 
         if activity_date:
-
             try:
                 activity_date = pd.to_datetime(
                     activity_date
                 ).strftime("%Y/%m/%d")
-            except:
-
+            except Exception:
                 activity_date = str(activity_date)
 
-            info.append(
-                f"🎉 活動日期：{activity_date}"
-            )
+            info.append(f"🎉 活動日期：{activity_date}")
 
         if point_date:
-
             try:
                 point_date = pd.to_datetime(
                     point_date
                 ).strftime("%Y/%m/%d")
-            except:
-
+            except Exception:
                 point_date = str(point_date)
 
-            info.append(
-                f"🎁 點數期限：{point_date}"
-            )
+            info.append(f"🎁 點數期限：{point_date}")
 
         if info:
-
-            st.caption(
-                "　｜　".join(info)
-            )
+            st.caption("　｜　".join(info))
 
         # 內容預覽
         if content:
-
-            preview = str(
-                content
-            ).replace(
-                "\n",
-                " "
-            )
+            preview = str(content).replace("\n", " ")
 
             if len(preview) > 100:
+                preview = preview[:100] + "……"
 
-                preview = (
-                    preview[:100]
-                    + "……"
+            st.write(preview)
+
+        # 編輯與刪除按鈕
+        edit_col, delete_col = st.columns(2)
+
+        with edit_col:
+            if st.button(
+                "✏️ 編輯",
+                key=f"edit_announcement_{index}",
+                use_container_width=True
+            ):
+                st.session_state[
+                    "editing_announcement"
+                ] = index
+
+                st.session_state.pop(
+                    "deleting_announcement",
+                    None
                 )
 
-            st.write(
-                preview
-            )
+                st.rerun()
 
-        # 編輯按鈕
-        if st.button(
-            "✏️ 編輯",
-            key=f"edit_announcement_{index}"
+        with delete_col:
+            if st.button(
+                "🗑️ 刪除",
+                key=f"delete_announcement_{index}",
+                use_container_width=True
+            ):
+                st.session_state[
+                    "deleting_announcement"
+                ] = index
+
+                st.rerun()
+
+        # 刪除確認區
+        if (
+            st.session_state.get(
+                "deleting_announcement"
+            ) == index
         ):
 
-            st.session_state[
-                "editing_announcement"
-            ] = index
+            st.divider()
 
-            st.rerun()
+            st.warning(
+                f"即將刪除公告「{title or '未命名公告'}」。"
+                "請確認公告內容及編號後再繼續。"
+            )
+
+            if not announcement_id:
+                st.error(
+                    "找不到公告編號，為避免誤刪，已停止此操作。"
+                )
+
+            else:
+                delete_editor_name = st.text_input(
+                    "👤 刪除人姓名（必填）",
+                    key=f"delete_editor_name_{index}",
+                    placeholder="請輸入實際操作人的姓名"
+                )
+
+                confirm_col, cancel_col = st.columns(2)
+
+                with confirm_col:
+                    confirm_delete = st.button(
+                        "⚠️ 確認刪除",
+                        type="primary",
+                        key=f"confirm_delete_{index}",
+                        use_container_width=True,
+                        disabled=not delete_editor_name.strip()
+                    )
+
+                with cancel_col:
+                    cancel_delete = st.button(
+                        "取消",
+                        key=f"cancel_delete_{index}",
+                        use_container_width=True
+                    )
+
+                if cancel_delete:
+                    st.session_state.pop(
+                        "deleting_announcement",
+                        None
+                    )
+
+                    st.rerun()
+
+                if confirm_delete:
+
+                    # 保存刪除前的公告內容
+                    old_data = {
+                        "title": str(title or ""),
+                        "content": str(content or ""),
+                        "announcement_date": str(date or ""),
+                        "event_date": str(activity_date or ""),
+                        "points_deadline": str(point_date or ""),
+                        "display_status": status
+                    }
+
+                    # 第一步：先寫入刪除歷程
+                    history_saved = save_announcement_history(
+                        action="刪除",
+                        announcement_id=announcement_id,
+                        title=title,
+                        editor_name=delete_editor_name.strip(),
+                        old_data=old_data
+                    )
+
+                    if not history_saved:
+                        st.error(
+                            "刪除歷程保存失敗，公告尚未刪除。"
+                            "請檢查 Supabase 後再試。"
+                        )
+
+                    else:
+                        # 第二步：歷程保存成功後才刪除公告
+                        try:
+                            response = (
+                                supabase
+                                .table("announcements")
+                                .delete()
+                                .eq(
+                                    "announcement_id",
+                                    announcement_id
+                                )
+                                .select("announcement_id")
+                                .execute()
+                            )
+
+                            if response.data:
+
+                                load_announcements.clear()
+
+                                st.session_state.pop(
+                                    "deleting_announcement",
+                                    None
+                                )
+
+                                if (
+                                    st.session_state.get(
+                                        "editing_announcement"
+                                    ) == index
+                                ):
+                                    st.session_state.pop(
+                                        "editing_announcement",
+                                        None
+                                    )
+
+                                st.success(
+                                    "公告已刪除，刪除歷程已保存。"
+                                )
+
+                                st.rerun()
+
+                            else:
+                                st.error(
+                                    "沒有刪除任何公告。"
+                                    "請確認公告編號是否正確；"
+                                    "刪除操作歷程已保存。"
+                                )
+
+                        except Exception as e:
+                            st.error(
+                                f"公告刪除失敗：{e}。"
+                                "刪除操作歷程已保存，請確認公告是否仍存在。"
+                            )
 # ============================================================
 # Excel 載入
 # ============================================================
