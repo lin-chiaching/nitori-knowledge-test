@@ -7558,12 +7558,27 @@ elif page == "🛠️ 資料維護":
                             )
 
                             if response.data:
+                                history_saved = save_announcement_history(
+                                    action="新增",
+                                    announcement_id=new_number,
+                                    title=add_title.strip(),
+                                    editor_name=add_editor_name.strip()
+                                )
+
                                 load_announcements.clear()
                                 st.session_state.pop(
                                     "adding_announcement", None
                                 )
-                                st.success("公告已新增！")
+
+                                if history_saved:
+                                    st.success("公告已新增，歷史紀錄已保存！")
+                                else:
+                                    st.warning(
+                                        "公告已新增，但歷史紀錄寫入失敗，請確認 Excel 檔案是否可寫入。"
+                                    )
+
                                 st.rerun()
+
                             else:
                                 st.error(
                                     "未收到新增結果，請重新確認公告資料。"
@@ -7571,6 +7586,7 @@ elif page == "🛠️ 資料維護":
 
                         except Exception as e:
                             st.error(f"公告新增失敗：{e}")
+
 
         # --------------------------------------------------------
         # 公告列表
