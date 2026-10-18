@@ -3001,83 +3001,133 @@ with st.sidebar:
 
     st.divider()
 
-    menu_items = [
-        "🏠 首頁",
-        "🔍 知識搜尋",
-        "📊 客訴資料統計",
-        "🗺️ 門市地圖",
-        "🎓 新人訓練中心",
-        "📢 公告",
-        "🛠️ 資料維護"
-    ]
-
-    if "current_page" not in st.session_state:
-
-        st.session_state[
-            "current_page"
-        ] = "🏠 首頁"
-
-    for item in menu_items:
-
-        is_current = (
-            st.session_state[
-                "current_page"
-            ] == item
-        )
-
-        if is_current:
-
-            st.markdown(
-                f"""
-                <div style="
-                    background:#F3EBDD;
-                    border-radius:12px;
-                    padding:10px 14px;
-                    margin:4px 0;
-                    color:#5F554C;
-                    font-weight:600;
-                    font-size:15px;
-                ">
-                    🐾 {item}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        else:
-
-            if st.button(
-                item,
-                key=f"menu_{item}",
-                use_container_width=True
-            ):
-
-                st.session_state[
-                    "current_page"
-                ] = item
-
-                st.rerun()
-
-    st.divider()
-
-    st.markdown(
-        """
-        <div style="
-            text-align:center;
-            color:#9A8F84;
-            font-size:13px;
-            padding:8px;
-        ">
-            🐾 讓小貓陪你一起找資料
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-page = st.session_state[
-    "current_page"
+menu_items = [
+    "🏠 首頁",
+    "🔍 知識搜尋",
+    "📊 客訴資料統計",
+    "🗺️ 門市地圖",
+    "🎓 新人訓練中心",
+    "📢 公告",
+    "🛠️ 資料維護"
 ]
 
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "🏠 首頁"
+
+# 側邊欄品牌區
+st.markdown(
+    """
+    <div style="
+        padding: 12px 8px 22px 8px;
+        text-align: center;
+    ">
+        <div style="font-size: 38px; margin-bottom: 5px;">
+            🐱
+        </div>
+        <div style="
+            color: #514C45;
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        ">
+            客服作業系統
+        </div>
+        <div style="
+            color: #9A8F84;
+            font-size: 12px;
+            margin-top: 7px;
+            letter-spacing: 1px;
+        ">
+            NITORI · CUSTOMER SUPPORT
+        </div>
+        <div style="
+            width: 42px;
+            height: 3px;
+            background: #B9785E;
+            border-radius: 5px;
+            margin: 15px auto 0 auto;
+        "></div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <div style="
+        color: #9A8F84;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        padding: 0 8px 8px 8px;
+    ">
+        MENU / 功能選單
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+for item in menu_items:
+    is_current = st.session_state["current_page"] == item
+
+    if is_current:
+        st.markdown(
+            f"""
+            <div style="
+                background: linear-gradient(
+                    100deg, #EAD6C9 0%, #F5EAE1 100%
+                );
+                border: 1px solid #D9B6A3;
+                border-left: 4px solid #B9785E;
+                border-radius: 12px;
+                padding: 12px 12px;
+                margin: 5px 0;
+                color: #754D3D;
+                font-weight: 700;
+                font-size: 14px;
+                box-shadow: 0 2px 5px rgba(90,70,50,0.04);
+            ">
+                {item}
+                <span style="
+                    float: right;
+                    color: #B9785E;
+                    font-size: 12px;
+                ">●</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        if st.button(
+            item,
+            key=f"menu_{item}",
+            use_container_width=True
+        ):
+            st.session_state["current_page"] = item
+            st.rerun()
+
+st.markdown(
+    """
+    <div style="
+        margin-top: 22px;
+        border-top: 1px solid #D8CFC2;
+        padding-top: 15px;
+        text-align: center;
+        color: #93877B;
+        font-size: 12px;
+        line-height: 1.9;
+    ">
+        <div style="font-size: 20px;">🐾</div>
+        讓小貓陪你一起找資料
+        <div style="font-size: 10px; color: #AAA094;">
+            A LITTLE HELP, EVERY DAY
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+page = st.session_state["current_page"]
 
 # ============================================================
 # 修改歷程顯示
@@ -3269,34 +3319,77 @@ def render_change_history(
 
 if page == "🏠 首頁":
 
+    # --------------------------------------------------------
+    # 依照目前時間顯示問候語
+    # --------------------------------------------------------
     current_hour = datetime.now().hour
 
     if current_hour < 12:
-
-        greeting = (
-            "🌅 早安，今天也辛苦了！"
-        )
+        greeting = "🌅 早安，今天也辛苦了！"
+        greeting_subtitle = "新的一天，慢慢開始今天的工作吧。"
 
     elif current_hour < 18:
-
-        greeting = (
-            "☀️ 午安，辛苦了一半，繼續加油！"
-        )
+        greeting = "☀️ 午安，辛苦了一半，繼續加油！"
+        greeting_subtitle = "喝口水、整理一下思緒，繼續完成今天的任務。"
 
     else:
+        greeting = "🌙 辛苦了，今天的工作也接近尾聲囉！"
+        greeting_subtitle = "整理好今天的工作，明天也能更順利地開始。"
 
-        greeting = (
-            "🌙 辛苦了，今天的工作也接近尾聲囉！"
-        )
-
-    st.title(
-        greeting
+    # --------------------------------------------------------
+    # 首頁歡迎區
+    # --------------------------------------------------------
+    st.markdown(
+        f"""
+        <div style="
+            background: linear-gradient(120deg, #FFFDF9 0%, #F0E4D7 100%);
+            border: 1px solid #E4D9CB;
+            border-radius: 20px;
+            padding: 30px 30px 26px 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(90,70,50,0.04);
+        ">
+            <div style="
+                font-size: 12px;
+                color: #9A8F84;
+                letter-spacing: 2px;
+                margin-bottom: 10px;
+            ">
+                NITORI · CUSTOMER SUPPORT
+            </div>
+            <div style="
+                font-size: 27px;
+                font-weight: 700;
+                color: #514C45;
+                line-height: 1.5;
+                margin-bottom: 8px;
+            ">
+                {greeting}
+            </div>
+            <div style="
+                font-size: 15px;
+                line-height: 1.8;
+                color: #898176;
+            ">
+                {greeting_subtitle}<br>
+                歡迎回到客服作業系統，讓小貓陪你一起處理今天的工作 🐾
+            </div>
+            <div style="
+                margin-top: 18px;
+                color: #B9785E;
+                font-size: 13px;
+                font-weight: 600;
+            ">
+                ♡ 細心聆聽・正確查詢・溫暖回覆
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.caption(
-        "歡迎回到客服作業系統，讓小貓陪你一起處理今天的工作 🐾"
-    )
-
+    # --------------------------------------------------------
+    # 每日客服小提醒
+    # --------------------------------------------------------
     daily_tips = [
         "遇到不確定的問題，先確認資料，再回覆顧客。",
         "先理解顧客的需求，再確認需要查詢的資訊。",
@@ -3311,47 +3404,82 @@ if page == "🏠 首頁":
     ]
 
     today_index = (
-        datetime.now()
-        .timetuple()
-        .tm_yday
+        datetime.now().timetuple().tm_yday
         % len(daily_tips)
     )
 
-    st.subheader(
-        "🌱 每日客服小提醒"
+    st.markdown(
+        """
+        <div style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 12px 0;
+        ">
+            <span style="font-size: 23px;">🌱</span>
+            <span style="
+                font-size: 20px;
+                font-weight: 700;
+                color: #514C45;
+            ">每日客服小提醒</span>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.info(
-        f"🐾 {daily_tips[today_index]}"
+    st.markdown(
+        f"""
+        <div style="
+            background: #F2E8DB;
+            border-left: 4px solid #B9785E;
+            border-radius: 12px;
+            padding: 17px 20px;
+            margin-bottom: 28px;
+            color: #6B5B4E;
+            font-size: 15px;
+            line-height: 1.8;
+        ">
+            🐾 {daily_tips[today_index]}
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.subheader(
-        "📢 最新公告"
+    # --------------------------------------------------------
+    # 最新公告
+    # --------------------------------------------------------
+    st.markdown(
+        """
+        <div style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0 14px 0;
+        ">
+            <span style="font-size: 23px;">📢</span>
+            <span style="
+                font-size: 20px;
+                font-weight: 700;
+                color: #514C45;
+            ">最新公告</span>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     ann = load_announcements()
 
     if ann.empty:
-
-        st.info(
-            "目前沒有公告資料。"
-        )
+        st.info("目前沒有公告資料。")
 
     else:
-
-        announcement_columns = (
-            get_announcement_columns(
-                ann
-            )
-        )
+        announcement_columns = get_announcement_columns(ann)
 
         for _, row in ann.head(5).iterrows():
-
             render_announcement(
                 row,
                 announcement_columns
             )
-
 
 # ============================================================
 # 知識搜尋
