@@ -7318,7 +7318,7 @@ elif page == "🛠️ 資料維護":
                                 "announcement_date": new_date,
                                 "event_date": new_activity_date,
                                 "points_deadline": new_point_date,
-                                "display_status": new_status
+                                "display_status": new_status,
                                 "updated_by": editor_name_announcement.strip(),
                                 "updated_at": datetime.now().isoformat()
                             }
