@@ -1853,6 +1853,60 @@ def save_change_history(
         )
 
         return False
+def save_data_change_history(history_df):
+    """將各資料區域的修改歷程寫入 Supabase 共用資料表。"""
+
+    if history_df is None or history_df.empty:
+        return True
+
+    column_mapping = {
+        "修改人": "editor_name",
+        "資料區域": "data_area",
+        "動作": "action",
+        "資料識別": "data_identifier",
+        "欄位名稱": "field_name",
+        "修改前": "old_value",
+        "修改後": "new_value"
+    }
+
+    allowed_actions = {"新增", "修改", "刪除"}
+    records = []
+
+    try:
+        for _, row in history_df.iterrows():
+            record = {}
+
+            for source_col, target_col in column_mapping.items():
+                record[target_col] = clean_text(
+                    row.get(source_col, "")
+                )
+
+            if record["action"] not in allowed_actions:
+                st.error("修改歷程包含無效的動作，未寫入 Supabase。")
+                return False
+
+            if not record["editor_name"]:
+                st.error("修改歷程缺少修改人，未寫入 Supabase。")
+                return False
+
+            if not record["data_area"]:
+                st.error("修改歷程缺少資料區域，未寫入 Supabase。")
+                return False
+
+            records.append(record)
+
+        response = (
+            supabase
+            .table("data_change_history")
+            .insert(records)
+            .execute()
+        )
+
+        return bool(response.data)
+
+    except Exception as e:
+        print(f"共用修改歷程寫入失敗：{e}")
+        return False
         
 def save_announcement_history(
     action,
@@ -1935,9 +1989,6 @@ def save_announcement_history(
     except Exception as e:
         print(f"公告歷程寫入失敗：{e}")
         return False
-
-
-
 # ============================================================
 # 儲存 Excel
 # ============================================================
