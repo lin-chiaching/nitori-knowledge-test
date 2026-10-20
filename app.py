@@ -7745,23 +7745,28 @@ elif page == "🛠️ 資料維護":
                 date_col1, date_col2, date_col3 = st.columns(3)
 
                 with date_col1:
-                    add_date = st.text_input(
+                    add_date = st.date_input(
                         "公告日期",
+                        value=None,
+                        format="YYYY/MM/DD",
                         key="add_announcement_date"
                     )
 
                 with date_col2:
-                    add_activity_date = st.text_input(
+                    add_activity_date = st.date_input(
                         "活動日期",
+                        value=None,
+                        format="YYYY/MM/DD",
                         key="add_announcement_activity_date"
                     )
 
                 with date_col3:
-                    add_point_date = st.text_input(
+                    add_point_date = st.date_input(
                         "點數期限",
+                        value=None,
+                        format="YYYY/MM/DD",
                         key="add_announcement_point_date"
                     )
-
                 add_editor_name = st.text_input(
                     "👤 建立人姓名（必填）",
                     placeholder="請輸入建立人的姓名",
