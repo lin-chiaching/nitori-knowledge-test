@@ -7107,14 +7107,8 @@ elif page == "🛠️ 資料維護":
 
                         render_change_history(
                             find_sheet(
-                                [
-                                    "知識庫",
-                                    "問題集",
-                                    "Sheet1"
-                                ],
-                                0
-                            ) or "知識庫",
-                            "knowledge_history"
+                                "總表",
+                                "knowledge_history"
                         )
         # =================================================
         # ➕ 新增知識
