@@ -7993,23 +7993,26 @@ elif page == "🛠️ 資料維護":
                     date_col1, date_col2, date_col3 = st.columns(3)
 
                     with date_col1:
-                        new_date = st.text_input(
+                        new_date = st.date_input(
                             "公告日期",
-                            value=str(edit_date or ""),
+                            value=parse_announcement_date(edit_date),
+                            format="YYYY/MM/DD",
                             key="edit_announcement_date"
                         )
 
                     with date_col2:
-                        new_activity_date = st.text_input(
+                        new_activity_date = st.date_input(
                             "活動日期",
-                            value=str(edit_activity_date or ""),
+                            value=parse_announcement_date(edit_activity_date),
+                            format="YYYY/MM/DD",
                             key="edit_announcement_activity_date"
                         )
 
                     with date_col3:
-                        new_point_date = st.text_input(
+                        new_point_date = st.date_input(
                             "點數期限",
-                            value=str(edit_point_date or ""),
+                            value=parse_announcement_date(edit_point_date),
+                            format="YYYY/MM/DD",
                             key="edit_announcement_point_date"
                         )
 
@@ -8082,9 +8085,9 @@ elif page == "🛠️ 資料維護":
                                     update_data = {
                                         "title": new_title.strip(),
                                         "content": new_content.strip(),
-                                        "announcement_date": new_date.strip(),
-                                        "event_date": new_activity_date.strip(),
-                                        "points_deadline": new_point_date.strip(),
+                                        "announcement_date": new_date.isoformat() if new_date else None,
+                                        "event_date": new_activity_date.isoformat() if new_activity_date else None,
+                                        "points_deadline": new_point_date.isoformat() if new_point_date else None,
                                         "display_status": new_status,
                                         "updated_by": editor_name_announcement.strip(),
                                         "updated_at": datetime.now().isoformat()
