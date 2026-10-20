@@ -947,7 +947,6 @@ def load_data():
 
     sheet = find_sheet(
         ["知識庫", "問題集", "Sheet1"],
-        0
     )
 
     if not sheet:
