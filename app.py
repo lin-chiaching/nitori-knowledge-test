@@ -7596,7 +7596,8 @@ elif page == "🛠️ 資料維護":
 
                         new_date = st.date_input(
                             "公告日期",
-                            value=str(edit_date or ""),
+                            value=parse_announcement_date(edit_date),
+                            format="YYYY/MM/DD",
                             key="edit_announcement_date"
                         )
 
