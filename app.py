@@ -7539,34 +7539,57 @@ elif page == "🛠️ 資料維護":
                         key="edit_announcement_content"
                     )
 
-                    date_col1, date_col2, date_col3 = st.columns(3)
+                    new_date = st.date_input(
+                        "公告日期",
+                        value=parse_announcement_date(edit_date),
+                        format="YYYY/MM/DD",
+                        key="edit_announcement_date"
+                    )
 
-                    with date_col1:
+                    event_col1, event_col2 = st.columns(2)
 
-                        new_date = st.date_input(
-                            "公告日期",
-                            value=None,
+                    with event_col1:
+                        new_event_start_date = st.date_input(
+                            "活動開始日",
+                            value=parse_announcement_date(
+                                edit_row.get("活動開始日")
+                            ),
                             format="YYYY/MM/DD",
-                            key="edit_announcement_date_test"
+                            key="edit_announcement_event_start_date"
                         )
 
-                    with date_col2:
-
-                        new_activity_date = st.date_input(
-                            "活動日期",
-                            value=parse_announcement_date(edit_activity_date),
+                    with event_col2:
+                        new_event_end_date = st.date_input(
+                            "活動結束日",
+                            value=parse_announcement_date(
+                                edit_row.get("活動結束日")
+                            ),
                             format="YYYY/MM/DD",
-                            key="edit_announcement_activity_date"
+                            key="edit_announcement_event_end_date"
                         )
 
-                    with date_col3:
+                    points_col1, points_col2 = st.columns(2)
 
-                        new_point_date = st.date_input(
-                            "點數期限",
-                            value=parse_announcement_date(edit_point_date),
+                    with points_col1:
+                        new_points_start_date = st.date_input(
+                            "點數期限開始日",
+                            value=parse_announcement_date(
+                                edit_row.get("點數期限開始日")
+                            ),
                             format="YYYY/MM/DD",
-                            key="edit_announcement_point_date"
+                            key="edit_announcement_points_start_date"
                         )
+
+                    with points_col2:
+                        new_points_end_date = st.date_input(
+                            "點數期限結束日",
+                            value=parse_announcement_date(
+                                edit_row.get("點數期限結束日")
+                            ),
+                            format="YYYY/MM/DD",
+                            key="edit_announcement_points_end_date"
+                        )
+
                     new_status = st.selectbox(
                         "顯示狀態",
                         ["是", "否"],
@@ -7652,11 +7675,30 @@ elif page == "🛠️ 資料維護":
                             update_data = {
                                 "title": new_title.strip(),
                                 "content": new_content.strip(),
-                                "announcement_date": new_date.isoformat() if new_date else None,
-                                "event_date": new_activity_date.isoformat() if new_activity_date else None,
-                                "points_deadline": new_point_date.isoformat() if new_point_date else None,
+                                "announcement_date": (
+                                    new_date.isoformat()
+                                    if new_date else None
+                                ),
+                                "event_start_date": (
+                                    new_event_start_date.isoformat()
+                                    if new_event_start_date else None
+                                ),
+                                "event_end_date": (
+                                    new_event_end_date.isoformat()
+                                    if new_event_end_date else None
+                                ),
+                                "points_start_date": (
+                                    new_points_start_date.isoformat()
+                                    if new_points_start_date else None
+                                ),
+                                "points_end_date": (
+                                    new_points_end_date.isoformat()
+                                    if new_points_end_date else None
+                                ),
                                 "display_status": new_status,
-                                "updated_by": editor_name_announcement.strip(),
+                                "updated_by": (
+                                    editor_name_announcement.strip()
+                                ),
                                 "updated_at": datetime.now().isoformat()
                             }
 
