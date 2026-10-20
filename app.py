@@ -7376,22 +7376,27 @@ elif page == "🛠️ 資料維護":
 
                     with date_col1:
 
-                        add_date = st.text_input(
+                        add_date = st.date_input(
                             "公告日期",
+                            value=None,
+                            format="YYYY/MM/DD",
                             key="add_announcement_date"
                         )
 
                     with date_col2:
 
-                        add_activity_date = st.text_input(
+                        add_activity_date = st.date_input(
                             "活動日期",
+                            value=None,
+                            format="YYYY/MM/DD",
                             key="add_announcement_activity_date"
                         )
 
                     with date_col3:
 
-                        add_point_date = st.text_input(
+                        add_point_date = st.date_input(
                             "點數期限",
+                            value=None,
                             key="add_announcement_point_date"
                         )
 
