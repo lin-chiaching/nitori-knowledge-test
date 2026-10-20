@@ -7325,13 +7325,9 @@ elif page == "🛠️ 資料維護":
 
                 st.divider()
 
-                with st.container(
-                    border=True
-                ):
+                with st.container(border=True):
 
-                    st.markdown(
-                        "### ➕ 新增公告"
-                    )
+                    st.markdown("### ➕ 新增公告")
 
                     st.caption(
                         "填寫完成後請輸入建立人姓名，再按「新增公告」。"
@@ -7348,34 +7344,9 @@ elif page == "🛠️ 資料維護":
                         key="add_announcement_content"
                     )
 
-                date_col1, date_col2, date_col3 = st.columns(3)
-
-                with date_col1:
-                    add_date = st.date_input(
-                        "公告日期",
-                        value=None,
-                        format="YYYY/MM/DD",
-                        key="add_announcement_date"
-                    )
-
-                with date_col2:
-                    add_activity_date = st.date_input(
-                        "活動日期",
-                        value=None,
-                        format="YYYY/MM/DD",
-                        key="add_announcement_activity_date"
-                    )
-
-                with date_col3:
-                    add_point_date = st.date_input(
-                        "點數期限",
-                        value=None,
-                        format="YYYY/MM/DD",
-                        key="add_announcement_point_date"
-                    )
+                    date_col1, date_col2, date_col3 = st.columns(3)
 
                     with date_col1:
-
                         add_date = st.date_input(
                             "公告日期",
                             value=None,
@@ -7384,7 +7355,6 @@ elif page == "🛠️ 資料維護":
                         )
 
                     with date_col2:
-
                         add_activity_date = st.date_input(
                             "活動日期",
                             value=None,
@@ -7393,10 +7363,10 @@ elif page == "🛠️ 資料維護":
                         )
 
                     with date_col3:
-
                         add_point_date = st.date_input(
                             "點數期限",
                             value=None,
+                            format="YYYY/MM/DD",
                             key="add_announcement_point_date"
                         )
 
@@ -7409,7 +7379,6 @@ elif page == "🛠️ 資料維護":
                     add_col1, add_col2 = st.columns(2)
 
                     with add_col1:
-
                         save_new = st.button(
                             "💾 新增公告",
                             type="primary",
@@ -7419,128 +7388,103 @@ elif page == "🛠️ 資料維護":
                         )
 
                     with add_col2:
-
                         cancel_new = st.button(
                             "取消新增",
                             use_container_width=True,
                             key="cancel_new_announcement"
                         )
 
-                    # --------------------------------------------------------
                     # 取消新增
-                    # --------------------------------------------------------
-
                     if cancel_new:
-
-                        del st.session_state[
-                            "adding_announcement"
-                        ]
-
+                        st.session_state.pop(
+                            "adding_announcement",
+                            None
+                        )
                         st.rerun()
 
-                    # --------------------------------------------------------
                     # 儲存新增公告
-                    # --------------------------------------------------------
-
                     if save_new:
 
-                        new_df = df.copy()
+                        if not add_title.strip():
+                            st.warning("請填寫公告標題。")
 
-                        # 自動產生公告編號
-                        if "公告編號" in new_df.columns:
+                        elif not add_content.strip():
+                            st.warning("請填寫公告內容。")
 
-                            numbers = pd.to_numeric(
-                                new_df["公告編號"],
-                                errors="coerce"
-                            )
+                        else:
+                            new_df = df.copy()
 
-                            if numbers.notna().any():
+                            # 自動產生公告編號
+                            if "公告編號" in new_df.columns:
+                                numbers = pd.to_numeric(
+                                    new_df["公告編號"],
+                                    errors="coerce"
+                                )
 
-                                new_number = int(
-                                    numbers.max()
-                                ) + 1
-
+                                if numbers.notna().any():
+                                    new_number = int(
+                                        numbers.max()
+                                    ) + 1
+                                else:
+                                    new_number = 1
                             else:
-
                                 new_number = 1
 
-                        else:
+                            new_row = {
+                                "公告編號": new_number,
+                                "公告標題": add_title.strip(),
+                                "公告內容": add_content.strip(),
+                                "公告日期": (
+                                    add_date.strftime("%Y/%m/%d")
+                                    if add_date else ""
+                                ),
+                                "活動日期": (
+                                    add_activity_date.strftime("%Y/%m/%d")
+                                    if add_activity_date else ""
+                                ),
+                                "點數期限": (
+                                    add_point_date.strftime("%Y/%m/%d")
+                                    if add_point_date else ""
+                                ),
+                                "顯示狀態": "是"
+                            }
 
-                            new_number = 1
-
-                        new_row = {
-                            "公告編號": new_number,
-                            "公告標題": add_title,
-                            "公告內容": add_content,
-                            "公告日期": add_date,
-                            "活動日期": add_activity_date,
-                            "點數期限": add_point_date,
-                            "顯示狀態": "是"
-                        }
-
-                        new_df = pd.concat(
-                            [
-                                new_df,
-                                pd.DataFrame(
-                                    [new_row]
-                                )
-                            ],
-                            ignore_index=True
-                        )
-
-                        sheet = find_sheet(
-                            [
-                                "內部公告",
-                                "公告"
-                            ]
-                        )
-
-                        if sheet:
-
-                            success = save_sheet(
-                                sheet,
-                                new_df,
-                                add_editor_name
+                            new_df = pd.concat(
+                                [
+                                    new_df,
+                                    pd.DataFrame([new_row])
+                                ],
+                                ignore_index=True
                             )
 
-                            if success:
+                            sheet = find_sheet(
+                                ["內部公告", "公告"]
+                            )
 
-                                st.success(
-                                    "公告已新增！"
+                            if sheet:
+                                success = save_sheet(
+                                    sheet,
+                                    new_df,
+                                    add_editor_name.strip()
                                 )
 
-                                del st.session_state[
-                                    "adding_announcement"
-                                ]
+                                if success:
+                                    st.success("公告已新增！")
 
-                                st.rerun()
-
+                                    st.session_state.pop(
+                                        "adding_announcement",
+                                        None
+                                    )
+                                    st.rerun()
+                                else:
+                                    st.error(
+                                        "公告新增失敗，請稍後再試。"
+                                    )
                             else:
-
                                 st.error(
-                                    "公告新增失敗，請稍後再試。"
+                                    "找不到公告資料工作表。"
                                 )
 
-                        else:
-
-                            st.error(
-                                "找不到公告資料工作表。"
-                            )
-
-
-            announcement_columns = (
-                get_announcement_columns(
-                    df
-                )
-            )
-
-            for index, row in df.iterrows():
-
-                render_announcement_admin(
-                    row,
-                    announcement_columns,
-                    index
-                )
 
 
             # ========================================================
