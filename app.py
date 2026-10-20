@@ -7594,25 +7594,27 @@ elif page == "🛠️ 資料維護":
 
                     with date_col1:
 
-                        new_date = st.text_input(
+                        new_date = st.date_input(
                             "公告日期",
-                            value=edit_date or "",
+                            value=str(edit_date or ""),
                             key="edit_announcement_date"
                         )
 
                     with date_col2:
 
-                        new_activity_date = st.text_input(
+                        new_activity_date = st.date_input(
                             "活動日期",
-                            value=edit_activity_date or "",
+                            value=parse_announcement_date(edit_activity_date),
+                            format="YYYY/MM/DD",
                             key="edit_announcement_activity_date"
                         )
 
                     with date_col3:
 
-                        new_point_date = st.text_input(
+                        new_point_date = st.date_input(
                             "點數期限",
-                            value=edit_point_date or "",
+                            value=parse_announcement_date(edit_point_date),
+                            format="YYYY/MM/DD",
                             key="edit_announcement_point_date"
                         )
                     new_status = st.selectbox(
