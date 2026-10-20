@@ -19,6 +19,24 @@ supabase = create_client(
     st.secrets["SUPABASE_URL"],
     st.secrets["SUPABASE_KEY"]
 )
+@st.cache_data(ttl=60)
+def load_staff_members():
+    """讀取 Supabase 中啟用的同事名單。"""
+
+    response = (
+        supabase
+        .table("staff_members")
+        .select("staff_name")
+        .eq("is_active", True)
+        .order("display_order")
+        .execute()
+    )
+
+    return [
+        row["staff_name"]
+        for row in (response.data or [])
+        if row.get("staff_name")
+    ]
 # ============================================================
 # 基本設定
 # ============================================================
@@ -7024,12 +7042,20 @@ elif page == "🛠️ 資料維護":
                         )
 
                     st.divider()
-                    editor_name_knowledge = st.text_input(
+                    staff_names = load_staff_members()
+
+                    editor_name_options = ["請選擇修改人"] + staff_names
+
+                    editor_name_knowledge = st.selectbox(
                         "👤 本次修改人姓名（必填）",
-                        placeholder="例如：皮皮、66",
+                        options=editor_name_options,
+                        index=0,
                         key="editor_name_knowledge",
-                        help="儲存時會更新「更新人」及「更新日期」。"
+                        help="請選擇本次修改人，儲存時會更新「更新人」及「更新日期」。"
                     )
+
+                    if editor_name_knowledge == "請選擇修改人":
+                        editor_name_knowledge = ""
 
                     if st.button(
                         "💾 儲存這筆知識",
@@ -7188,11 +7214,19 @@ elif page == "🛠️ 資料維護":
 
             st.divider()
 
-            new_creator = st.text_input(
+            staff_names = load_staff_members()
+
+            creator_options = ["請選擇建立人"] + staff_names
+
+            new_creator = st.selectbox(
                 "👤 建立人（必填）",
-                placeholder="例如：皮皮、66",
+                options=creator_options,
+                index=0,
                 key="new_knowledge_creator"
             )
+
+            if new_creator == "請選擇建立人":
+                new_creator = ""
 
             if st.button(
                 "➕ 新增這筆知識",
