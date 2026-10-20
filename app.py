@@ -946,7 +946,7 @@ def find_sheet(candidates, fallback_index=None):
 def load_data():
 
     sheet = find_sheet(
-        ["知識庫", "問題集", "Sheet1"],
+         ["總表", "知識庫", "問題集", "Sheet1"]
     )
 
     if not sheet:
