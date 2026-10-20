@@ -2138,25 +2138,18 @@ def save_knowledge_data(
 ):
 
     sheet = find_sheet(
-        [
-            "知識庫",
-            "問題集",
-            "Sheet1"
-        ],
-        0
+        ["總表", "知識庫", "問題集", "Sheet1"]
     )
 
     if sheet:
-
         return save_sheet(
             sheet,
             data,
             editor_name
         )
 
+    st.error("找不到知識庫工作表，無法儲存。")
     return False
-
-
 # ============================================================
 # 新增待審核問題
 # ============================================================
