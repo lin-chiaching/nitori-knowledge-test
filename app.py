@@ -7742,31 +7742,49 @@ elif page == "🛠️ 資料維護":
                     key="add_announcement_content"
                 )
 
-                date_col1, date_col2, date_col3 = st.columns(3)
+                add_date = st.date_input(
+                    "公告日期",
+                    value=None,
+                    format="YYYY/MM/DD",
+                    key="add_announcement_date"
+                )
 
-                with date_col1:
-                    add_date = st.date_input(
-                        "公告日期",
+                event_col1, event_col2 = st.columns(2)
+
+                with event_col1:
+                    add_event_start_date = st.date_input(
+                        "活動開始日",
                         value=None,
                         format="YYYY/MM/DD",
-                        key="add_announcement_date"
+                        key="add_announcement_event_start_date"
                     )
 
-                with date_col2:
-                    add_activity_date = st.date_input(
-                        "活動日期",
+                with event_col2:
+                    add_event_end_date = st.date_input(
+                        "活動結束日",
                         value=None,
                         format="YYYY/MM/DD",
-                        key="add_announcement_activity_date"
+                        key="add_announcement_event_end_date"
                     )
 
-                with date_col3:
-                    add_point_date = st.date_input(
-                        "點數期限",
+                points_col1, points_col2 = st.columns(2)
+
+                with points_col1:
+                    add_points_start_date = st.date_input(
+                        "點數期限開始日",
                         value=None,
                         format="YYYY/MM/DD",
-                        key="add_announcement_point_date"
+                        key="add_announcement_points_start_date"
                     )
+
+                with points_col2:
+                    add_points_end_date = st.date_input(
+                        "點數期限結束日",
+                        value=None,
+                        format="YYYY/MM/DD",
+                        key="add_announcement_points_end_date"
+                    )
+
                 add_editor_name = st.text_input(
                     "👤 建立人姓名（必填）",
                     placeholder="請輸入建立人的姓名",
@@ -7825,8 +7843,10 @@ elif page == "🛠️ 資料維護":
                                 "title": add_title.strip(),
                                 "content": add_content.strip(),
                                 "announcement_date": add_date.isoformat() if add_date else None,
-                                "event_date": add_activity_date.isoformat() if add_activity_date else None,
-                                "points_deadline": add_point_date.isoformat() if add_point_date else None,
+                                "event_start_date": add_event_start_date.isoformat() if add_event_start_date else None,
+                                "event_end_date": add_event_end_date.isoformat() if add_event_end_date else None,
+                                "points_start_date": add_points_start_date.isoformat() if add_points_start_date else None,
+                                "points_end_date": add_points_end_date.isoformat() if add_points_end_date else None,
                                 "display_status": "是",
                                 "created_by": add_editor_name.strip(),
                                 "updated_by": add_editor_name.strip(),
