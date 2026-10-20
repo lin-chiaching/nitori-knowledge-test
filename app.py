@@ -1069,7 +1069,20 @@ def load_announcements():
                 "顯示狀態"
             ]
         )
+def parse_announcement_date(value):
+    """將公告日期轉成 date；空白或無效日期回傳 None。"""
+    if value is None or pd.isna(value):
+        return None
 
+    value = str(value).strip()
+    if not value:
+        return None
+
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return None
+
+    return parsed.date()
 # =========================================================
 # 新人訓練中心
 # =========================================================
@@ -7335,7 +7348,31 @@ elif page == "🛠️ 資料維護":
                         key="add_announcement_content"
                     )
 
-                    date_col1, date_col2, date_col3 = st.columns(3)
+                date_col1, date_col2, date_col3 = st.columns(3)
+
+                with date_col1:
+                    add_date = st.date_input(
+                        "公告日期",
+                        value=None,
+                        format="YYYY/MM/DD",
+                        key="add_announcement_date"
+                    )
+
+                with date_col2:
+                    add_activity_date = st.date_input(
+                        "活動日期",
+                        value=None,
+                        format="YYYY/MM/DD",
+                        key="add_announcement_activity_date"
+                    )
+
+                with date_col3:
+                    add_point_date = st.date_input(
+                        "點數期限",
+                        value=None,
+                        format="YYYY/MM/DD",
+                        key="add_announcement_point_date"
+                    )
 
                     with date_col1:
 
@@ -7830,9 +7867,9 @@ elif page == "🛠️ 資料維護":
                                 "announcement_id": new_number,
                                 "title": add_title.strip(),
                                 "content": add_content.strip(),
-                                "announcement_date": add_date.strip(),
-                                "event_date": add_activity_date.strip(),
-                                "points_deadline": add_point_date.strip(),
+                                "announcement_date": add_date.isoformat() if add_date else None,
+                                "event_date": add_activity_date.isoformat() if add_activity_date else None,
+                                "points_deadline": add_point_date.isoformat() if add_point_date else None,
                                 "display_status": "是",
                                 "created_by": add_editor_name.strip(),
                                 "updated_by": add_editor_name.strip(),
