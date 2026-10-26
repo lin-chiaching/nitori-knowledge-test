@@ -8195,11 +8195,30 @@ elif page == "🛠️ 資料維護":
                                     update_data = {
                                         "title": new_title.strip(),
                                         "content": new_content.strip(),
-                                        "announcement_date": new_date.isoformat() if new_date else None,
-                                        "event_date": new_activity_date.isoformat() if new_activity_date else None,
-                                        "points_deadline": new_point_date.isoformat() if new_point_date else None,
+                                        "announcement_date": (
+                                            new_date.isoformat()
+                                            if new_date else None
+                                        ),
+                                        "event_start_date": (
+                                            new_event_start_date.isoformat()
+                                            if new_event_start_date else None
+                                        ),
+                                        "event_end_date": (
+                                            new_event_end_date.isoformat()
+                                            if new_event_end_date else None
+                                        ),
+                                        "points_start_date": (
+                                            new_points_start_date.isoformat()
+                                            if new_points_start_date else None
+                                        ),
+                                        "points_end_date": (
+                                            new_points_end_date.isoformat()
+                                            if new_points_end_date else None
+                                        ),
                                         "display_status": new_status,
-                                        "updated_by": editor_name_announcement.strip(),
+                                        "updated_by": (
+                                            editor_name_announcement.strip()
+                                        ),
                                         "updated_at": datetime.now().isoformat()
                                     }
 
