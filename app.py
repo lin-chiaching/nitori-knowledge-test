@@ -6706,7 +6706,6 @@ elif page == "🛠️ 資料維護":
         )
 
         df = load_data()
-        st.write("知識庫欄位檢查：", df.columns.tolist())
         if df.empty:
 
             st.warning(
