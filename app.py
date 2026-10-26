@@ -1059,16 +1059,20 @@ def load_announcements():
         )
 
         return pd.DataFrame(
-            columns=[
-                "公告編號",
-                "公告標題",
-                "公告內容",
-                "公告日期",
-                "活動日期",
-                "點數期限",
-                "顯示狀態"
-            ]
-        )
+        column_mapping = {
+            "announcement_id": "公告編號",
+            "title": "公告標題",
+            "content": "公告內容",
+            "announcement_date": "公告日期",
+            "event_date": "活動日期",
+            "event_start_date": "活動開始日",
+            "event_end_date": "活動結束日",
+            "points_deadline": "點數期限",
+            "points_start_date": "點數期限開始日",
+            "points_end_date": "點數期限結束日",
+            "display_status": "顯示狀態"
+        }
+
 def parse_announcement_date(value):
     """將公告日期轉成 date；空白或無效日期回傳 None。"""
     if value is None or pd.isna(value):
