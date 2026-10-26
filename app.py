@@ -1384,9 +1384,7 @@ def load_training_content():
             .astype(str)
             .str.strip()
         )
-        
-        st.dataframe(df, use_container_width=True)
-        
+            
         return df
 
     except Exception as e:
