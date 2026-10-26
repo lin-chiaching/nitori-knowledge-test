@@ -620,100 +620,105 @@ def get_announcement_values(row, columns):
 
 
 def render_announcement(row, columns):
-
-(
-    title,
-    content,
-    date,
-    activity_date,
-    point_date
-) = get_announcement_values(
-    row,
-    columns
-)
-
-status = clean_text(
-    row.get(
-        "顯示狀態",
-        ""
+    (
+        title,
+        content,
+        date,
+        activity_date,
+        point_date
+    ) = get_announcement_values(
+        row,
+        columns
     )
-)
 
-with st.container(border=True):
+    status = clean_text(
+        row.get(
+            "顯示狀態",
+            ""
+        )
+    )
 
-    if title:
-        st.subheader(
-            "📌 " + title
+    with st.container(border=True):
+        if title:
+            st.subheader("📌 " + title)
+
+        # 公告日期
+        if date:
+            parsed_date = parse_announcement_date(date)
+            if parsed_date:
+                st.caption(
+                    "📅 公告日期：" +
+                    parsed_date.strftime("%Y/%m/%d")
+                )
+            else:
+                st.caption("📅 公告日期：" + str(date))
+
+        # 活動日期區間
+        event_start = parse_announcement_date(
+            row.get("活動開始日")
+        )
+        event_end = parse_announcement_date(
+            row.get("活動結束日")
         )
 
-    # 公告日期
-    if date:
-        parsed_date = parse_announcement_date(date)
-        if parsed_date:
-            st.caption(
-                "📅 公告日期：" + parsed_date.strftime("%Y/%m/%d")
+        if event_start or event_end:
+            start_text = (
+                event_start.strftime("%Y/%m/%d")
+                if event_start else ""
             )
-        else:
-            st.caption("📅 公告日期：" + str(date))
+            end_text = (
+                event_end.strftime("%Y/%m/%d")
+                if event_end else ""
+            )
 
-    # 活動日期區間
-    event_start = parse_announcement_date(
-        row.get("活動開始日")
-    )
-    event_end = parse_announcement_date(
-        row.get("活動結束日")
-    )
+            event_text = (
+                f"{start_text} ～ {end_text}"
+                if start_text and end_text
+                else start_text or end_text
+            )
 
-    if event_start or event_end:
-        start_text = (
-            event_start.strftime("%Y/%m/%d")
-            if event_start else ""
+            st.caption("🎉 活動日期：" + event_text)
+
+        elif activity_date:
+            st.caption(
+                "🎉 活動日期：" +
+                str(activity_date).replace("~~", " ～ ")
+            )
+
+        # 點數期限區間
+        points_start = parse_announcement_date(
+            row.get("點數期限開始日")
         )
-        end_text = (
-            event_end.strftime("%Y/%m/%d")
-            if event_end else ""
-        )
-
-        if start_text and end_text:
-            event_text = f"{start_text} ～ {end_text}"
-        else:
-            event_text = start_text or end_text
-
-        st.caption("🎉 活動日期：" + event_text)
-
-    elif activity_date:
-        st.caption("🎉 活動日期：" + str(activity_date).replace("~~", " ～ "))
-
-    # 點數期限區間
-    points_start = parse_announcement_date(
-        row.get("點數期限開始日")
-    )
-    points_end = parse_announcement_date(
-        row.get("點數期限結束日")
-    )
-
-    if points_start or points_end:
-        start_text = (
-            points_start.strftime("%Y/%m/%d")
-            if points_start else ""
-        )
-        end_text = (
-            points_end.strftime("%Y/%m/%d")
-            if points_end else ""
+        points_end = parse_announcement_date(
+            row.get("點數期限結束日")
         )
 
-        if start_text and end_text:
-            points_text = f"{start_text} ～ {end_text}"
-        else:
-            points_text = start_text or end_text
+        if points_start or points_end:
+            start_text = (
+                points_start.strftime("%Y/%m/%d")
+                if points_start else ""
+            )
+            end_text = (
+                points_end.strftime("%Y/%m/%d")
+                if points_end else ""
+            )
 
-        st.caption("🎁 點數期限：" + points_text)
+            points_text = (
+                f"{start_text} ～ {end_text}"
+                if start_text and end_text
+                else start_text or end_text
+            )
 
-    elif point_date:
-        st.caption("🎁 點數期限：" + str(point_date).replace("~~", " ～ "))
+            st.caption("🎁 點數期限：" + points_text)
 
-    if content:
-        st.write(content)
+        elif point_date:
+            st.caption(
+                "🎁 點數期限：" +
+                str(point_date).replace("~~", " ～ ")
+            )
+
+        if content:
+            st.write(content)
 
 def render_announcement_admin(
     row,
