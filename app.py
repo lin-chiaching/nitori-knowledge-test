@@ -8218,9 +8218,26 @@ elif page == "🛠️ 資料維護":
                                         new_history_data = {
                                             "title": new_title.strip(),
                                             "content": new_content.strip(),
-                                            "announcement_date": new_date.strip(),
-                                            "event_date": new_activity_date.strip(),
-                                            "points_deadline": new_point_date.strip(),
+                                            "announcement_date": (
+                                                new_date.isoformat()
+                                                if new_date else ""
+                                            ),
+                                            "event_start_date": (
+                                                new_event_start_date.isoformat()
+                                                if new_event_start_date else ""
+                                            ),
+                                            "event_end_date": (
+                                                new_event_end_date.isoformat()
+                                                if new_event_end_date else ""
+                                            ),
+                                            "points_start_date": (
+                                                new_points_start_date.isoformat()
+                                                if new_points_start_date else ""
+                                            ),
+                                            "points_end_date": (
+                                                new_points_end_date.isoformat()
+                                                if new_points_end_date else ""
+                                            ),
                                             "display_status": new_status
                                         }
 
