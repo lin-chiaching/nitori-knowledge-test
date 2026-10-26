@@ -996,9 +996,7 @@ def load_synonyms():
 
 @st.cache_data(ttl=60)
 def load_announcements():
-
     try:
-
         # 從 Supabase 讀取公告資料
         response = (
             supabase
@@ -1007,9 +1005,7 @@ def load_announcements():
             .execute()
         )
 
-        df = pd.DataFrame(
-            response.data or []
-        )
+        df = pd.DataFrame(response.data or [])
 
         # 將 Supabase 英文欄位名稱轉回原本的中文欄位
         column_mapping = {
@@ -1018,23 +1014,23 @@ def load_announcements():
             "content": "公告內容",
             "announcement_date": "公告日期",
             "event_date": "活動日期",
+            "event_start_date": "活動開始日",
+            "event_end_date": "活動結束日",
             "points_deadline": "點數期限",
+            "points_start_date": "點數期限開始日",
+            "points_end_date": "點數期限結束日",
             "display_status": "顯示狀態"
         }
 
         if df.empty:
-
             return pd.DataFrame(
                 columns=list(column_mapping.values())
             )
 
-        df = df.rename(
-            columns=column_mapping
-        )
+        df = df.rename(columns=column_mapping)
 
         # 確保必要欄位存在
         for column in column_mapping.values():
-
             if column not in df.columns:
                 df[column] = ""
 
@@ -1053,25 +1049,41 @@ def load_announcements():
         return df
 
     except Exception as e:
-
         st.warning(
             f"無法讀取 Supabase 公告資料：{e}"
         )
 
         return pd.DataFrame(
-        column_mapping = {
-            "announcement_id": "公告編號",
-            "title": "公告標題",
-            "content": "公告內容",
-            "announcement_date": "公告日期",
-            "event_date": "活動日期",
-            "event_start_date": "活動開始日",
-            "event_end_date": "活動結束日",
-            "points_deadline": "點數期限",
-            "points_start_date": "點數期限開始日",
-            "points_end_date": "點數期限結束日",
-            "display_status": "顯示狀態"
-        }
+            columns=[
+                "公告編號",
+                "公告標題",
+                "公告內容",
+                "公告日期",
+                "活動日期",
+                "活動開始日",
+                "活動結束日",
+                "點數期限",
+                "點數期限開始日",
+                "點數期限結束日",
+                "顯示狀態"
+            ]
+        )
+
+
+def parse_announcement_date(value):
+    """將公告日期轉成 date；空白或無效日期回傳 None。"""
+    if value is None or pd.isna(value):
+        return None
+
+    value = str(value).strip()
+    if not value:
+        return None
+
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return None
+
+    return parsed.date()
 
 def parse_announcement_date(value):
     """將公告日期轉成 date；空白或無效日期回傳 None。"""
