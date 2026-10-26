@@ -761,33 +761,78 @@ def render_announcement_admin(
         # 日期資訊
         info = []
 
+        # 公告日期：單一日期
         if date:
-            try:
-                date = pd.to_datetime(date).strftime("%Y/%m/%d")
-            except Exception:
-                date = str(date)
+            parsed_date = parse_announcement_date(date)
 
-            info.append(f"📅 公告日期：{date}")
+            if parsed_date:
+                date_text = parsed_date.strftime("%Y/%m/%d")
+            else:
+                date_text = str(date).replace("~~", " ～ ")
 
-        if activity_date:
-            try:
-                activity_date = pd.to_datetime(
-                    activity_date
-                ).strftime("%Y/%m/%d")
-            except Exception:
-                activity_date = str(activity_date)
+            info.append(f"📅 公告日期：{date_text}")
 
-            info.append(f"🎉 活動日期：{activity_date}")
+        # 活動日期：優先使用開始日、結束日
+        event_start = parse_announcement_date(
+            row.get("活動開始日")
+        )
+        event_end = parse_announcement_date(
+            row.get("活動結束日")
+        )
 
-        if point_date:
-            try:
-                point_date = pd.to_datetime(
-                    point_date
-                ).strftime("%Y/%m/%d")
-            except Exception:
-                point_date = str(point_date)
+        if event_start or event_end:
+            start_text = (
+                event_start.strftime("%Y/%m/%d")
+                if event_start else ""
+            )
+            end_text = (
+                event_end.strftime("%Y/%m/%d")
+                if event_end else ""
+            )
 
-            info.append(f"🎁 點數期限：{point_date}")
+            if start_text and end_text:
+                event_text = f"{start_text} ～ {end_text}"
+            else:
+                event_text = start_text or end_text
+
+            info.append(f"🎉 活動日期：{event_text}")
+
+        elif activity_date:
+            info.append(
+                "🎉 活動日期：" +
+                str(activity_date).replace("~~", " ～ ")
+            )
+
+        # 點數期限：優先使用開始日、結束日
+        points_start = parse_announcement_date(
+            row.get("點數期限開始日")
+        )
+        points_end = parse_announcement_date(
+            row.get("點數期限結束日")
+        )
+
+        if points_start or points_end:
+            start_text = (
+                points_start.strftime("%Y/%m/%d")
+                if points_start else ""
+            )
+            end_text = (
+                points_end.strftime("%Y/%m/%d")
+                if points_end else ""
+            )
+
+            if start_text and end_text:
+                points_text = f"{start_text} ～ {end_text}"
+            else:
+                points_text = start_text or end_text
+
+            info.append(f"🎁 點數期限：{points_text}")
+
+        elif point_date:
+            info.append(
+                "🎁 點數期限：" +
+                str(point_date).replace("~~", " ～ ")
+            )
 
         if info:
             st.caption("　｜　".join(info))
