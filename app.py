@@ -8024,6 +8024,17 @@ elif page == "🛠️ 資料維護":
 
             else:
                 edit_row = df.loc[edit_index]
+                # 兼容舊公告：若尚未有區間日期，沿用原本單日日期
+                event_start_value = edit_row.get("活動開始日")
+                event_end_value = edit_row.get("活動結束日")
+                points_start_value = edit_row.get("點數期限開始日")
+                points_end_value = edit_row.get("點數期限結束日")
+
+                if not event_start_value:
+                    event_start_value = edit_row.get("活動日期")
+
+                if not points_end_value:
+                    points_end_value = edit_row.get("點數期限")
 
                 (
                     edit_title,
