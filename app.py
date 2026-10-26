@@ -621,67 +621,99 @@ def get_announcement_values(row, columns):
 
 def render_announcement(row, columns):
 
-    (
-        title,
-        content,
-        date,
-        activity_date,
-        point_date
-    ) = get_announcement_values(
-        row,
-        columns
+(
+    title,
+    content,
+    date,
+    activity_date,
+    point_date
+) = get_announcement_values(
+    row,
+    columns
+)
+
+status = clean_text(
+    row.get(
+        "顯示狀態",
+        ""
     )
-    status = clean_text(
-        row.get(
-            "顯示狀態",
-            ""
+)
+
+with st.container(border=True):
+
+    if title:
+        st.subheader(
+            "📌 " + title
         )
+
+    # 公告日期
+    if date:
+        parsed_date = parse_announcement_date(date)
+        if parsed_date:
+            st.caption(
+                "📅 公告日期：" + parsed_date.strftime("%Y/%m/%d")
+            )
+        else:
+            st.caption("📅 公告日期：" + str(date))
+
+    # 活動日期區間
+    event_start = parse_announcement_date(
+        row.get("活動開始日")
+    )
+    event_end = parse_announcement_date(
+        row.get("活動結束日")
     )
 
-    with st.container(border=True):
+    if event_start or event_end:
+        start_text = (
+            event_start.strftime("%Y/%m/%d")
+            if event_start else ""
+        )
+        end_text = (
+            event_end.strftime("%Y/%m/%d")
+            if event_end else ""
+        )
 
-        if title:
-            st.subheader(
-                "📌 " + title
-            )
+        if start_text and end_text:
+            event_text = f"{start_text} ～ {end_text}"
+        else:
+            event_text = start_text or end_text
 
-        if date:
-            try:
-                date = pd.to_datetime(
-                    date
-                ).strftime("%Y/%m/%d")
-            except:
-                date = str(date)
+        st.caption("🎉 活動日期：" + event_text)
 
-            st.caption(
-                "📅 公告日期：" + date
-            )
+    elif activity_date:
+        st.caption("🎉 活動日期：" + str(activity_date).replace("~~", " ～ "))
 
-        if activity_date:
-            try:
-                activity_date = pd.to_datetime(
-                    activity_date
-                ).strftime("%Y/%m/%d")
-            except:
-                activity_date = str(activity_date)
+    # 點數期限區間
+    points_start = parse_announcement_date(
+        row.get("點數期限開始日")
+    )
+    points_end = parse_announcement_date(
+        row.get("點數期限結束日")
+    )
 
-            st.caption(
-                "🎉 活動日期：" + activity_date
-            )
+    if points_start or points_end:
+        start_text = (
+            points_start.strftime("%Y/%m/%d")
+            if points_start else ""
+        )
+        end_text = (
+            points_end.strftime("%Y/%m/%d")
+            if points_end else ""
+        )
 
-        if point_date:
-            try:
-                point_date = pd.to_datetime(
-                    point_date
-                ).strftime("%Y/%m/%d")
-            except:
-                point_date = str(point_date)
+        if start_text and end_text:
+            points_text = f"{start_text} ～ {end_text}"
+        else:
+            points_text = start_text or end_text
 
-            st.caption(
-                "🎁 點數期限：" + point_date
-            )
-        if content:
-            st.write(content)
+        st.caption("🎁 點數期限：" + points_text)
+
+    elif point_date:
+        st.caption("🎁 點數期限：" + str(point_date).replace("~~", " ～ "))
+
+    if content:
+        st.write(content)
 
 def render_announcement_admin(
     row,
