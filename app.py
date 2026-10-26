@@ -8080,20 +8080,50 @@ elif page == "🛠️ 資料維護":
                             key="edit_announcement_date"
                         )
 
-                    with date_col2:
-                        new_activity_date = st.date_input(
-                            "活動日期",
-                            value=parse_announcement_date(edit_activity_date),
+                    event_col1, event_col2 = st.columns(2)
+
+                    with event_col1:
+                        new_event_start_date = st.date_input(
+                            "活動開始日",
+                            value=parse_announcement_date(
+                                edit_row.get("活動開始日")
+                                or edit_activity_date
+                            ),
                             format="YYYY/MM/DD",
-                            key="edit_announcement_activity_date"
+                            key="edit_announcement_event_start_date"
                         )
 
-                    with date_col3:
-                        new_point_date = st.date_input(
-                            "點數期限",
-                            value=parse_announcement_date(edit_point_date),
+                    with event_col2:
+                        new_event_end_date = st.date_input(
+                            "活動結束日",
+                            value=parse_announcement_date(
+                                edit_row.get("活動結束日")
+                            ),
                             format="YYYY/MM/DD",
-                            key="edit_announcement_point_date"
+                            key="edit_announcement_event_end_date"
+                        )
+
+                    points_col1, points_col2 = st.columns(2)
+
+                    with points_col1:
+                        new_points_start_date = st.date_input(
+                            "點數期限開始日",
+                            value=parse_announcement_date(
+                                edit_row.get("點數期限開始日")
+                            ),
+                            format="YYYY/MM/DD",
+                            key="edit_announcement_points_start_date"
+                        )
+
+                    with points_col2:
+                        new_points_end_date = st.date_input(
+                            "點數期限結束日",
+                            value=parse_announcement_date(
+                                edit_row.get("點數期限結束日")
+                                or edit_point_date
+                            ),
+                            format="YYYY/MM/DD",
+                            key="edit_announcement_points_end_date"
                         )
 
                     new_status = st.selectbox(
