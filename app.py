@@ -5406,395 +5406,443 @@ elif page == "🎓 新人訓練中心":
     # ========================================================
 
     if st.session_state["training_page"] == "home":
+
         left_col, right_col = st.columns(
-        [2.1, 1],
-        gap="large"
-    )
-
-    with left_col:
-        # ----------------------------------------------------
-        # 主視覺橫幅
-        # ----------------------------------------------------
-
-        st.markdown("""
-        <div style="
-            background:linear-gradient(110deg,#F5F1E9 0%,#F9EBDD 100%);
-            padding:28px 30px;
-            border-radius:18px;
-            border:1px solid #E9DFD1;
-            margin-bottom:20px;
-            position:relative;
-        ">
-            <div style="
-                color:#9A846C;
-                font-size:11px;
-                letter-spacing:3px;
-                margin-bottom:10px;
-            ">NITORI · TRAINING CENTER</div>
-            <div style="
-                color:#514437;
-                font-size:30px;
-                font-weight:700;
-                margin-bottom:10px;
-            ">新人訓練中心</div>
-            <div style="
-                color:#817365;
-                font-size:14px;
-                line-height:1.8;
-            ">從基礎到實戰，陪你一步步成為更專業的客服夥伴！</div>
-            <div style="
-                margin-top:16px;
-                display:inline-block;
-                background:#FFFFFFB8;
-                color:#8A7863;
-                border:1px solid #E5D7C4;
-                border-radius:20px;
-                padding:6px 14px;
-                font-size:12px;
-            ">🌱 一起學習，一起成長</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # 接下來接原本的「課程選擇」與六堂課程
-        # 主視覺橫幅放這裡
-
-        # 原本的課程選擇及六堂課程放這裡
-
-    with right_col:
-
-        # 學習進度
-        # 今日學習任務
-        # 最新公告
-        # 行事曆
-        # ----------------------------------------------------
-        # 主視覺橫幅
-        # ----------------------------------------------------
-
-        st.markdown("""
-        <div style="
-            background:linear-gradient(110deg,#F5F1E9 0%,#F9EBDD 100%);
-            padding:28px 30px;
-            border-radius:18px;
-            border:1px solid #E9DFD1;
-            margin-bottom:20px;
-            position:relative;
-        ">
-            <div style="
-                color:#9A846C;
-                font-size:11px;
-                letter-spacing:3px;
-                margin-bottom:10px;
-            ">NITORI · TRAINING CENTER</div>
-            <div style="
-                color:#514437;
-                font-size:30px;
-                font-weight:700;
-                margin-bottom:10px;
-            ">新人訓練中心</div>
-            <div style="
-                color:#817365;
-                font-size:14px;
-                line-height:1.8;
-            ">從基礎到實戰，陪你一步步成為更專業的客服夥伴！</div>
-            <div style="
-                margin-top:16px;
-                display:inline-block;
-                background:#FFFFFFB8;
-                color:#8A7863;
-                border:1px solid #E5D7C4;
-                border-radius:20px;
-                padding:6px 14px;
-                font-size:12px;
-            ">🌱 一起學習，一起成長</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # ----------------------------------------------------
-        # 課程資料
-        # ----------------------------------------------------
-
-        course_groups = [
-            (
-                "DAY 1",
-                "宜得利基礎",
-                [
-                    (
-                        "DAY1_BASIC",
-                        "🏠 宜得利基礎",
-                        "了解宜得利基本資訊、企業理念與新人需要掌握的基礎知識。",
-                        "#E8F2E5",
-                        "#7DA66C"
-                    ),
-                    (
-                        "DAY1_SERVICE",
-                        "💬 接客基礎",
-                        "學習接客基本概念與顧客應對方式。",
-                        "#E5F0FB",
-                        "#76A7D9"
-                    ),
-                ],
-            ),
-            (
-                "DAY 2",
-                "商品與系統",
-                [
-                    (
-                        "DAY2_PRODUCT",
-                        "🛋 商品基礎",
-                        "認識家具、家飾及常見商品資訊。",
-                        "#FBEBDD",
-                        "#D69A64"
-                    ),
-                    (
-                        "DAY2_SYSTEM",
-                        "💻 系統操作",
-                        "認識客服工作中常用的系統及基本操作。",
-                        "#F0E8FA",
-                        "#A38ACB"
-                    ),
-                ],
-            ),
-            (
-                "DAY 3",
-                "實務訓練",
-                [
-                    (
-                        "DAY3_PHONE",
-                        "☎️ 電話應對",
-                        "學習顧客來電時的基本接聽流程與應對方式。",
-                        "#FBE9E7",
-                        "#D88F88"
-                    ),
-                    (
-                        "DAY3_PRACTICE",
-                        "📝 實務練習",
-                        "透過實際案例進行新人訓練與確認。",
-                        "#E5F1EC",
-                        "#78A995"
-                    ),
-                ],
-            ),
-        ]
-
-        course_names = {
-            course[0]: course[1]
-            for _, _, courses in course_groups
-            for course in courses
-        }
-
-        # ----------------------------------------------------
-        # 取得目前登入新人的學習進度
-        # ----------------------------------------------------
-
-        current_employee_id = str(
-            st.session_state.get(
-                "training_employee_id", ""
-            )
-        ).strip()
-
-        training_records = load_training_records()
-
-        if (
-            current_employee_id
-            and not training_records.empty
-            and "員工編號" in training_records.columns
-        ):
-            employee_records = training_records[
-                training_records["員工編號"]
-                .astype(str)
-                .str.strip()
-                .eq(current_employee_id)
-            ].copy()
-        else:
-            employee_records = pd.DataFrame()
-
-        completed_courses = 0
-        in_progress_courses = 0
-
-        for course_id in course_names:
-
-            course_record = (
-                employee_records[
-                    employee_records["課程ID"]
-                    .astype(str)
-                    .str.strip()
-                    .eq(course_id)
-                ]
-                if (
-                    not employee_records.empty
-                    and "課程ID" in employee_records.columns
-                )
-                else pd.DataFrame()
-            )
-
-            if not course_record.empty:
-                latest_status = str(
-                    course_record.iloc[-1].get(
-                        "學習狀態", ""
-                    )
-                ).strip()
-
-                if latest_status == "已完成":
-                    completed_courses += 1
-                elif latest_status == "學習中":
-                    in_progress_courses += 1
-
-        total_courses = len(course_names)
-
-        progress_percent = (
-            int(completed_courses / total_courses * 100)
-            if total_courses else 0
+            [2.1, 1],
+            gap="large"
         )
 
-        # ----------------------------------------------------
-        # 學習摘要卡片
-        # ----------------------------------------------------
+        # ====================================================
+        # 左側：主視覺與六堂課程
+        # ====================================================
 
-        st.markdown("""
-        <div style="
-            color:#514437;
-            font-size:20px;
-            font-weight:700;
-            margin:8px 0 12px 0;
-        ">✨ 我的學習概況</div>
-        """, unsafe_allow_html=True)
+        with left_col:
 
-        summary_cols = st.columns(4, gap="medium")
+            # ------------------------------------------------
+            # 主視覺橫幅
+            # ------------------------------------------------
 
-        summary_cards = [
-            ("🌱", "新人入門", "循序認識工作內容", "#E8F2E5", "#719764"),
-            ("📘", "訓練進度", f"已完成 {completed_courses} / {total_courses} 堂", "#E5F0FB", "#6598CD"),
-            ("📝", "學習中", f"目前 {in_progress_courses} 堂", "#FBEBDD", "#C78A50"),
-            ("🎯", "完成比例", f"{progress_percent}%", "#F0E8FA", "#9A7EC4"),
-        ]
+            st.markdown("""
+            <div style="
+                background:linear-gradient(110deg,#F5F1E9 0%,#F9EBDD 100%);
+                padding:28px 30px;
+                border-radius:18px;
+                border:1px solid #E9DFD1;
+                margin-bottom:20px;
+            ">
+                <div style="
+                    color:#9A846C;
+                    font-size:11px;
+                    letter-spacing:3px;
+                    margin-bottom:10px;
+                ">NITORI · TRAINING CENTER</div>
 
-        for col, card in zip(summary_cols, summary_cards):
-            icon, title, description, bg_color, accent_color = card
+                <div style="
+                    color:#514437;
+                    font-size:30px;
+                    font-weight:700;
+                    margin-bottom:10px;
+                ">新人訓練中心</div>
 
-            with col:
+                <div style="
+                    color:#817365;
+                    font-size:14px;
+                    line-height:1.8;
+                ">從基礎到實戰，陪你一步步成為更專業的客服夥伴！</div>
+
+                <div style="
+                    margin-top:16px;
+                    display:inline-block;
+                    background:#FFFFFFB8;
+                    color:#8A7863;
+                    border:1px solid #E5D7C4;
+                    border-radius:20px;
+                    padding:6px 14px;
+                    font-size:12px;
+                ">🌱 一起學習，一起成長</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # ------------------------------------------------
+            # 課程選擇標題
+            # ------------------------------------------------
+
+            st.markdown("""
+            <div style="
+                color:#403B34;
+                font-size:21px;
+                font-weight:600;
+                margin:20px 0 6px 0;
+            ">📚 課程選擇</div>
+
+            <div style="
+                color:#81786D;
+                font-size:13px;
+                margin-bottom:18px;
+            ">依照 DAY 1 至 DAY 3 的順序，完成影片、課程內容與測驗。</div>
+            """, unsafe_allow_html=True)
+
+            # ------------------------------------------------
+            # 六堂課程設定
+            # ------------------------------------------------
+
+            course_groups = [
+                (
+                    "DAY 1",
+                    "宜得利基礎",
+                    [
+                        (
+                            "DAY1_BASIC",
+                            "🏠 宜得利基礎",
+                            "了解宜得利基本資訊、企業理念與新人需要掌握的基礎知識。"
+                        ),
+                        (
+                            "DAY1_SERVICE",
+                            "💬 接客基礎",
+                            "學習接客基本概念與顧客應對方式。"
+                        ),
+                    ],
+                ),
+                (
+                    "DAY 2",
+                    "商品與系統",
+                    [
+                        (
+                            "DAY2_PRODUCT",
+                            "🛋 商品基礎",
+                            "認識家具、家飾及常見商品資訊。"
+                        ),
+                        (
+                            "DAY2_SYSTEM",
+                            "💻 系統操作",
+                            "認識客服工作中常用的系統及基本操作。"
+                        ),
+                    ],
+                ),
+                (
+                    "DAY 3",
+                    "實務訓練",
+                    [
+                        (
+                            "DAY3_PHONE",
+                            "☎️ 電話應對",
+                            "學習顧客來電時的基本接聽流程與應對方式。"
+                        ),
+                        (
+                            "DAY3_PRACTICE",
+                            "📝 實務練習",
+                            "透過實際案例進行新人訓練與確認。"
+                        ),
+                    ],
+                ),
+            ]
+
+            # ------------------------------------------------
+            # 顯示課程卡片
+            # ------------------------------------------------
+
+            for day_label, day_title, courses in course_groups:
+
                 st.markdown(
                     f"""
                     <div style="
-                        background:#FFFEFC;
-                        border:1px solid #EAE1D6;
-                        border-radius:15px;
-                        padding:17px 15px;
-                        min-height:125px;
-                        box-shadow:0 2px 8px #6D59430A;
-                    ">
-                        <div style="
-                            display:inline-block;
-                            background:{bg_color};
-                            border-radius:12px;
-                            padding:8px;
-                            font-size:20px;
-                            margin-bottom:10px;
-                        ">{icon}</div>
-                        <div style="
-                            color:#514437;
-                            font-size:15px;
-                            font-weight:700;
-                            margin-bottom:6px;
-                        ">{title}</div>
-                        <div style="
-                            color:{accent_color};
-                            font-size:12px;
-                        ">{description}</div>
-                    </div>
+                        color:#8A7863;
+                        font-size:12px;
+                        letter-spacing:2px;
+                        margin:26px 0 12px 0;
+                    ">{day_label}</div>
+
+                    <div style="
+                        color:#403B34;
+                        font-size:18px;
+                        font-weight:600;
+                        margin-bottom:14px;
+                    ">{day_title}</div>
                     """,
                     unsafe_allow_html=True
                 )
 
-        st.progress(
-            progress_percent / 100,
-            text=f"整體課程完成度　{progress_percent}%"
-        )
+                course_col1, course_col2 = st.columns(
+                    2,
+                    gap="medium"
+                )
 
-        # ----------------------------------------------------
-        # 課程分類卡片
-        # ----------------------------------------------------
+                for index, course in enumerate(courses):
 
-        st.markdown("""
-        <div style="
-            color:#514437;
-            font-size:21px;
-            font-weight:700;
-            margin:28px 0 4px 0;
-        ">📚 課程學習</div>
-        <div style="
-            color:#8A7E70;
-            font-size:13px;
-            margin-bottom:14px;
-        ">依照訓練順序，選擇課程開始學習。</div>
-        """, unsafe_allow_html=True)
+                    course_id, course_name, description = course
 
-        for day_label, day_title, courses in course_groups:
+                    current_col = (
+                        course_col1
+                        if index == 0
+                        else course_col2
+                    )
 
-            st.markdown(
-                f"""
-                <div style="
-                    color:#9A846C;
-                    font-size:11px;
-                    letter-spacing:2px;
-                    margin:18px 0 10px 0;
-                ">{day_label}　｜　{day_title}</div>
-                """,
-                unsafe_allow_html=True
-            )
+                    with current_col:
 
-            course_cols = st.columns(2, gap="medium")
+                        with st.container(border=True):
 
-            for index, course in enumerate(courses):
-
-                (
-                    course_id,
-                    course_name,
-                    description,
-                    bg_color,
-                    accent_color
-                ) = course
-
-                with course_cols[index]:
-
-                    with st.container(border=True):
-
-                        st.markdown(
-                            f"""
-                            <div style="
-                                background:{bg_color};
-                                border-radius:12px;
-                                padding:16px;
-                                min-height:150px;
-                                margin-bottom:10px;
-                            ">
+                            st.markdown(
+                                f"""
                                 <div style="
-                                    font-size:25px;
+                                    height:4px;
+                                    background:#C5AD8C;
+                                    border-radius:4px;
+                                    margin-bottom:16px;
+                                "></div>
+
+                                <div style="
+                                    color:#403B34;
+                                    font-size:18px;
+                                    font-weight:600;
                                     margin-bottom:10px;
-                                ">{course_name.split(" ")[0]}</div>
-                                <div style="
-                                    color:#514437;
-                                    font-size:17px;
-                                    font-weight:700;
-                                    margin-bottom:8px;
                                 ">{course_name}</div>
+
                                 <div style="
                                     color:#81786D;
                                     font-size:13px;
                                     line-height:1.8;
+                                    min-height:72px;
+                                    margin-bottom:12px;
                                 ">{description}</div>
+
                                 <div style="
-                                    color:{accent_color};
-                                    font-size:11px;
-                                    margin-top:10px;
-                                ">{day_label} 課程　›</div>
-                            </div>
-                            """,
-                            unsafe_allow_html=True
+                                    display:inline-block;
+                                    background:#F5F1E9;
+                                    color:#8A7863;
+                                    padding:5px 10px;
+                                    border-radius:16px;
+                                    font-size:12px;
+                                ">{day_label} 課程</div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+
+                            if st.button(
+                                "開始課程 →",
+                                key=f"training_card_{course_id}",
+                                use_container_width=True
+                            ):
+
+                                st.session_state[
+                                    "training_page"
+                                ] = "course"
+
+                                st.session_state[
+                                    "training_course_id"
+                                ] = course_id
+
+                                st.session_state[
+                                    "training_step"
+                                ] = "subtopics"
+
+                                st.session_state[
+                                    "training_quiz_passed"
+                                ] = False
+
+                                st.session_state[
+                                    "training_content_id"
+                                ] = ""
+
+                                # 保留原本 DAY1_BASIC 的學習紀錄功能
+                                if course_id == "DAY1_BASIC":
+
+                                    current_employee_id = str(
+                                        st.session_state.get(
+                                            "training_employee_id", ""
+                                        )
+                                    ).strip()
+
+                                    current_employee_name = str(
+                                        st.session_state.get(
+                                            "training_employee_name", ""
+                                        )
+                                    ).strip()
+
+                                    save_training_record(
+                                        employee_id=current_employee_id,
+                                        employee_name=current_employee_name,
+                                        course_id=course_id,
+                                        course_name=course_name,
+                                        day="DAY1",
+                                        start_date=str(
+                                            pd.Timestamp.now().date()
+                                        ),
+                                        learning_status="學習中",
+                                        quiz_status="尚未測驗",
+                                        completed_date=""
+                                    )
+
+                                st.rerun()
+
+        # ====================================================
+        # 右側：學習進度、任務、公告、行事曆
+        # ====================================================
+
+        with right_col:
+
+            # ------------------------------------------------
+            # 1. 學習進度
+            # ------------------------------------------------
+
+            with st.container(border=True):
+
+                st.markdown("### 📊 學習進度")
+
+                course_ids = [
+                    "DAY1_BASIC",
+                    "DAY1_SERVICE",
+                    "DAY2_PRODUCT",
+                    "DAY2_SYSTEM",
+                    "DAY3_PHONE",
+                    "DAY3_PRACTICE",
+                ]
+
+                current_employee_id = str(
+                    st.session_state.get(
+                        "training_employee_id", ""
+                    )
+                ).strip()
+
+                training_records_home = load_training_records()
+
+                employee_records_home = pd.DataFrame()
+
+                if (
+                    not training_records_home.empty
+                    and "員工編號" in training_records_home.columns
+                    and "課程ID" in training_records_home.columns
+                ):
+
+                    employee_records_home = training_records_home[
+                        training_records_home["員工編號"]
+                        .astype(str)
+                        .str.strip()
+                        .eq(current_employee_id)
+                    ].copy()
+
+                completed_count = 0
+                learning_count = 0
+
+                for cid in course_ids:
+
+                    matched = pd.DataFrame()
+
+                    if (
+                        not employee_records_home.empty
+                        and "課程ID" in employee_records_home.columns
+                    ):
+
+                        matched = employee_records_home[
+                            employee_records_home["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            .eq(cid)
+                        ]
+
+                    if not matched.empty:
+
+                        current_status = str(
+                            matched.iloc[-1].get(
+                                "學習狀態", ""
+                            )
+                        ).strip()
+
+                        if current_status == "已完成":
+                            completed_count += 1
+
+                        elif current_status == "學習中":
+                            learning_count += 1
+
+                total_count = len(course_ids)
+
+                progress_value = (
+                    completed_count / total_count
+                    if total_count
+                    else 0
+                )
+
+                st.progress(progress_value)
+
+                st.markdown(
+                    f"**{progress_value:.0%}**"
+                    f"　{completed_count} / {total_count} 堂完成"
+                )
+
+                st.caption(
+                    f"學習中 {learning_count} 堂，"
+                    f"尚有 {total_count - completed_count} 堂未完成。"
+                )
+
+            # ------------------------------------------------
+            # 2. 今日學習任務
+            # ------------------------------------------------
+
+            with st.container(border=True):
+
+                st.markdown("### 📝 今日學習任務")
+
+                course_name_map = {
+                    "DAY1_BASIC": "🏠 宜得利基礎",
+                    "DAY1_SERVICE": "💬 接客基礎",
+                    "DAY2_PRODUCT": "🛋 商品基礎",
+                    "DAY2_SYSTEM": "💻 系統操作",
+                    "DAY3_PHONE": "☎️ 電話應對",
+                    "DAY3_PRACTICE": "📝 實務練習",
+                }
+
+                unfinished_courses = []
+
+                for cid in course_ids:
+
+                    matched = pd.DataFrame()
+
+                    if (
+                        not employee_records_home.empty
+                        and "課程ID" in employee_records_home.columns
+                    ):
+
+                        matched = employee_records_home[
+                            employee_records_home["課程ID"]
+                            .astype(str)
+                            .str.strip()
+                            .eq(cid)
+                        ]
+
+                    current_status = "尚未開始"
+
+                    if not matched.empty:
+
+                        current_status = str(
+                            matched.iloc[-1].get(
+                                "學習狀態", ""
+                            )
+                        ).strip()
+
+                    if current_status != "已完成":
+
+                        unfinished_courses.append(
+                            (
+                                cid,
+                                course_name_map[cid],
+                                current_status
+                            )
+                        )
+
+                if unfinished_courses:
+
+                    for cid, cname, status in unfinished_courses[:3]:
+
+                        st.markdown(f"**{cname}**")
+
+                        st.caption(
+                            "進行中"
+                            if status == "學習中"
+                            else "尚未開始"
                         )
 
                         if st.button(
-                            "開始課程　→",
-                            key=f"training_card_{course_id}",
+                            "前往學習 →",
+                            key=f"home_task_{cid}",
                             use_container_width=True
                         ):
 
@@ -5804,7 +5852,7 @@ elif page == "🎓 新人訓練中心":
 
                             st.session_state[
                                 "training_course_id"
-                            ] = course_id
+                            ] = cid
 
                             st.session_state[
                                 "training_step"
@@ -5818,53 +5866,133 @@ elif page == "🎓 新人訓練中心":
                                 "training_content_id"
                             ] = ""
 
-                            if course_id == "DAY1_BASIC":
-
-                                current_employee_id = str(
-                                    st.session_state.get(
-                                        "training_employee_id", ""
-                                    )
-                                ).strip()
-
-                                current_employee_name = str(
-                                    st.session_state.get(
-                                        "training_employee_name", ""
-                                    )
-                                ).strip()
-
-                                save_training_record(
-                                    employee_id=current_employee_id,
-                                    employee_name=current_employee_name,
-                                    course_id=course_id,
-                                    course_name=course_name,
-                                    day="DAY1",
-                                    start_date=str(
-                                        pd.Timestamp.now().date()
-                                    ),
-                                    learning_status="學習中",
-                                    quiz_status="尚未測驗",
-                                    completed_date=""
-                                )
-
                             st.rerun()
 
-        # ----------------------------------------------------
-        # 頁尾提示
-        # ----------------------------------------------------
+                else:
 
-        st.markdown("""
-        <div style="
-            background:#F5F1E9;
-            border:1px solid #E9DFD1;
-            border-radius:14px;
-            padding:16px 20px;
-            margin-top:22px;
-            color:#817365;
-            font-size:13px;
-            text-align:center;
-        ">🐾 按照自己的步調學習，每完成一堂課，都是向前的一步。</div>
-        """, unsafe_allow_html=True)
+                    st.success("🎉 六堂課程都已完成！")
 
+            # ------------------------------------------------
+            # 3. 最新公告
+            # ------------------------------------------------
+
+            with st.container(border=True):
+
+                st.markdown("### 📢 最新公告")
+
+                try:
+
+                    announcements_home = load_announcements()
+
+                    if announcements_home is None or announcements_home.empty:
+
+                        st.info("目前沒有公告資料。")
+
+                    else:
+
+                        visible_announcements = announcements_home.copy()
+
+                        if "顯示狀態" in visible_announcements.columns:
+
+                            visible_announcements = visible_announcements[
+                                visible_announcements["顯示狀態"]
+                                .astype(str)
+                                .str.strip()
+                                .eq("是")
+                            ]
+
+                        if visible_announcements.empty:
+
+                            st.info("目前沒有顯示中的公告。")
+
+                        else:
+
+                            if "公告日期" in visible_announcements.columns:
+
+                                visible_announcements["_sort_date"] = pd.to_datetime(
+                                    visible_announcements["公告日期"],
+                                    errors="coerce"
+                                )
+
+                                visible_announcements = (
+                                    visible_announcements
+                                    .sort_values(
+                                        "_sort_date",
+                                        ascending=False,
+                                        na_position="last"
+                                    )
+                                )
+
+                            for _, announcement in visible_announcements.head(3).iterrows():
+
+                                announcement_title = str(
+                                    announcement.get(
+                                        "公告標題", "未命名公告"
+                                    )
+                                ).strip()
+
+                                announcement_date = str(
+                                    announcement.get(
+                                        "公告日期", ""
+                                    )
+                                ).strip()
+
+                                announcement_content = str(
+                                    announcement.get(
+                                        "公告內容", ""
+                                    )
+                                ).strip()
+
+                                st.markdown(
+                                    f"**📌 {announcement_title or '未命名公告'}**"
+                                )
+
+                                if announcement_date:
+                                    st.caption(announcement_date)
+
+                                if announcement_content:
+                                    st.write(
+                                        announcement_content[:100]
+                                        + (
+                                            "…"
+                                            if len(announcement_content) > 100
+                                            else ""
+                                        )
+                                    )
+
+                                st.divider()
+
+                except Exception as e:
+
+                    st.warning(
+                        f"公告讀取失敗：{e}"
+                    )
+
+            # ------------------------------------------------
+            # 4. 行事曆
+            # ------------------------------------------------
+
+            with st.container(border=True):
+
+                st.markdown("### 🗓️ 行事曆")
+
+                selected_training_date = st.date_input(
+                    "選擇日期",
+                    value=pd.Timestamp.now().date(),
+                    key="training_home_calendar_date"
+                )
+
+                st.markdown(
+                    f"**{selected_training_date.strftime('%Y/%m/%d')}**"
+                )
+
+                st.caption(
+                    "可先選擇日期查看；目前尚未連接正式訓練行程資料。"
+                )
+
+                st.info(
+                    "🌱 小提醒：每天完成一小步，逐步累積學習成果。"
+                )
 
     # ========================================================
     # 📊 學習紀錄｜日系簡約版
