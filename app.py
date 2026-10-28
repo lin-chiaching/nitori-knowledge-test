@@ -5950,28 +5950,120 @@ elif page == "🎓 新人訓練中心":
             # 4. 行事曆
             # ------------------------------------------------
 
+            import calendar
+            from datetime import date
+
             with st.container(border=True):
 
                 st.markdown("### 🗓️ 行事曆")
 
-                selected_training_date = st.date_input(
-                    "選擇日期",
-                    value=pd.Timestamp.now().date(),
-                    key="training_home_calendar_date"
-                )
+                # 初始化目前顯示的月份
+                if "training_calendar_year" not in st.session_state:
+                    today = date.today()
+                    st.session_state["training_calendar_year"] = today.year
+                    st.session_state["training_calendar_month"] = today.month
 
-                st.markdown(
-                    f"**{selected_training_date.strftime('%Y/%m/%d')}**"
-                )
+                year = st.session_state["training_calendar_year"]
+                month = st.session_state["training_calendar_month"]
 
-                st.caption(
-                    "可先選擇日期查看；目前尚未連接正式訓練行程資料。"
-                )
+                # 月份切換按鈕
+                prev_col, title_col, next_col = st.columns([1, 4, 1])
 
-                st.info(
-                    "🌱 小提醒：每天完成一小步，逐步累積學習成果。"
-                )
+                with prev_col:
+                    if st.button(
+                        "◀",
+                        key="training_calendar_prev",
+                        use_container_width=True
+                    ):
+                        if month == 1:
+                            year -= 1
+                            month = 12
+                        else:
+                            month -= 1
 
+                        st.session_state["training_calendar_year"] = year
+                        st.session_state["training_calendar_month"] = month
+                        st.rerun()
+
+                with title_col:
+                    st.markdown(
+                        f"<div style='text-align:center; "
+                        f"font-weight:600; font-size:17px; "
+                        f"color:#514437; padding-top:5px;'>"
+                        f"{year} 年 {month} 月</div>",
+                        unsafe_allow_html=True
+                    )
+
+                with next_col:
+                    if st.button(
+                        "▶",
+                        key="training_calendar_next",
+                        use_container_width=True
+                    ):
+                        if month == 12:
+                            year += 1
+                            month = 1
+                        else:
+                            month += 1
+
+                        st.session_state["training_calendar_year"] = year
+                        st.session_state["training_calendar_month"] = month
+                        st.rerun()
+
+                # 建立月曆：星期日為每週第一天
+                cal = calendar.Calendar(firstweekday=6)
+                weeks = cal.monthdayscalendar(year, month)
+
+                # 星期標題
+                weekdays = ["日", "一", "二", "三", "四", "五", "六"]
+                weekday_cols = st.columns(7)
+
+                for col, weekday in zip(weekday_cols, weekdays):
+                    with col:
+                        st.markdown(
+                            f"<div style='text-align:center; "
+                            f"color:#9A846C; font-size:13px; "
+                            f"padding:5px 0;'>{weekday}</div>",
+                            unsafe_allow_html=True
+                        )
+
+                # 日期格子
+                today = date.today()
+
+                for week_index, week in enumerate(weeks):
+                    day_cols = st.columns(7)
+
+                    for col, day in zip(day_cols, week):
+                        with col:
+                            if day == 0:
+                                st.markdown(
+                                    "<div style='height:34px;'></div>",
+                                    unsafe_allow_html=True
+                                )
+                            else:
+                                is_today = (
+                                    year == today.year
+                                    and month == today.month
+                                    and day == today.day
+                                )
+
+                                bg_color = "#E9DFD1" if is_today else "#F8F5F0"
+                                text_color = "#514437"
+                                font_weight = "700" if is_today else "400"
+
+                                st.markdown(
+                                    f"<div style='"
+                                    f"text-align:center;"
+                                    f"padding:8px 0;"
+                                    f"margin:2px 0;"
+                                    f"border-radius:8px;"
+                                    f"background:{bg_color};"
+                                    f"color:{text_color};"
+                                    f"font-weight:{font_weight};"
+                                    f"font-size:13px;"
+                                    f"'>{day}</div>",
+                                    unsafe_allow_html=True
+                                )
     # ========================================================
     # 📊 學習紀錄｜日系簡約版
     # ========================================================
