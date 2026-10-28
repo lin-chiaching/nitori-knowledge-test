@@ -5422,47 +5422,25 @@ elif page == "🎓 新人訓練中心":
             # 主視覺橫幅
             # ------------------------------------------------
 
-            st.markdown("""
-            <div style="
-                background:linear-gradient(110deg,#F5F1E9 0%,#F9EBDD 100%);
-                padding:28px 30px;
-                border-radius:18px;
-                border:1px solid #E9DFD1;
-                margin-bottom:20px;
-            ">
-                <div style="
-                    color:#9A846C;
-                    font-size:11px;
-                    letter-spacing:3px;
-                    margin-bottom:10px;
-                ">NITORI · TRAINING CENTER</div>
-
-                <div style="
-                    color:#514437;
-                    font-size:30px;
-                    font-weight:700;
-                    margin-bottom:10px;
-                ">新人訓練中心</div>
-
-                <div style="
-                    color:#817365;
-                    font-size:14px;
-                    line-height:1.8;
-                ">從基礎到實戰，陪你一步步成為更專業的客服夥伴！</div>
-
-                <div style="
-                    margin-top:16px;
-                    display:inline-block;
-                    background:#FFFFFFB8;
-                    color:#8A7863;
-                    border:1px solid #E5D7C4;
-                    border-radius:20px;
-                    padding:6px 14px;
-                    font-size:12px;
-                ">🌱 一起學習，一起成長</div>
-            </div>
-            """, unsafe_allow_html=True)
-
+            st.markdown(
+                """
+                <div style="background:linear-gradient(110deg,#F5F1E9 0%,#F9EBDD 100%);padding:28px 30px;border-radius:18px;border:1px solid #E9DFD1;margin-bottom:20px;">
+                    <div style="color:#9A846C;font-size:11px;letter-spacing:3px;margin-bottom:10px;">
+                        NITORI · TRAINING CENTER
+                    </div>
+                    <div style="color:#514437;font-size:30px;font-weight:700;margin-bottom:10px;">
+                        新人訓練中心
+                    </div>
+                    <div style="color:#817365;font-size:14px;line-height:1.8;">
+                        從基礎到實戰，陪你一步步成為更專業的客服夥伴！
+                    </div>
+                    <div style="margin-top:16px;display:inline-block;background:#FFFFFFB8;color:#8A7863;border:1px solid #E5D7C4;border-radius:20px;padding:6px 14px;font-size:12px;">
+                        🌱 一起學習，一起成長
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
             # ------------------------------------------------
             # 課程選擇標題
             # ------------------------------------------------
