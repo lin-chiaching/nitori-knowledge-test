@@ -1606,7 +1606,8 @@ def save_training_record(
     except Exception as e:
         st.error(f"儲存新人學習紀錄失敗：{e}")
         return False
-
+        
+@st.cache_data(ttl=60)
 def load_training_quiz():
 
     try:
