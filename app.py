@@ -1314,7 +1314,6 @@ def load_training_overview():
         )
 
 
-@st.cache_data(ttl=60)
 def load_training_content():
 
     try:
@@ -1643,6 +1642,12 @@ def load_training_quiz():
         
 training_overview = load_training_overview()
 training_content = load_training_content()
+st.write("課程細項資料載入時間：", datetime.now())
+st.write(
+    training_content[
+        ["內容ID", "課程細項"]
+    ]
+)
 training_videos = load_training_videos()
 training_records = load_training_records()
 employee_data = load_employee_data()
