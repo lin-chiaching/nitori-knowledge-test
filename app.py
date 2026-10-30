@@ -1642,23 +1642,11 @@ def load_training_quiz():
         
 training_overview = load_training_overview()
 training_content = load_training_content()
-st.write("課程細項資料載入時間：", datetime.now())
+st.write("測試：是否有載入 D1-01-01")
 st.write(
     training_content[
-        ["內容ID", "課程細項"]
+        training_content["內容ID"].astype(str).str.strip() == "D1-01-01"
     ]
-)
-# 暫時確認 Supabase 原始資料
-test_response = (
-    supabase
-    .table("course_contents")
-    .select("content_id, content_title")
-    .execute()
-)
-
-st.write("Supabase 原始資料：")
-st.dataframe(
-    pd.DataFrame(test_response.data)
 )
 training_videos = load_training_videos()
 training_records = load_training_records()
