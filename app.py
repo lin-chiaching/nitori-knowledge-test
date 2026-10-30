@@ -1373,7 +1373,7 @@ def load_training_content():
 
         # 保留原本 Level 1 的篩選規則
         df = df[
-            df["Level"].isin(["", "1"])
+            df["Level"].isin(["", "1", "LEVEL1"])
         ].copy()
 
         # 統一課程 ID 格式，避免比對時出現空白
