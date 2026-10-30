@@ -1648,6 +1648,18 @@ st.write(
         ["內容ID", "課程細項"]
     ]
 )
+# 暫時確認 Supabase 原始資料
+test_response = (
+    supabase
+    .table("course_contents")
+    .select("content_id, content_title")
+    .execute()
+)
+
+st.write("Supabase 原始資料：")
+st.dataframe(
+    pd.DataFrame(test_response.data)
+)
 training_videos = load_training_videos()
 training_records = load_training_records()
 employee_data = load_employee_data()
