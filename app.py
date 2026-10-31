@@ -6700,8 +6700,17 @@ elif page == "🎓 新人訓練中心":
                 st.warning("目前無法讀取課程細項。")
 
             else:
-                st.write("測試 selected_content_id：", selected_content_id)
-                st.write("測試 supabase_course_id：", supabase_course_id)
+
+                st.write(
+                    "測試 selected_content_id：",
+                    repr(selected_content_id)
+                )
+
+                st.write(
+                    "測試 supabase_course_id：",
+                    repr(supabase_course_id)
+                )
+
                 st.write(
                     "資料中的課程ID：",
                     training_content[
@@ -6714,8 +6723,6 @@ elif page == "🎓 新人訓練中心":
                 )
 
                 selected_detail = training_content[
-                st.write("目前選取的細項 ID：", repr(selected_content_id))
-                st.write("目前課程 ID：", repr(supabase_course_id))
                     training_content["內容ID"]
                     .fillna("")
                     .astype(str)
