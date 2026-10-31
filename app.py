@@ -6726,19 +6726,6 @@ elif page == "🎓 新人訓練中心":
                     .str.strip()
                     .eq(supabase_course_id or "")
                 ].copy()
-                selected_detail = training_content[
-                    training_content["內容ID"]
-                    .fillna("")
-                    .astype(str)
-                    .str.strip()
-                    .eq(selected_content_id)
-                    &
-                    training_content["課程ID"]
-                    .fillna("")
-                    .astype(str)
-                    .str.strip()
-                    .eq(supabase_course_id or "")
-                ].copy()
 
                 if selected_detail.empty:
 
