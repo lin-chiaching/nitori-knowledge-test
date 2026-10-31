@@ -6714,6 +6714,8 @@ elif page == "🎓 新人訓練中心":
                 )
 
                 selected_detail = training_content[
+                st.write("目前選取的細項 ID：", repr(selected_content_id))
+                st.write("目前課程 ID：", repr(supabase_course_id))
                     training_content["內容ID"]
                     .fillna("")
                     .astype(str)
