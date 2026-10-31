@@ -6903,7 +6903,18 @@ elif page == "🎓 新人訓練中心":
                 )
 
             else:
+                st.write("目前課程 ID：", repr(supabase_course_id))
 
+                st.write(
+                    "符合目前課程 ID 的細項：",
+                    training_content[
+                        training_content["課程ID"]
+                        .fillna("")
+                        .astype(str)
+                        .str.strip()
+                        .eq(str(supabase_course_id or "").strip())
+                    ][["內容ID", "課程ID", "課程細項"]]
+                )
                 course_details = training_content[
                     training_content["課程ID"]
                     .fillna("")
