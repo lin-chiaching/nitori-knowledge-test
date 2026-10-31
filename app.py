@@ -6554,6 +6554,17 @@ elif page == "🎓 新人訓練中心":
             else:
 
                 course_details = training_content[
+                st.write(
+                    "細項筆數：",
+                    len(course_details)
+                )
+
+                st.write(
+                    "目前課程全部細項：",
+                    course_details[
+                        ["內容ID", "課程細項"]
+                    ].to_dict("records")
+                )
                     training_content["課程ID"]
                     .fillna("")
                     .astype(str)
